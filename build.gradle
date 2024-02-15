@@ -22,8 +22,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	// AutoValue
-	implementation "com.google.auto.value:auto-value-annotations:1.6"
-	annotationProcessor "com.google.auto.value:auto-value:1.6"
+	implementation 'com.google.auto.value:auto-value-annotations:1.6'
+	annotationProcessor 'com.google.auto.value:auto-value:1.6'
+
+	// Replace jakarta.persistence with javax.persistence
+	implementation 'javax.persistence:javax.persistence-api:2.2'
 }
 
 tasks.named('test') {
