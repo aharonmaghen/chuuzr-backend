@@ -23,7 +23,7 @@ dependencies {
 
 	// AutoValue
 	implementation "com.google.auto.value:auto-value-annotations:1.6"
-  annotationProcessor "com.google.auto.value:auto-value:1.6"
+	annotationProcessor "com.google.auto.value:auto-value:1.6"
 }
 
 tasks.named('test') {
