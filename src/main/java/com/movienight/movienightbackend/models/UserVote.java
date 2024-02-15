@@ -5,10 +5,11 @@ import java.util.Optional;
 
 import com.google.auto.value.AutoValue;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
-import jakarta.persistence.ManyToOne;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
 
 /**
  * Represents a vote by a user in a room for a particular movie.
@@ -26,6 +27,7 @@ public abstract class UserVote {
       @JoinColumn(name = "room_id", referencedColumnName = "room_id"),
       @JoinColumn(name = "user_id", referencedColumnName = "user_id")
   })
+  @EmbeddedId
   public abstract RoomUser roomUser();
 
   /**
@@ -38,6 +40,7 @@ public abstract class UserVote {
       @JoinColumn(name = "room_id", referencedColumnName = "room_id"),
       @JoinColumn(name = "movie_id", referencedColumnName = "movie_id")
   })
+  @EmbeddedId
   public abstract RoomMovie roomMovie();
 
   /**

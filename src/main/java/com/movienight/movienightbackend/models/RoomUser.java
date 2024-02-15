@@ -5,9 +5,9 @@ import java.util.Optional;
 
 import com.google.auto.value.AutoValue;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 /**
  * Represents a relationship between a room and a user.
