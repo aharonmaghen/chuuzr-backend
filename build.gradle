@@ -16,8 +16,14 @@ repositories {
 }
 
 dependencies {
+	// Spring
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// AutoValue
+	implementation "com.google.auto.value:auto-value-annotations:1.6"
+  annotationProcessor "com.google.auto.value:auto-value:1.6"
 }
 
 tasks.named('test') {
