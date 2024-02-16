@@ -1,61 +1,113 @@
 package com.movienight.movienightbackend.models;
 
 import java.sql.Date;
-import java.util.Optional;
 
-import com.google.auto.value.AutoValue;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * Represents a room.
  */
-@AutoValue
 @Entity
-public abstract class Room {
-  /**
-   * Returns the ID of the room.
-   *
-   * @return The ID of the room.
-   */
+@Table(name = "rooms")
+public class Room {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  public abstract Long id();
+  private Long id;
+  private String name;
+  private Date updatedAt;
+  private Date createdAt;
 
   /**
-   * Returns the name of the room.
-   *
-   * @return The name of the room.
+   * Default constructor for Room required by JPA.
    */
-  public abstract String name();
-
-  /**
-   * Returns the optional last updated date of the room.
-   *
-   * @return The optional last updated date of the room.
-   */
-  public abstract Optional<Date> updatedAt();
-
-  /**
-   * Returns the optional creation date of the room.
-   *
-   * @return The optional creation date of the room.
-   */
-  public abstract Optional<Date> createdAt();
+  public Room() {
+  }
 
   /**
    * Creates a new Room instance.
    *
    * @param id        The ID of the room.
    * @param name      The name of the room.
-   * @param updatedAt The optional last updated date of the room.
-   * @param createdAt The optional creation date of the room.
-   * @return A new Room instance.
+   * @param updatedAt The last updated date of the room.
+   * @param createdAt The creation date of the room.
    */
-  public static Room create(Long id, String name, Optional<Date> updatedAt, Optional<Date> createdAt) {
-    return new AutoValue_Room(id, name, updatedAt, createdAt);
+  public Room(Long id, String name, Date updatedAt, Date createdAt) {
+    this.id = id;
+    this.name = name;
+    this.updatedAt = updatedAt;
+    this.createdAt = createdAt;
+  }
+
+  /**
+   * Returns the ID of the room.
+   *
+   * @return The ID of the room.
+   */
+  public Long getId() {
+    return id;
+  }
+
+  /**
+   * Returns the name of the room.
+   *
+   * @return The name of the room.
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Returns the last updated date of the room.
+   *
+   * @return The last updated date of the room.
+   */
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
+
+  /**
+   * Sets the last updated date of the room.
+   *
+   * @param updatedAt The last updated date of the room.
+   */
+  public void setUpdatedAt(Date updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  /**
+   * Returns the creation date of the room.
+   *
+   * @return The creation date of the room.
+   */
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  /**
+   * Sets the creation date of the room.
+   *
+   * @param createdAt The creation date of the room.
+   */
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  /**
+   * Returns a string representation of the Room object.
+   *
+   * @return A string representation of the Room object.
+   */
+  @Override
+  public String toString() {
+    return "Room{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", updatedAt=" + updatedAt +
+        ", createdAt=" + createdAt +
+        '}';
   }
 }

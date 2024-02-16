@@ -1,86 +1,166 @@
 package com.movienight.movienightbackend.models;
 
 import java.sql.Date;
-import java.util.Optional;
 
-import com.google.auto.value.AutoValue;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Represents a vote by a user in a room for a particular movie.
  */
-@AutoValue
 @Entity
-public abstract class UserVote {
-  /**
-   * Returns the room-user relationship associated with the user vote.
-   *
-   * @return The room-user relationship associated with the user vote.
-   */
+@Table(name = "user_votes")
+public class UserVote {
   @ManyToOne
   @JoinColumns({
       @JoinColumn(name = "room_id", referencedColumnName = "room_id"),
       @JoinColumn(name = "user_id", referencedColumnName = "user_id")
   })
   @EmbeddedId
-  public abstract RoomUser roomUser();
+  private RoomUser roomUser;
 
-  /**
-   * Returns the room-movie relationship associated with the user vote.
-   *
-   * @return The room-movie relationship associated with the user vote.
-   */
   @ManyToOne
   @JoinColumns({
       @JoinColumn(name = "room_id", referencedColumnName = "room_id"),
       @JoinColumn(name = "movie_id", referencedColumnName = "movie_id")
   })
   @EmbeddedId
-  public abstract RoomMovie roomMovie();
+  private RoomMovie roomMovie;
+  private VoteType voteType;
+  private Date updatedAt;
+  private Date createdAt;
+
+  /**
+   * Default constructor for UserVote required by JPA.
+   */
+  public UserVote() {
+  }
+
+  /**
+   * Constructs a new UserVote instance.
+   *
+   * @param roomUser  The room-user relationship associated with the user vote.
+   * @param roomMovie The room-movie relationship associated with the user vote.
+   * @param voteType  The type of vote (UP, DOWN, or NONE).
+   * @param updatedAt The last updated date of the user vote.
+   * @param createdAt The creation date of the user vote.
+   */
+  public UserVote(RoomUser roomUser, RoomMovie roomMovie, VoteType voteType, Date updatedAt, Date createdAt) {
+    this.roomUser = roomUser;
+    this.roomMovie = roomMovie;
+    this.voteType = voteType;
+    this.updatedAt = updatedAt;
+    this.createdAt = createdAt;
+  }
+
+  /**
+   * Returns the room-user relationship associated with the user vote.
+   *
+   * @return The room-user relationship associated with the user vote.
+   */
+  public RoomUser getRoomUser() {
+    return roomUser;
+  }
+
+  /**
+   * Sets the room-user relationship associated with the user vote.
+   *
+   * @param roomUser The room-user relationship associated with the user vote.
+   */
+  public void setRoomUser(RoomUser roomUser) {
+    this.roomUser = roomUser;
+  }
+
+  /**
+   * Returns the room-movie relationship associated with the user vote.
+   *
+   * @return The room-movie relationship associated with the user vote.
+   */
+  public RoomMovie getRoomMovie() {
+    return roomMovie;
+  }
+
+  /**
+   * Sets the room-movie relationship associated with the user vote.
+   *
+   * @param roomMovie The room-movie relationship associated with the user vote.
+   */
+  public void setRoomMovie(RoomMovie roomMovie) {
+    this.roomMovie = roomMovie;
+  }
 
   /**
    * Returns the type of vote (UP, DOWN, or NONE).
    *
    * @return The type of vote (UP, DOWN, or NONE).
    */
-  public abstract VoteType voteType();
+  public VoteType getVoteType() {
+    return voteType;
+  }
 
   /**
-   * Returns the optional last updated date of the user vote.
+   * Sets the type of vote (UP, DOWN, or NONE).
    *
-   * @return The optional last updated date of the user vote.
+   * @param voteType The type of vote (UP, DOWN, or NONE).
    */
-  public abstract Optional<Date> updatedAt();
+  public void setVoteType(VoteType voteType) {
+    this.voteType = voteType;
+  }
 
   /**
-   * Returns the optional creation date of the user vote.
+   * Returns the last updated date of the user vote.
    *
-   * @return The optional creation date of the user vote.
+   * @return The last updated date of the user vote.
    */
-  public abstract Optional<Date> createdAt();
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
 
   /**
-   * Creates a new UserVote instance.
+   * Sets the last updated date of the user vote.
    *
-   * @param roomUser  The room-user relationship associated with the user vote.
-   * @param roomMovie The room-movie relationship associated with the user vote.
-   * @param voteType  The type of vote (UP, DOWN, or NONE).
-   * @param updatedAt The optional last updated date of the user vote.
-   * @param createdAt The optional creation date of the user vote.
-   * @return A new UserVote instance.
+   * @param updatedAt The last updated date of the user vote.
    */
-  public static UserVote create(
-      RoomUser roomUser,
-      RoomMovie roomMovie,
-      VoteType voteType,
-      Optional<Date> updatedAt,
-      Optional<Date> createdAt) {
-    return new AutoValue_UserVote(roomUser, roomMovie, voteType, updatedAt, createdAt);
+  public void setUpdatedAt(Date updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  /**
+   * Returns the creation date of the user vote.
+   *
+   * @return The creation date of the user vote.
+   */
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  /**
+   * Sets the creation date of the user vote.
+   *
+   * @param createdAt The creation date of the user vote.
+   */
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  /**
+   * Returns a string representation of the UserVote object.
+   *
+   * @return A string representation of the UserVote object.
+   */
+  @Override
+  public String toString() {
+    return "UserVote{" +
+        "roomUser=" + roomUser +
+        ", roomMovie=" + roomMovie +
+        ", voteType=" + voteType +
+        ", updatedAt=" + updatedAt +
+        ", createdAt=" + createdAt +
+        '}';
   }
 
   /**
