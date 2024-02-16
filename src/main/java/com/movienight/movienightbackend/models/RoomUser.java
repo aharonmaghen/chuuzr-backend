@@ -2,6 +2,7 @@ package com.movienight.movienightbackend.models;
 
 import java.sql.Date;
 
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -15,10 +16,12 @@ import jakarta.persistence.Table;
 public class RoomUser {
   @ManyToOne
   @JoinColumn(name = "room_id", referencedColumnName = "id")
+  @EmbeddedId
   private Room room;
 
   @ManyToOne
   @JoinColumn(name = "user_id", referencedColumnName = "id")
+  @EmbeddedId
   private User user;
   private Date updatedAt;
   private Date createdAt;
