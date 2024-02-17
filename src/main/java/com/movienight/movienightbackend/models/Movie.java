@@ -1,6 +1,6 @@
 package com.movienight.movienightbackend.models;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +20,7 @@ public class Movie {
   private String title;
   private Integer year;
   private String genre;
-  private Date createdAt;
+  private LocalDateTime createdAt;
 
   /**
    * Default constructor for Movie required by JPA.
@@ -35,9 +35,9 @@ public class Movie {
    * @param title     The title of the movie.
    * @param year      The release year of the movie.
    * @param genre     The genre of the movie.
-   * @param createdAt The creation date of the movie.
+   * @param createdAt The creation timestamp of the movie.
    */
-  public Movie(Long id, String title, Integer year, String genre, Date createdAt) {
+  public Movie(Long id, String title, Integer year, String genre, LocalDateTime createdAt) {
     this.id = id;
     this.title = title;
     this.year = year;
@@ -118,21 +118,21 @@ public class Movie {
   }
 
   /**
-   * Returns the creation date of the movie.
+   * Returns the creation timestamp of the movie.
    *
-   * @return The creation date of the movie.
+   * @return The creation timestamp of the movie.
    */
-  public Date getCreatedAt() {
+  public LocalDateTime getCreatedAt() {
     return createdAt;
   }
 
   /**
-     * Sets the creation date of the movie.
-     *
-     * @param createdAt The creation date of the movie.
-     */
-    public void setCreatedAt(Date createdAt) {
-      this.createdAt = createdAt;
+   * Sets the creation timestamp of the movie.
+   *
+   * @param createdAt The creation timestamp of the movie.
+   */
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
   }
 
   /**
@@ -142,12 +142,53 @@ public class Movie {
    */
   @Override
   public String toString() {
-    return "Movie{" +
-        "id=" + id +
-        ", title='" + title + '\'' +
-        ", year=" + year +
-        ", genre='" + genre + '\'' +
-        ", createdAt=" + createdAt +
-        '}';
+    return "Movie{id=" + this.id +
+        ", title=" + this.title +
+        ", year=" + this.year +
+        ", genre=" + this.genre +
+        ", createdAt=" + this.createdAt + "}";
+  }
+
+  /**
+   * Indicates whether a movie is "equal to" this one.
+   *
+   * @param movie the movie with which to compare.
+   * @return true if this movie is the same as the movie argument; false
+   *         otherwise.
+   */
+  public boolean equals(Object movie) {
+    if (movie == this) {
+      return true;
+    } else if (!(movie instanceof Movie)) {
+      return false;
+    } else {
+      Movie that = (Movie) movie;
+      return this.id.equals(that.getId()) &&
+          this.title.equals(that.getTitle()) &&
+          this.year.equals(that.getYear()) &&
+          this.genre.equals(that.getGenre()) &&
+          this.createdAt.equals(that.getCreatedAt());
+    }
+  }
+
+  /**
+   * Returns a hash code value for the movie. This method is supported for the
+   * benefit of hash tables such as those provided by HashMap.
+   *
+   * @return a hash code value for the movie.
+   */
+  public int hashCode() {
+    int h$ = 1;
+    h$ *= 1000003;
+    h$ ^= this.id.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.title.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.year.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.genre.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.createdAt.hashCode();
+    return h$;
   }
 }

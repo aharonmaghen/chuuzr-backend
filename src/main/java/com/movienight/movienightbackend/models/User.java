@@ -1,7 +1,7 @@
 package com.movienight.movienightbackend.models;
 
 import java.net.URL;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +23,8 @@ public class User {
   private String countryCode;
   private String phoneNumber;
   private URL profilePicture;
-  private Date updatedAt;
-  private Date createdAt;
+  private LocalDateTime updatedAt;
+  private LocalDateTime createdAt;
 
   /**
    * Default constructor for User required by JPA.
@@ -41,8 +41,8 @@ public class User {
    * @param countryCode    The country code of the user.
    * @param phoneNumber    The phone number of the user.
    * @param profilePicture The profile picture URL of the user.
-   * @param updatedAt      The last updated date of the user.
-   * @param createdAt      The creation date of the user.
+   * @param updatedAt      The last updated timestamp of the user.
+   * @param createdAt      The creation timestamp of the user.
    */
   public User(
       Long id,
@@ -51,8 +51,8 @@ public class User {
       String countryCode,
       String phoneNumber,
       URL profilePicture,
-      Date updatedAt,
-      Date createdAt) {
+      LocalDateTime updatedAt,
+      LocalDateTime createdAt) {
     this.id = id;
     this.name = name;
     this.nickname = nickname;
@@ -172,38 +172,38 @@ public class User {
   }
 
   /**
-   * Returns the last updated date of the user.
+   * Returns the last updated timestamp of the user.
    *
-   * @return The last updated date of the user.
+   * @return The last updated timestamp of the user.
    */
-  public Date getUpdatedAt() {
+  public LocalDateTime getUpdatedAt() {
     return updatedAt;
   }
 
   /**
-   * Sets the last updated date of the user.
+   * Sets the last updated timestamp of the user.
    *
-   * @param updatedAt The last updated date of the user.
+   * @param updatedAt The last updated timestamp of the user.
    */
-  public void setUpdatedAt(Date updatedAt) {
+  public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
   }
 
   /**
-   * Returns the creation date of the user.
+   * Returns the creation timestamp of the user.
    *
-   * @return The creation date of the user.
+   * @return The creation timestamp of the user.
    */
-  public Date getCreatedAt() {
+  public LocalDateTime getCreatedAt() {
     return createdAt;
   }
 
   /**
-   * Sets the creation date of the user.
+   * Sets the creation timestamp of the user.
    *
-   * @param createdAt The creation date of the user.
+   * @param createdAt The creation timestamp of the user.
    */
-  public void setCreatedAt(Date createdAt) {
+  public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
   }
 
@@ -212,17 +212,65 @@ public class User {
    *
    * @return A string representation of the user.
    */
-  @Override
   public String toString() {
-    return "User{" +
-        "id=" + id +
-        ", name='" + name + '\'' +
-        ", nickname='" + nickname + '\'' +
-        ", countryCode='" + countryCode + '\'' +
-        ", phoneNumber='" + phoneNumber + '\'' +
-        ", profilePicture=" + profilePicture +
-        ", updatedAt=" + updatedAt +
-        ", createdAt=" + createdAt +
-        '}';
+    return "User{id=" + this.id +
+        ", name=" + this.name +
+        ", nickname=" + this.nickname +
+        ", countryCode=" + this.countryCode +
+        ", phoneNumber=" + this.phoneNumber +
+        ", profilePicture=" + this.profilePicture +
+        ", updatedAt=" + this.updatedAt +
+        ", createdAt=" + this.createdAt + "}";
+  }
+
+  /**
+   * Indicates whether a user is "equal to" this one.
+   *
+   * @param user the user with which to compare.
+   * @return true if this user is the same as the user argument; false otherwise.
+   */
+  public boolean equals(Object user) {
+    if (user == this) {
+      return true;
+    } else if (!(user instanceof User)) {
+      return false;
+    } else {
+      User that = (User) user;
+      return this.id.equals(that.getId()) &&
+          this.name.equals(that.getName()) &&
+          this.nickname.equals(that.getNickname()) &&
+          this.countryCode.equals(that.getCountryCode()) &&
+          this.phoneNumber.equals(that.getPhoneNumber()) &&
+          this.profilePicture.equals(that.getProfilePicture()) &&
+          this.updatedAt.equals(that.getUpdatedAt()) &&
+          this.createdAt.equals(that.getCreatedAt());
+    }
+  }
+
+  /**
+   * Returns a hash code value for the user. This method is supported for the
+   * benefit of hash tables such as those provided by HashMap.
+   *
+   * @return a hash code value for the user.
+   */
+  public int hashCode() {
+    int h$ = 1;
+    h$ *= 1000003;
+    h$ ^= this.id.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.name.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.nickname.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.countryCode.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.phoneNumber.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.profilePicture.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.updatedAt.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.createdAt.hashCode();
+    return h$;
   }
 }

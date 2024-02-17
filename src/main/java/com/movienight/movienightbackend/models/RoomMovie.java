@@ -1,6 +1,6 @@
 package com.movienight.movienightbackend.models;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -23,8 +23,8 @@ public class RoomMovie {
   @JoinColumn(name = "movie_id", referencedColumnName = "id")
   @EmbeddedId
   private Movie movie;
-  private Date updatedAt;
-  private Date createdAt;
+  private LocalDateTime updatedAt;
+  private LocalDateTime createdAt;
 
   /**
    * Default constructor for RoomMovie required by JPA.
@@ -37,10 +37,10 @@ public class RoomMovie {
    *
    * @param room      The room associated with the room-movie relationship.
    * @param movie     The movie associated with the room-movie relationship.
-   * @param updatedAt The last updated date of the room-movie relationship.
-   * @param createdAt The creation date of the room-movie relationship.
+   * @param updatedAt The last updated timestamp of the room-movie relationship.
+   * @param createdAt The creation timestamp of the room-movie relationship.
    */
-  public RoomMovie(Room room, Movie movie, Date updatedAt, Date createdAt) {
+  public RoomMovie(Room room, Movie movie, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.room = room;
     this.movie = movie;
     this.updatedAt = updatedAt;
@@ -84,38 +84,39 @@ public class RoomMovie {
   }
 
   /**
-   * Returns the last updated date of the room-movie relationship.
+   * Returns the last updated timestamp of the room-movie relationship.
    *
-   * @return The last updated date of the room-movie relationship.
+   * @return The last updated timestamp of the room-movie relationship.
    */
-  public Date getUpdatedAt() {
+  public LocalDateTime getUpdatedAt() {
     return updatedAt;
   }
 
   /**
-   * Sets the last updated date of the room-movie relationship.
+   * Sets the last updated timestamp of the room-movie relationship.
    *
-   * @param updatedAt The last updated date of the room-movie relationship.
+   * @param updatedAt The last updated timestamp of the room-movie relationship.
    */
-  public void setUpdatedAt(Date updatedAt) {
+  public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
   }
 
   /**
-   * Returns the creation date of the room-movie relationship.
+   * Returns the creation timestamp of the room-movie relationship.
    *
-   * @return The creation date of the room-movie relationship.
+   * @return The creation timestamp of the room-movie relationship.
    */
-  public Date getCreatedAt() {
+  public LocalDateTime getCreatedAt() {
     return createdAt;
   }
 
   /**
-   * Sets the optional creation date of the room-movie relationship.
+   * Sets the optional creation timestamp of the room-movie relationship.
    *
-   * @param createdAt The optional creation date of the room-movie relationship.
+   * @param createdAt The optional creation timestamp of the room-movie
+   *                  relationship.
    */
-  public void setCreatedAt(Date createdAt) {
+  public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
   }
 
@@ -126,11 +127,49 @@ public class RoomMovie {
    */
   @Override
   public String toString() {
-    return "RoomMovie{" +
-        "room=" + room +
-        ", movie=" + movie +
-        ", updatedAt=" + updatedAt +
-        ", createdAt=" + createdAt +
-        '}';
+    return "RoomMovie{room=" + this.room +
+        ", movie=" + this.movie +
+        ", updatedAt=" + this.updatedAt +
+        ", createdAt=" + this.createdAt + "}";
+  }
+
+  /**
+   * Indicates whether the RoomMovie object is "equal to" this one.
+   *
+   * @param roomMovie the RoomMovie object with which to compare.
+   * @return true if this RoomMovie is the same as the roomMovie argument; false
+   *         otherwise.
+   */
+  public boolean equals(Object roomMovie) {
+    if (roomMovie == this) {
+      return true;
+    } else if (!(roomMovie instanceof RoomMovie)) {
+      return false;
+    } else {
+      RoomMovie that = (RoomMovie) roomMovie;
+      return this.room.equals(that.getRoom()) &&
+          this.movie.equals(that.getMovie()) &&
+          this.updatedAt.equals(that.getUpdatedAt()) &&
+          this.createdAt.equals(that.getCreatedAt());
+    }
+  }
+
+  /**
+   * Returns a hash code value for the RoomMovie object. This method is supported for the
+   * benefit of hash tables such as those provided by HashMap.
+   *
+   * @return a hash code value for the RoomMovie object.
+   */
+  public int hashCode() {
+    int h$ = 1;
+    h$ *= 1000003;
+    h$ ^= this.room.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.movie.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.updatedAt.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.createdAt.hashCode();
+    return h$;
   }
 }
