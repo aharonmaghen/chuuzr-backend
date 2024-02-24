@@ -186,12 +186,6 @@ public class UserVote {
     }
   }
 
-  /**
-   * Returns a hash code value for the UerVote object. This method is supported for the
-   * benefit of hash tables such as those provided by HashMap.
-   *
-   * @return a hash code value for the UerVote object.
-   */
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;
@@ -207,9 +201,6 @@ public class UserVote {
     return h$;
   }
 
-  /**
-   * Represents the type of vote: UP, DOWN, or NONE.
-   */
   public enum VoteType {
     UP, DOWN, NONE
   }

@@ -47,83 +47,38 @@ public class RoomUser {
     this.createdAt = createdAt;
   }
 
-  /**
-   * Returns the room associated with the room-user relationship.
-   *
-   * @return The room associated with the room-user relationship.
-   */
   public Room getRoom() {
     return room;
   }
 
-  /**
-   * Sets the room associated with the room-user relationship.
-   *
-   * @param room The room associated with the room-user relationship.
-   */
   public void setRoom(Room room) {
     this.room = room;
   }
 
-  /**
-   * Returns the user associated with the room-user relationship.
-   *
-   * @return The user associated with the room-user relationship.
-   */
   public User getUser() {
     return user;
   }
 
-  /**
-   * Sets the user associated with the room-user relationship.
-   *
-   * @param user The user associated with the room-user relationship.
-   */
   public void setUser(User user) {
     this.user = user;
   }
 
-  /**
-   * Returns the optional last updated timestamp of the room-user relationship.
-   *
-   * @return The optional last updated timestamp of the room-user relationship.
-   */
   public LocalDateTime getUpdatedAt() {
     return updatedAt;
   }
 
-  /**
-   * Sets the optional last updated timestamp of the room-user relationship.
-   *
-   * @param updatedAt The optional last updated timestamp of the room-user relationship.
-   */
   public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
   }
 
-  /**
-   * Returns the optional creation timestamp of the room-user relationship.
-   *
-   * @return The optional creation timestamp of the room-user relationship.
-   */
   public LocalDateTime getCreatedAt() {
     return createdAt;
   }
 
-  /**
-   * Sets the optional creation timestamp of the room-user relationship.
-   *
-   * @param createdAt The optional creation timestamp of the room-user relationship.
-   */
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
   }
 
-  /**
-   * Returns a string representation of the RoomUser object.
-   *
-   * @return A string representation of the RoomUser object.
-   */
   @Override
   public String toString() {
     return "RoomUser{room=" + this.room +
@@ -132,13 +87,6 @@ public class RoomUser {
         ", createdAt=" + this.createdAt + "}";
   }
 
-  /**
-   * Indicates whether the RoomUser object is "equal to" this one.
-   *
-   * @param roomUser the RoomUser object with which to compare.
-   * @return true if this RoomUser is the same as the roomUser argument; false
-   *         otherwise.
-   */
   public boolean equals(Object roomUser) {
     if (roomUser == this) {
       return true;
@@ -153,12 +101,6 @@ public class RoomUser {
     }
   }
 
-  /**
-   * Returns a hash code value for the RoomUser object. This method is supported for the
-   * benefit of hash tables such as those provided by HashMap.
-   *
-   * @return a hash code value for the RoomUser object.
-   */
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;
