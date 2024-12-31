@@ -39,7 +39,7 @@ public class RoomController {
   public ResponseEntity<Void> createRoom(@RequestBody Room newRoomRequest, UriComponentsBuilder ucb) {
     Room roomToSave = new Room(null, newRoomRequest.getName(), null, null);
     Room savedRoom = roomRepository.save(roomToSave);
-    URI locationOfNewRoom = ucb.path("api/rooms/{id}").buildAndExpand(savedRoom.getId()).toUri();
+    URI locationOfNewRoom = ucb.path("/api/rooms/{id}").buildAndExpand(savedRoom.getId()).toUri();
     return ResponseEntity.created(locationOfNewRoom).build();
   }
 
