@@ -1,6 +1,8 @@
 package com.movienight.movienightbackend.controllers;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +28,9 @@ public class RoomController {
     this.roomRepository = roomRepository;
   }
 
-  @GetMapping("/{requestId}")
-  public ResponseEntity<Room> findById(@PathVariable Long requestId) {
-    Room room = findRoom(requestId);
+  @GetMapping("/{roomUuid}")
+  public ResponseEntity<Room> findById(@PathVariable UUID roomUuid) {
+    Room room = findRoom(roomUuid);
     if (room != null) {
       return ResponseEntity.ok(room);
     }
@@ -37,24 +39,24 @@ public class RoomController {
 
   @PostMapping
   public ResponseEntity<Void> createRoom(@RequestBody Room newRoomRequest, UriComponentsBuilder ucb) {
-    Room roomToSave = new Room(null, newRoomRequest.getName(), null, null);
+    Room roomToSave = new Room(null, null, newRoomRequest.getName(), LocalDateTime.now(), LocalDateTime.now());
     Room savedRoom = roomRepository.save(roomToSave);
-    URI locationOfNewRoom = ucb.path("/api/rooms/{id}").buildAndExpand(savedRoom.getId()).toUri();
+    URI locationOfNewRoom = ucb.path("/api/rooms/{roomUuid}").buildAndExpand(savedRoom.getUuid()).toUri();
     return ResponseEntity.created(locationOfNewRoom).build();
   }
 
-  @PutMapping("/{requestId}")
-  public ResponseEntity<Void> updateRoom(@PathVariable Long requestId, @RequestBody Room roomToUpdate) {
-    Room room = findRoom(requestId);
+  @PutMapping("/{roomUuid}")
+  public ResponseEntity<Void> updateRoom(@PathVariable UUID roomUuid, @RequestBody Room roomToUpdate) {
+    Room room = findRoom(roomUuid);
     if (room != null) {
-      Room updatdeRoom = new Room(room.getId(), roomToUpdate.getName(), null, null);
+      Room updatdeRoom = new Room(room.getId(), room.getUuid(), roomToUpdate.getName(), LocalDateTime.now(), room.getCreatedAt());
       roomRepository.save(updatdeRoom);
       return ResponseEntity.noContent().build();
     }
     return ResponseEntity.notFound().build();
   }
 
-  private Room findRoom(Long id) {
-    return roomRepository.findById(id).orElse(null);
+  private Room findRoom(UUID roomUuid) {
+    return roomRepository.findByUuid(roomUuid).orElse(null);
   }
 }

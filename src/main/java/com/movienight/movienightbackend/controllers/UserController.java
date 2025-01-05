@@ -1,6 +1,8 @@
 package com.movienight.movienightbackend.controllers;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +28,9 @@ public class UserController {
     this.userRepository = userRepository;
   }
 
-  @GetMapping("/{requestId}")
-  public ResponseEntity<User> findById(@PathVariable Long requestId) {
-    User user = findUser(requestId);
+  @GetMapping("/{userUuid}")
+  public ResponseEntity<User> findById(@PathVariable UUID userUuid) {
+    User user = findUser(userUuid);
     if (user != null) {
       return ResponseEntity.ok(user);
     }
@@ -37,27 +39,27 @@ public class UserController {
 
   @PostMapping
   public ResponseEntity<Void> createUser(@RequestBody User newUserRequest, UriComponentsBuilder ucb) {
-    User userToSave = new User(null, newUserRequest.getName(), newUserRequest.getNickname(),
-        newUserRequest.getCountryCode(), newUserRequest.getPhoneNumber(), newUserRequest.getProfilePicture(), null,
-        null);
+    User userToSave = new User(null, null, newUserRequest.getName(), newUserRequest.getNickname(),
+        newUserRequest.getCountryCode(), newUserRequest.getPhoneNumber(), newUserRequest.getProfilePicture(), LocalDateTime.now(),
+        LocalDateTime.now());
     User savedUser = userRepository.save(userToSave);
-    URI locationOfNewUser = ucb.path("/api/users/{id}").buildAndExpand(savedUser.getId()).toUri();
+    URI locationOfNewUser = ucb.path("/api/users/{userUuid}").buildAndExpand(savedUser.getUuid()).toUri();
     return ResponseEntity.created(locationOfNewUser).build();
   }
 
-  @PutMapping("/{requestId}")
-  public ResponseEntity<Void> updateUser(@PathVariable Long requestId, @RequestBody User userToUpdate) {
-    User user = findUser(requestId);
+  @PutMapping("/{userUuid}")
+  public ResponseEntity<Void> updateUser(@PathVariable UUID userUuid, @RequestBody User userToUpdate) {
+    User user = findUser(userUuid);
     if (user != null) {
-      User updatedUser = new User(user.getId(), userToUpdate.getName(), userToUpdate.getNickname(),
-          userToUpdate.getCountryCode(), userToUpdate.getPhoneNumber(), userToUpdate.getProfilePicture(), null, null);
+      User updatedUser = new User(user.getId(), user.getUuid(), userToUpdate.getName(), userToUpdate.getNickname(),
+          userToUpdate.getCountryCode(), userToUpdate.getPhoneNumber(), userToUpdate.getProfilePicture(), LocalDateTime.now(), user.getCreatedAt());
       userRepository.save(updatedUser);
       return ResponseEntity.noContent().build();
     }
     return ResponseEntity.notFound().build();
   }
 
-  private User findUser(Long requestId) {
-    return userRepository.findById(requestId).orElse(null);
+  private User findUser(UUID userUuid) {
+    return userRepository.findByUuid(userUuid).orElse(null);
   }
 }
