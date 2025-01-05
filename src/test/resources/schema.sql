@@ -13,3 +13,14 @@ CREATE TABLE
     phone_number VARCHAR(20),
     profile_picture VARCHAR(256)
   );
+
+CREATE TABLE
+  room_users (
+    room_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (room_id, user_id),
+    FOREIGN KEY (room_id) REFERENCES rooms (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
+  );

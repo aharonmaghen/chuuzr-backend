@@ -2,49 +2,37 @@ package com.movienight.movienightbackend.models;
 
 import java.time.LocalDateTime;
 
+import com.movienight.movienightbackend.models.compositeKeys.RoomUserId;
+
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 
-/**
- * Represents a relationship between a room and a user.
- */
 @Entity
 @Table(name = "room_users")
 public class RoomUser {
-  @ManyToOne
-  @JoinColumn(name = "room_id", referencedColumnName = "id")
   @EmbeddedId
+  private RoomUserId roomUserId;
+
+  @ManyToOne
+  @MapsId("roomId")
   private Room room;
 
   @ManyToOne
-  @JoinColumn(name = "user_id", referencedColumnName = "id")
-  @EmbeddedId
+  @MapsId("userId")
   private User user;
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
-  /**
-   * Default constructor for RoomUser required by JPA.
-   */
   public RoomUser() {
   }
 
-  /**
-   * Constructs a new RoomUser instance.
-   *
-   * @param room      The room associated with the room-user relationship.
-   * @param user      The user associated with the room-user relationship.
-   * @param updatedAt The last updated timestamp of the room-user relationship.
-   * @param createdAt The creation timestamp of the room-user relationship.
-   */
-  public RoomUser(Room room, User user, LocalDateTime updatedAt, LocalDateTime createdAt) {
+  public RoomUser(Room room, User user) {
+    this.roomUserId = new RoomUserId(room.getId(), user.getId());
     this.room = room;
     this.user = user;
-    this.updatedAt = updatedAt;
-    this.createdAt = createdAt;
   }
 
   public Room getRoom() {
