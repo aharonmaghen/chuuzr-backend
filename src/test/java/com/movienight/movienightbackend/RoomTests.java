@@ -22,7 +22,6 @@ import java.net.URI;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class RoomTests {
-
   @Autowired
   TestRestTemplate restTemplate;
 

@@ -26,9 +26,9 @@ public class UserController {
     this.userRepository = userRepository;
   }
 
-  @GetMapping("/{requestedId}")
-  public ResponseEntity<User> findById(@PathVariable Long requestedId) {
-    User user = findUser(requestedId);
+  @GetMapping("/{requestId}")
+  public ResponseEntity<User> findById(@PathVariable Long requestId) {
+    User user = findUser(requestId);
     if (user != null) {
       return ResponseEntity.ok(user);
     }
@@ -36,18 +36,18 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<Void> createUser(@RequestBody User newuserRequest, UriComponentsBuilder ucb) {
-    User userToSave = new User(null, newuserRequest.getName(), newuserRequest.getNickname(),
-        newuserRequest.getCountryCode(), newuserRequest.getPhoneNumber(), newuserRequest.getProfilePicture(), null,
+  public ResponseEntity<Void> createUser(@RequestBody User newUserRequest, UriComponentsBuilder ucb) {
+    User userToSave = new User(null, newUserRequest.getName(), newUserRequest.getNickname(),
+        newUserRequest.getCountryCode(), newUserRequest.getPhoneNumber(), newUserRequest.getProfilePicture(), null,
         null);
     User savedUser = userRepository.save(userToSave);
     URI locationOfNewUser = ucb.path("/api/users/{id}").buildAndExpand(savedUser.getId()).toUri();
     return ResponseEntity.created(locationOfNewUser).build();
   }
 
-  @PutMapping("/{requestedId}")
-  public ResponseEntity<Void> updateUser(@PathVariable Long requestedId, @RequestBody User userToUpdate) {
-    User user = findUser(requestedId);
+  @PutMapping("/{requestId}")
+  public ResponseEntity<Void> updateUser(@PathVariable Long requestId, @RequestBody User userToUpdate) {
+    User user = findUser(requestId);
     if (user != null) {
       User updatedUser = new User(user.getId(), userToUpdate.getName(), userToUpdate.getNickname(),
           userToUpdate.getCountryCode(), userToUpdate.getPhoneNumber(), userToUpdate.getProfilePicture(), null, null);
@@ -57,7 +57,7 @@ public class UserController {
     return ResponseEntity.notFound().build();
   }
 
-  private User findUser(Long requestedId) {
-    return userRepository.findById(requestedId).orElse(null);
+  private User findUser(Long requestId) {
+    return userRepository.findById(requestId).orElse(null);
   }
 }

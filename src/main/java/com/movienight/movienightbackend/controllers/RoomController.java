@@ -26,9 +26,9 @@ public class RoomController {
     this.roomRepository = roomRepository;
   }
 
-  @GetMapping("/{requestedId}")
-  public ResponseEntity<Room> findById(@PathVariable Long requestedId) {
-    Room room = findRoom(requestedId);
+  @GetMapping("/{requestId}")
+  public ResponseEntity<Room> findById(@PathVariable Long requestId) {
+    Room room = findRoom(requestId);
     if (room != null) {
       return ResponseEntity.ok(room);
     }
@@ -43,9 +43,9 @@ public class RoomController {
     return ResponseEntity.created(locationOfNewRoom).build();
   }
 
-  @PutMapping("/{requestedId}")
-  public ResponseEntity<Void> updateRoom(@PathVariable Long requestedId, @RequestBody Room roomToUpdate) {
-    Room room = findRoom(requestedId);
+  @PutMapping("/{requestId}")
+  public ResponseEntity<Void> updateRoom(@PathVariable Long requestId, @RequestBody Room roomToUpdate) {
+    Room room = findRoom(requestId);
     if (room != null) {
       Room updatdeRoom = new Room(room.getId(), roomToUpdate.getName(), null, null);
       roomRepository.save(updatdeRoom);
