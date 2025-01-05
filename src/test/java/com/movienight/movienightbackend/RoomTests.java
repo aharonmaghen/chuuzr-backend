@@ -27,20 +27,24 @@ public class RoomTests {
 
   @Test
   void shouldReturnARoom() {
-    ResponseEntity<String> response = restTemplate.getForEntity("/api/rooms/1", String.class);
+    ResponseEntity<String> response = restTemplate.getForEntity("/api/rooms/dfc98e14-8bb9-4f76-af51-70afaaaaae4e", String.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     DocumentContext documentContext = JsonPath.parse(response.getBody());
-    Number id = documentContext.read("$.id");
+    String uuid = documentContext.read("$.uuid");
     String name = documentContext.read("$.name");
-    assertThat(id).isEqualTo(1);
+    String updatedAt = documentContext.read("$.updatedAt");
+    String createdAt = documentContext.read("$.createdAt");
+    assertThat(uuid).isEqualTo("dfc98e14-8bb9-4f76-af51-70afaaaaae4e");
     assertThat(name).isEqualTo("Aharon Test Room");
+    assertThat(updatedAt).isNotNull();
+    assertThat(createdAt).isNotNull();
   }
 
   @Test
   @DirtiesContext
   void shouldCreateARoom() {
-    Room request = new Room(null, "Test Room 2", null, null);
+    Room request = new Room(null, null, "Test Room 2", null, null);
     ResponseEntity<Void> response = restTemplate.postForEntity("/api/rooms", request, Void.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
@@ -49,27 +53,35 @@ public class RoomTests {
     assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     DocumentContext documentContext = JsonPath.parse(getResponse.getBody());
-    Number id = documentContext.read("$.id");
+    String uuid = documentContext.read("$.uuid");
     String name = documentContext.read("$.name");
-    assertThat(id).isNotNull();
+    String updatedAt = documentContext.read("$.updatedAt");
+    String createdAt = documentContext.read("$.createdAt");
+    assertThat(uuid).isNotNull();
     assertThat(name).isEqualTo("Test Room 2");
+    assertThat(updatedAt).isNotNull();
+    assertThat(createdAt).isNotNull();
   }
 
   @Test
   void shouldUpdateARoom() {
-    Room room = new Room(null, "Aharon Test Room Edited", null, null);
+    Room room = new Room(null, null, "Aharon Test Room Edited", null, null);
     HttpEntity<Room> request = new HttpEntity<>(room);
-    
-    ResponseEntity<Void> response = restTemplate.exchange("/api/rooms/1", HttpMethod.PUT, request, Void.class);
+
+    ResponseEntity<Void> response = restTemplate.exchange("/api/rooms/dfc98e14-8bb9-4f76-af51-70afaaaaae4e", HttpMethod.PUT, request, Void.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    ResponseEntity<String> getResponse = restTemplate.getForEntity("/api/rooms/1", String.class);
+    ResponseEntity<String> getResponse = restTemplate.getForEntity("/api/rooms/dfc98e14-8bb9-4f76-af51-70afaaaaae4e", String.class);
     assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     DocumentContext documentContext = JsonPath.parse(getResponse.getBody());
-    Number id = documentContext.read("$.id");
+    String uuid = documentContext.read("$.uuid");
     String name = documentContext.read("$.name");
-    assertThat(id).isEqualTo(1);
+    String updatedAt = documentContext.read("$.updatedAt");
+    String createdAt = documentContext.read("$.createdAt");
+    assertThat(uuid).isEqualTo("dfc98e14-8bb9-4f76-af51-70afaaaaae4e");
     assertThat(name).isEqualTo("Aharon Test Room Edited");
+    assertThat(updatedAt).isNotNull();
+    assertThat(createdAt).isNotNull();
   }
 }

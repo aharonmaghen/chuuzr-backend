@@ -2,22 +2,20 @@ package com.movienight.movienightbackend.models;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
-/**
- * Represents a user.
- */
 @Entity
 @Table(name = "users")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @JsonIgnore
   private Long id;
+  @Column(nullable = false, unique = true, updatable = false)
+  private UUID uuid;
   private String name;
   private String nickname;
   private String countryCode;
@@ -26,26 +24,12 @@ public class User {
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
-  /**
-   * Default constructor for User required by JPA.
-   */
   public User() {
   }
 
-  /**
-   * Constructs a new User with the specified attributes.
-   *
-   * @param id             The ID of the user.
-   * @param name           The name of the user.
-   * @param nickname       The nickname of the user.
-   * @param countryCode    The country code of the user.
-   * @param phoneNumber    The phone number of the user.
-   * @param profilePicture The profile picture URL of the user.
-   * @param updatedAt      The last updated timestamp of the user.
-   * @param createdAt      The creation timestamp of the user.
-   */
   public User(
       Long id,
+      UUID uuid,
       String name,
       String nickname,
       String countryCode,
@@ -54,6 +38,7 @@ public class User {
       LocalDateTime updatedAt,
       LocalDateTime createdAt) {
     this.id = id;
+    this.uuid = uuid;
     this.name = name;
     this.nickname = nickname;
     this.countryCode = countryCode;
@@ -63,12 +48,27 @@ public class User {
     this.createdAt = createdAt;
   }
 
+  @PrePersist
+  private void generateUuid() {
+    if (uuid == null) {
+      uuid = UUID.randomUUID();
+    }
+  }
+
   public Long getId() {
     return id;
   }
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public UUID getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
   }
 
   public String getName() {
@@ -129,6 +129,7 @@ public class User {
 
   public String toString() {
     return "User{id=" + this.id +
+        ", uuid=" + this.uuid +
         ", name=" + this.name +
         ", nickname=" + this.nickname +
         ", countryCode=" + this.countryCode +
@@ -146,6 +147,7 @@ public class User {
     } else {
       User that = (User) user;
       return this.id.equals(that.getId()) &&
+          this.uuid.equals(that.getUuid()) &&
           this.name.equals(that.getName()) &&
           this.nickname.equals(that.getNickname()) &&
           this.countryCode.equals(that.getCountryCode()) &&
@@ -160,6 +162,8 @@ public class User {
     int h$ = 1;
     h$ *= 1000003;
     h$ ^= this.id.hashCode();
+    h$ *= 1000003;
+    h$ ^= this.uuid.hashCode();
     h$ *= 1000003;
     h$ ^= this.name.hashCode();
     h$ *= 1000003;
