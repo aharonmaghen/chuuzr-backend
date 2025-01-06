@@ -1,8 +1,10 @@
 package com.movienight.movienightbackend.controllers;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,22 +42,22 @@ public class RoomUserController {
     this.userRepository = userRepository;
   }
 
-  @GetMapping("/{requestId}/users")
-  public ResponseEntity<List<User>> getRoomUsers(@PathVariable Long requestId, Pageable pageable) {
-    Page<User> page = roomUserRepository.findByRoomId(requestId, PageRequest.of(pageable.getPageNumber(),
+  @GetMapping("/{roomUuid}/users")
+  public ResponseEntity<List<User>> getRoomUsers(@PathVariable UUID roomUuid, Pageable pageable) {
+    Page<User> page = roomUserRepository.findByRoomUuid(roomUuid, PageRequest.of(pageable.getPageNumber(),
         pageable.getPageSize(), pageable.getSortOr(Sort.by(Sort.Direction.ASC, "userId")))).map(RoomUser::getUser);
     return ResponseEntity.ok(page.getContent());
   }
 
-  @PostMapping("/{requestId}/add-user")
-  public ResponseEntity<Void> addUserToRoom(@PathVariable Long requestId, @RequestBody Map<String, Object> roomUser,
+  @PostMapping("/{roomUuid}/add-user")
+  public ResponseEntity<Void> addUserToRoom(@PathVariable UUID roomUuid, @RequestBody Map<String, Object> roomUser,
       UriComponentsBuilder ucb) {
-    Room room = roomRepository.findById(requestId).orElse(null);
-    User user = userRepository.findById(Long.parseLong(roomUser.get("userId").toString())).orElse(null);
+    Room room = roomRepository.findByUuid(roomUuid).orElse(null);
+    User user = userRepository.findByUuid(UUID.fromString(roomUser.get("userUuid").toString())).orElse(null);
     if (room != null && user != null) {
-      RoomUser roomUserToAdd = new RoomUser(room, user);
+      RoomUser roomUserToAdd = new RoomUser(null, room, user, LocalDateTime.now(), LocalDateTime.now());
       RoomUser addedRoomUser = roomUserRepository.save(roomUserToAdd);
-      URI locationOfNewUser = ucb.path("/api/room-users/{roomId}/users").buildAndExpand(addedRoomUser.getRoom().getId())
+      URI locationOfNewUser = ucb.path("/api/room-users/{roomUuid}/users").buildAndExpand(addedRoomUser.getRoom().getUuid())
           .toUri();
       return ResponseEntity.created(locationOfNewUser).build();
     }
