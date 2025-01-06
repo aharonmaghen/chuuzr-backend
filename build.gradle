@@ -40,7 +40,6 @@ dependencies {
 
 	// DB
 	implementation 'org.postgresql:postgresql:42.7.1'
-	testImplementation 'com.h2database:h2:2.3.232'
 }
 
 tasks.named('test') {

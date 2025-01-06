@@ -1,20 +1,20 @@
 package com.movienight.movienightbackend.models;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.movienight.movienightbackend.models.compositeKeys.RoomUserId;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "room_users")
 public class RoomUser {
   @EmbeddedId
   private RoomUserId roomUserId;
+
+  @Column(nullable = false, unique = true, updatable = false)
+  private UUID uuid;
 
   @ManyToOne
   @MapsId("roomId")
@@ -29,10 +29,28 @@ public class RoomUser {
   public RoomUser() {
   }
 
-  public RoomUser(Room room, User user) {
+  public RoomUser(UUID uuid,Room room, User user, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.roomUserId = new RoomUserId(room.getId(), user.getId());
+    this.uuid = UUID.randomUUID();
     this.room = room;
     this.user = user;
+    this.updatedAt = updatedAt;
+    this.createdAt = createdAt;
+  }
+
+  @PrePersist
+  private void generateUuid() {
+    if (uuid == null) {
+      uuid = UUID.randomUUID();
+    }
+  }
+
+  public UUID getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
   }
 
   public Room getRoom() {
@@ -69,7 +87,8 @@ public class RoomUser {
 
   @Override
   public String toString() {
-    return "RoomUser{room=" + this.room +
+    return "RoomUser{uuid=" + this.uuid +
+        ", room=" + this.room +
         ", user=" + this.user +
         ", updatedAt=" + this.updatedAt +
         ", createdAt=" + this.createdAt + "}";
@@ -82,7 +101,8 @@ public class RoomUser {
       return false;
     } else {
       RoomUser that = (RoomUser) roomUser;
-      return this.room.equals(that.getRoom()) &&
+      return this.uuid.equals(that.uuid) &&
+          this.room.equals(that.getRoom()) &&
           this.user.equals(that.getUser()) &&
           this.updatedAt.equals(that.getUpdatedAt()) &&
           this.createdAt.equals(that.getCreatedAt());
@@ -91,6 +111,8 @@ public class RoomUser {
 
   public int hashCode() {
     int h$ = 1;
+    h$ *= 1000003;
+    h$ ^= this.uuid.hashCode();
     h$ *= 1000003;
     h$ ^= this.room.hashCode();
     h$ *= 1000003;
