@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,9 +13,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.yaml.snakeyaml.events.DocumentEndEvent;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -25,6 +25,8 @@ import com.movienight.movienightbackend.models.User;
 public class UserTests {
   @Autowired
   TestRestTemplate restTemplate;
+  @Autowired
+  JdbcTemplate jdbcTemplate;
 
   @Test
   void shouldReturnAUser() {
@@ -49,7 +51,6 @@ public class UserTests {
   }
 
   @Test
-  @DirtiesContext
   void shouldCreateAUser() {
     User request = new User(null, null, "John Doe", "Doey", "US", "3471112233", null, null, null);
     ResponseEntity<Void> response = restTemplate.postForEntity("/api/users", request, Void.class);
@@ -79,7 +80,6 @@ public class UserTests {
   }
 
   @Test
-  @DirtiesContext
   void shouldUpdateAUser() {
     User user = new User(null, null, "Aharon Sharabi", "Magooster", "US", "5165006000", null, null, null);
     HttpEntity<User> request = new HttpEntity<>(user);
@@ -107,5 +107,10 @@ public class UserTests {
     assertThat(profilePicture).isEqualTo(null);
     assertThat(updatedAt).isNotNull();
     assertThat(createdAt).isNotNull();
+  }
+
+  @BeforeEach
+  void setUp() {
+    jdbcTemplate.update("UPDATE users SET name='Aharon Maghen', nickname='Magoo', country_code='IL', phone_number='0505533685' WHERE id=10;");
   }
 }

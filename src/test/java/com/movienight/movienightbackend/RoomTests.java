@@ -1,5 +1,6 @@
 package com.movienight.movienightbackend;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,7 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.jayway.jsonpath.DocumentContext;
@@ -24,6 +25,8 @@ import java.net.URI;
 public class RoomTests {
   @Autowired
   TestRestTemplate restTemplate;
+  @Autowired
+  JdbcTemplate jdbcTemplate;
 
   @Test
   void shouldReturnARoom() {
@@ -42,7 +45,6 @@ public class RoomTests {
   }
 
   @Test
-  @DirtiesContext
   void shouldCreateARoom() {
     Room request = new Room(null, null, "Test Room 2", null, null);
     ResponseEntity<Void> response = restTemplate.postForEntity("/api/rooms", request, Void.class);
@@ -83,5 +85,10 @@ public class RoomTests {
     assertThat(name).isEqualTo("Aharon Test Room Edited");
     assertThat(updatedAt).isNotNull();
     assertThat(createdAt).isNotNull();
+  }
+
+  @BeforeEach
+  void setUp() {
+    jdbcTemplate.update("UPDATE rooms SET name='Aharon Test Room' WHERE id=8;");
   }
 }
