@@ -1,2 +1,3 @@
 FROM postgres:15
-COPY movie_night_2.0-backup /docker-entrypoint-initdb.d/
+WORKDIR /docker-entrypoint-initdb.d
+COPY docker/db/movie_night_backup.sql /docker-entrypoint-initdb.d/
