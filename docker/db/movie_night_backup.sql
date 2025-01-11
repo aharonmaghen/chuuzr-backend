@@ -11,7 +11,7 @@ SET standard_conforming_strings = on;
 -- Roles
 --
 
-CREATE ROLE aharon;
+CREATE ROLE aharon WITH PASSWORD 'postgres';
 ALTER ROLE aharon WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS;
 
 --
@@ -45,38 +45,29 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-ALTER TABLE ONLY public.room_users DROP CONSTRAINT user_id_fkey;
-ALTER TABLE ONLY public.user_votes DROP CONSTRAINT room_user_fkey;
-ALTER TABLE ONLY public.user_votes DROP CONSTRAINT room_movie_fkey;
-ALTER TABLE ONLY public.room_users DROP CONSTRAINT room_id_fkey;
-ALTER TABLE ONLY public.room_movies DROP CONSTRAINT room_id_fkey;
-ALTER TABLE ONLY public.room_movies DROP CONSTRAINT movie_id_fkey;
-ALTER TABLE ONLY public.users DROP CONSTRAINT users_pkey;
-ALTER TABLE ONLY public.user_votes DROP CONSTRAINT user_votes_pkey;
-ALTER TABLE ONLY public.user_votes DROP CONSTRAINT unique_user_vote_uuid;
-ALTER TABLE ONLY public.users DROP CONSTRAINT unique_user_uuid;
-ALTER TABLE ONLY public.rooms DROP CONSTRAINT unique_room_uuid;
-ALTER TABLE ONLY public.room_users DROP CONSTRAINT unique_room_user_uuid;
-ALTER TABLE ONLY public.room_movies DROP CONSTRAINT unique_room_movie_uuid;
-ALTER TABLE ONLY public.movies DROP CONSTRAINT unique_movie_uuid;
-ALTER TABLE ONLY public.rooms DROP CONSTRAINT rooms_pkey;
-ALTER TABLE ONLY public.room_users DROP CONSTRAINT room_users_pkey;
-ALTER TABLE ONLY public.room_movies DROP CONSTRAINT room_movies_pkey;
-ALTER TABLE ONLY public.movies DROP CONSTRAINT movies_pkey;
-ALTER TABLE public.users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE public.rooms ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE public.movies ALTER COLUMN id DROP DEFAULT;
-DROP SEQUENCE public.users_id_seq;
-DROP TABLE public.users;
-DROP TABLE public.user_votes;
-DROP SEQUENCE public.rooms_id_seq;
-DROP TABLE public.rooms;
-DROP TABLE public.room_users;
-DROP TABLE public.room_movies;
-DROP SEQUENCE public.movies_id_seq;
-DROP TABLE public.movies;
-DROP FUNCTION public.set_created_at_date();
-DROP TYPE public.vote_type;
+DROP DATABASE IF EXISTS "movie_night_2.0";
+--
+-- Name: movie_night_2.0; Type: DATABASE; Schema: -; Owner: aharon
+--
+
+CREATE DATABASE "movie_night_2.0" WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'C';
+
+
+ALTER DATABASE "movie_night_2.0" OWNER TO aharon;
+
+\connect "movie_night_2.0"
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
 --
 -- Name: vote_type; Type: TYPE; Schema: public; Owner: aharon
 --
