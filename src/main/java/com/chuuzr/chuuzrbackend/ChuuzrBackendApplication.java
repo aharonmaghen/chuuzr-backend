@@ -1,13 +1,13 @@
-package com.movienight.movienightbackend;
+package com.chuuzr.chuuzrbackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MovienightBackendApplication {
+public class ChuuzrBackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MovienightBackendApplication.class, args);
+		SpringApplication.run(ChuuzrBackendApplication.class, args);
 	}
 
 }

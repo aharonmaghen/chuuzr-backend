@@ -1,4 +1,4 @@
-package com.movienight.movienightbackend;
+package com.chuuzr.chuuzrbackend;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.movienight.movienightbackend.models.User;
+import com.chuuzr.chuuzrbackend.models.User;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
