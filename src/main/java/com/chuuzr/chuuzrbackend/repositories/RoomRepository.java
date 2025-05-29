@@ -1,8 +1,8 @@
-package com.movienight.movienightbackend.repositories;
+package com.chuuzr.chuuzrbackend.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.movienight.movienightbackend.models.Room;
+import com.chuuzr.chuuzrbackend.models.Room;
 
 import java.util.Optional;
 import java.util.UUID;

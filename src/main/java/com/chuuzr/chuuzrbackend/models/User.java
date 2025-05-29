@@ -1,4 +1,4 @@
-package com.movienight.movienightbackend.models;
+package com.chuuzr.chuuzrbackend.models;
 
 import java.net.URL;
 import java.time.LocalDateTime;

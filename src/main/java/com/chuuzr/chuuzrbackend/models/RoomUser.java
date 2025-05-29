@@ -1,9 +1,9 @@
-package com.movienight.movienightbackend.models;
+package com.chuuzr.chuuzrbackend.models;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.movienight.movienightbackend.models.compositeKeys.RoomUserId;
+import com.chuuzr.chuuzrbackend.models.compositeKeys.RoomUserId;
 
 import jakarta.persistence.*;
 

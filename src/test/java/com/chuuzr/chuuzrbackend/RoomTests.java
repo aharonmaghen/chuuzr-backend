@@ -1,4 +1,4 @@
-package com.movienight.movienightbackend;
+package com.chuuzr.chuuzrbackend;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.movienight.movienightbackend.models.Room;
+import com.chuuzr.chuuzrbackend.models.Room;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

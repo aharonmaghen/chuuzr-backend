@@ -1,4 +1,4 @@
-package com.movienight.movienightbackend.controllers;
+package com.chuuzr.chuuzrbackend.controllers;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.movienight.movienightbackend.models.User;
-import com.movienight.movienightbackend.repositories.UserRepository;
+import com.chuuzr.chuuzrbackend.models.User;
+import com.chuuzr.chuuzrbackend.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/api/users")

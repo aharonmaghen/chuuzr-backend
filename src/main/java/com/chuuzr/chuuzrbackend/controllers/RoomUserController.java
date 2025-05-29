@@ -1,4 +1,4 @@
-package com.movienight.movienightbackend.controllers;
+package com.chuuzr.chuuzrbackend.controllers;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.movienight.movienightbackend.models.RoomUser;
-import com.movienight.movienightbackend.models.User;
-import com.movienight.movienightbackend.models.Room;
-import com.movienight.movienightbackend.repositories.RoomRepository;
-import com.movienight.movienightbackend.repositories.RoomUserRepository;
-import com.movienight.movienightbackend.repositories.UserRepository;
+import com.chuuzr.chuuzrbackend.models.RoomUser;
+import com.chuuzr.chuuzrbackend.models.User;
+import com.chuuzr.chuuzrbackend.models.Room;
+import com.chuuzr.chuuzrbackend.repositories.RoomRepository;
+import com.chuuzr.chuuzrbackend.repositories.RoomUserRepository;
+import com.chuuzr.chuuzrbackend.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/api/room-users")

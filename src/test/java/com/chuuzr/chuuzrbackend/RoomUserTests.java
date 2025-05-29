@@ -1,4 +1,4 @@
-package com.movienight.movienightbackend;
+package com.chuuzr.chuuzrbackend;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,8 +1,8 @@
-package com.movienight.movienightbackend.repositories;
+package com.chuuzr.chuuzrbackend.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.movienight.movienightbackend.models.RoomMovie;
+import com.chuuzr.chuuzrbackend.models.RoomMovie;
 
 public interface RoomMovieRepository extends JpaRepository<RoomMovie, Long> {
   
