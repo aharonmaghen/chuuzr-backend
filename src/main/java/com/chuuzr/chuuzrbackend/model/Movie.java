@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.models;
+package com.chuuzr.chuuzrbackend.model;
 
 import java.time.LocalDateTime;
 

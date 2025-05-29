@@ -23,7 +23,7 @@ import net.minidev.json.JSONArray;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class RoomUserTests {
+public class RoomUserTest {
   @Autowired
   TestRestTemplate restTemplate;
   @Autowired

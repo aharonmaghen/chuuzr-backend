@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.models.compositeKeys;
+package com.chuuzr.chuuzrbackend.model.compositeKeys;
 
 import java.io.Serializable;
 

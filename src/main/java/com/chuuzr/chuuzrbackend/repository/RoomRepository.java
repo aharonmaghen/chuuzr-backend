@@ -1,8 +1,8 @@
-package com.chuuzr.chuuzrbackend.repositories;
+package com.chuuzr.chuuzrbackend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.chuuzr.chuuzrbackend.models.Room;
+import com.chuuzr.chuuzrbackend.model.Room;
 
 import java.util.Optional;
 import java.util.UUID;
