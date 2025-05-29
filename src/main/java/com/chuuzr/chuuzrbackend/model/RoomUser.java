@@ -1,9 +1,9 @@
-package com.chuuzr.chuuzrbackend.models;
+package com.chuuzr.chuuzrbackend.model;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.chuuzr.chuuzrbackend.models.compositeKeys.RoomUserId;
+import com.chuuzr.chuuzrbackend.model.compositeKeys.RoomUserId;
 
 import jakarta.persistence.*;
 

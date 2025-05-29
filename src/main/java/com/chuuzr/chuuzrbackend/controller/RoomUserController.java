@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.controllers;
+package com.chuuzr.chuuzrbackend.controller;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.chuuzr.chuuzrbackend.models.RoomUser;
-import com.chuuzr.chuuzrbackend.models.User;
-import com.chuuzr.chuuzrbackend.models.Room;
-import com.chuuzr.chuuzrbackend.repositories.RoomRepository;
-import com.chuuzr.chuuzrbackend.repositories.RoomUserRepository;
-import com.chuuzr.chuuzrbackend.repositories.UserRepository;
+import com.chuuzr.chuuzrbackend.model.RoomUser;
+import com.chuuzr.chuuzrbackend.model.User;
+import com.chuuzr.chuuzrbackend.model.Room;
+import com.chuuzr.chuuzrbackend.repository.RoomRepository;
+import com.chuuzr.chuuzrbackend.repository.RoomUserRepository;
+import com.chuuzr.chuuzrbackend.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/room-users")

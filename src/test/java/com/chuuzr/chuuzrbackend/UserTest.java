@@ -18,11 +18,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.chuuzr.chuuzrbackend.models.User;
+import com.chuuzr.chuuzrbackend.model.User;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class UserTests {
+public class UserTest {
   @Autowired
   TestRestTemplate restTemplate;
   @Autowired

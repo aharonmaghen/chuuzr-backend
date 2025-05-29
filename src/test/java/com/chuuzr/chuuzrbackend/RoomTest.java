@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.chuuzr.chuuzrbackend.models.Room;
+import com.chuuzr.chuuzrbackend.model.Room;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +22,7 @@ import java.net.URI;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class RoomTests {
+public class RoomTest {
   @Autowired
   TestRestTemplate restTemplate;
   @Autowired

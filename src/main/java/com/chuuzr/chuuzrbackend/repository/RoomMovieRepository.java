@@ -1,8 +1,8 @@
-package com.chuuzr.chuuzrbackend.repositories;
+package com.chuuzr.chuuzrbackend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.chuuzr.chuuzrbackend.models.RoomMovie;
+import com.chuuzr.chuuzrbackend.model.RoomMovie;
 
 public interface RoomMovieRepository extends JpaRepository<RoomMovie, Long> {
   
