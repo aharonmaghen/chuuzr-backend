@@ -26,14 +26,26 @@ This is the Spring Boot backend that powers chuuzr, a social coordination platfo
 - **JWT / OTP Authentication (Planned or Implemented)**
 - **Hosted on:** _coming soon_
 
-
 ## 🧪 Running Locally
+
+First, clone the repository:
 
 ```bash
 git clone https://github.com/aharonmaghen/chuuzr-backend.git
 cd chuuzr-backend
-./gradlew bootRun
 ```
+
+### Option 1: Using Docker (Recommended)
+
+Make sure you have Docker and Docker Compose installed. Then run:
+
+```bash
+docker-compose up
+```
+
+This will start the backend service and a PostgreSQL database using the configuration in `docker-compose.yml`.
+
+### Option 2: Using Gradle
 
 Ensure you have a PostgreSQL database running and update your `application.properties` file accordingly:
 
@@ -42,6 +54,12 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/chuuzr_db
 spring.datasource.username=your_username
 spring.datasource.password=your_password
 spring.jpa.hibernate.ddl-auto=update
+```
+
+Then run the application:
+
+```bash
+./gradlew bootRun
 ```
 
 ## 📖 API Documentation
