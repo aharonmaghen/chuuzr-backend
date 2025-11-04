@@ -2,6 +2,8 @@ package com.chuuzr.chuuzrbackend.model;
 
 import java.time.LocalDateTime;
 
+import com.chuuzr.chuuzrbackend.model.compositeKeys.UserVoteId;
+
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,25 +14,27 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
- * Represents a vote by a user in a room for a particular movie.
+ * Represents a vote by a user in a room for a particular option.
  */
 @Entity
 @Table(name = "user_votes")
 public class UserVote {
+  @EmbeddedId
+  private UserVoteId userVoteId;
+
   @ManyToOne
   @JoinColumns({
-      @JoinColumn(name = "room_id", referencedColumnName = "room_id"),
-      @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+      @JoinColumn(name = "room_id", referencedColumnName = "room_id", insertable = false, updatable = false),
+      @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
   })
-  @EmbeddedId
   private RoomUser roomUser;
+
   @ManyToOne
   @JoinColumns({
-      @JoinColumn(name = "room_id", referencedColumnName = "room_id"),
-      @JoinColumn(name = "movie_id", referencedColumnName = "movie_id")
+      @JoinColumn(name = "room_id", referencedColumnName = "room_id", insertable = false, updatable = false),
+      @JoinColumn(name = "option_id", referencedColumnName = "option_id", insertable = false, updatable = false)
   })
-  @EmbeddedId
-  private RoomMovie roomMovie;
+  private RoomOption roomOption;
   @Enumerated(EnumType.STRING)
   private VoteType voteType;
   private LocalDateTime updatedAt;
@@ -45,19 +49,39 @@ public class UserVote {
   /**
    * Constructs a new UserVote instance.
    *
-   * @param roomUser  The room-user relationship associated with the user vote.
-   * @param roomMovie The room-movie relationship associated with the user vote.
-   * @param voteType  The type of vote (UP, DOWN, or NONE).
-   * @param updatedAt The last updated timestamp of the user vote.
-   * @param createdAt The creation timestamp of the user vote.
+   * @param roomUser   The room-user relationship associated with the user vote.
+   * @param roomOption The room-option relationship associated with the user vote.
+   * @param voteType   The type of vote (UP, DOWN, or NONE).
+   * @param updatedAt  The last updated timestamp of the user vote.
+   * @param createdAt  The creation timestamp of the user vote.
    */
-  public UserVote(RoomUser roomUser, RoomMovie roomMovie, VoteType voteType, LocalDateTime updatedAt,
+  public UserVote(RoomUser roomUser, RoomOption roomOption, VoteType voteType, LocalDateTime updatedAt,
       LocalDateTime createdAt) {
+    this.userVoteId = new UserVoteId(roomUser.getRoom().getId(), roomUser.getUser().getId(), 
+        roomOption.getOption().getId());
     this.roomUser = roomUser;
-    this.roomMovie = roomMovie;
+    this.roomOption = roomOption;
     this.voteType = voteType;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
+  }
+
+  /**
+   * Returns the composite key for the user vote.
+   *
+   * @return The composite key for the user vote.
+   */
+  public UserVoteId getUserVoteId() {
+    return userVoteId;
+  }
+
+  /**
+   * Sets the composite key for the user vote.
+   *
+   * @param userVoteId The composite key for the user vote.
+   */
+  public void setUserVoteId(UserVoteId userVoteId) {
+    this.userVoteId = userVoteId;
   }
 
   /**
@@ -79,21 +103,21 @@ public class UserVote {
   }
 
   /**
-   * Returns the room-movie relationship associated with the user vote.
+   * Returns the room-option relationship associated with the user vote.
    *
-   * @return The room-movie relationship associated with the user vote.
+   * @return The room-option relationship associated with the user vote.
    */
-  public RoomMovie getRoomMovie() {
-    return roomMovie;
+  public RoomOption getRoomOption() {
+    return roomOption;
   }
 
   /**
-   * Sets the room-movie relationship associated with the user vote.
+   * Sets the room-option relationship associated with the user vote.
    *
-   * @param roomMovie The room-movie relationship associated with the user vote.
+   * @param roomOption The room-option relationship associated with the user vote.
    */
-  public void setRoomMovie(RoomMovie roomMovie) {
-    this.roomMovie = roomMovie;
+  public void setRoomOption(RoomOption roomOption) {
+    this.roomOption = roomOption;
   }
 
   /**
@@ -158,7 +182,7 @@ public class UserVote {
   @Override
   public String toString() {
     return "UserVote{roomUser=" + this.roomUser +
-        ", roomMovie=" + this.roomMovie +
+        ", roomOption=" + this.roomOption +
         ", voteType=" + this.voteType +
         ", updatedAt=" + this.updatedAt +
         ", createdAt=" + this.createdAt + "}";
@@ -179,7 +203,7 @@ public class UserVote {
     } else {
       UserVote that = (UserVote) userVote;
       return this.roomUser.equals(that.getRoomUser()) &&
-          this.roomMovie.equals(that.getRoomMovie()) &&
+          this.roomOption.equals(that.getRoomOption()) &&
           this.voteType.equals(that.getVoteType()) &&
           this.updatedAt.equals(that.getUpdatedAt()) &&
           this.createdAt.equals(that.getCreatedAt());
@@ -191,7 +215,7 @@ public class UserVote {
     h$ *= 1000003;
     h$ ^= this.roomUser.hashCode();
     h$ *= 1000003;
-    h$ ^= this.roomMovie.hashCode();
+    h$ ^= this.roomOption.hashCode();
     h$ *= 1000003;
     h$ ^= this.voteType.hashCode();
     h$ *= 1000003;
