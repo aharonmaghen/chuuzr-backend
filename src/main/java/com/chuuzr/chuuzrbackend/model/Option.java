@@ -3,6 +3,8 @@ package com.chuuzr.chuuzrbackend.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +17,7 @@ import jakarta.persistence.Table;
 public class Option {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @JsonIgnore
   private Long id;
   private UUID uuid;
   private Long optionTypeId;
