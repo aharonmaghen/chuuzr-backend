@@ -1,7 +1,6 @@
 package com.chuuzr.chuuzrbackend.controller;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.chuuzr.chuuzrbackend.dto.room.RoomMapper;
+import com.chuuzr.chuuzrbackend.dto.room.RoomRequestDTO;
+import com.chuuzr.chuuzrbackend.dto.room.RoomResponseDTO;
 import com.chuuzr.chuuzrbackend.model.Room;
 import com.chuuzr.chuuzrbackend.repository.RoomRepository;
 
@@ -29,28 +31,28 @@ public class RoomController {
   }
 
   @GetMapping("/{roomUuid}")
-  public ResponseEntity<Room> findById(@PathVariable UUID roomUuid) {
+  public ResponseEntity<RoomResponseDTO> findById(@PathVariable UUID roomUuid) {
     Room room = findRoom(roomUuid);
     if (room != null) {
-      return ResponseEntity.ok(room);
+      return ResponseEntity.ok(RoomMapper.toResponseDTO(room));
     }
     return ResponseEntity.notFound().build();
   }
 
   @PostMapping
-  public ResponseEntity<Void> createRoom(@RequestBody Room newRoomRequest, UriComponentsBuilder ucb) {
-    Room roomToSave = new Room(null, null, newRoomRequest.getName(), LocalDateTime.now(), LocalDateTime.now());
+  public ResponseEntity<Void> createRoom(@RequestBody RoomRequestDTO newRoomRequest, UriComponentsBuilder ucb) {
+    Room roomToSave = RoomMapper.toEntity(newRoomRequest);
     Room savedRoom = roomRepository.save(roomToSave);
     URI locationOfNewRoom = ucb.path("/api/rooms/{roomUuid}").buildAndExpand(savedRoom.getUuid()).toUri();
     return ResponseEntity.created(locationOfNewRoom).build();
   }
 
   @PutMapping("/{roomUuid}")
-  public ResponseEntity<Void> updateRoom(@PathVariable UUID roomUuid, @RequestBody Room roomToUpdate) {
+  public ResponseEntity<Void> updateRoom(@PathVariable UUID roomUuid, @RequestBody RoomRequestDTO roomToUpdate) {
     Room room = findRoom(roomUuid);
     if (room != null) {
-      Room updatdeRoom = new Room(room.getId(), room.getUuid(), roomToUpdate.getName(), LocalDateTime.now(), room.getCreatedAt());
-      roomRepository.save(updatdeRoom);
+      RoomMapper.updateEntityFromDTO(room, roomToUpdate);
+      roomRepository.save(room);
       return ResponseEntity.noContent().build();
     }
     return ResponseEntity.notFound().build();
