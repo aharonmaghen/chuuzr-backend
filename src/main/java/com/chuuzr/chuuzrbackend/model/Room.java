@@ -31,10 +31,21 @@ public class Room {
   }
 
   @PrePersist
-  private void generateUuid() {
+  private void prePersist() {
     if (uuid == null) {
       uuid = UUID.randomUUID();
     }
+    if (createdAt == null) {
+      createdAt = LocalDateTime.now();
+    }
+    if (updatedAt == null) {
+      updatedAt = LocalDateTime.now();
+    }
+  }
+
+  @PreUpdate
+  private void preUpdate() {
+    updatedAt = LocalDateTime.now();
   }
 
   public Long getId() {
