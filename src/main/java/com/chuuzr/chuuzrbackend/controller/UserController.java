@@ -14,51 +14,42 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.chuuzr.chuuzrbackend.dto.user.UserMapper;
 import com.chuuzr.chuuzrbackend.dto.user.UserRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
-import com.chuuzr.chuuzrbackend.model.User;
-import com.chuuzr.chuuzrbackend.repository.UserRepository;
+import com.chuuzr.chuuzrbackend.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-  private UserRepository userRepository;
+  private final UserService userService;
 
   @Autowired
-  public UserController(UserRepository userRepository) {
-    this.userRepository = userRepository;
+  public UserController(UserService userService) {
+    this.userService = userService;
   }
 
   @GetMapping("/{userUuid}")
   public ResponseEntity<UserResponseDTO> findById(@PathVariable UUID userUuid) {
-    User user = findUser(userUuid);
+    UserResponseDTO user = userService.findByUuid(userUuid);
     if (user != null) {
-      return ResponseEntity.ok(UserMapper.toResponseDTO(user));
+      return ResponseEntity.ok(user);
     }
     return ResponseEntity.notFound().build();
   }
 
   @PostMapping
   public ResponseEntity<Void> createUser(@RequestBody UserRequestDTO newUserRequest, UriComponentsBuilder ucb) {
-    User userToSave = UserMapper.toEntity(newUserRequest);
-    User savedUser = userRepository.save(userToSave);
-    URI locationOfNewUser = ucb.path("/api/users/{userUuid}").buildAndExpand(savedUser.getUuid()).toUri();
+    UserResponseDTO createdUser = userService.createUser(newUserRequest);
+    URI locationOfNewUser = ucb.path("/api/users/{userUuid}").buildAndExpand(createdUser.getUuid()).toUri();
     return ResponseEntity.created(locationOfNewUser).build();
   }
 
   @PutMapping("/{userUuid}")
   public ResponseEntity<Void> updateUser(@PathVariable UUID userUuid, @RequestBody UserRequestDTO userToUpdate) {
-    User user = findUser(userUuid);
-    if (user != null) {
-      UserMapper.updateEntityFromDTO(user, userToUpdate);
-      userRepository.save(user);
+    UserResponseDTO updatedUser = userService.updateUser(userUuid, userToUpdate);
+    if (updatedUser != null) {
       return ResponseEntity.noContent().build();
     }
     return ResponseEntity.notFound().build();
-  }
-
-  private User findUser(UUID userUuid) {
-    return userRepository.findByUuid(userUuid).orElse(null);
   }
 }
