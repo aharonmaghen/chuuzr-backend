@@ -8,50 +8,50 @@ import java.util.UUID;
  * Only exposes UUID (not internal ID) and includes timestamps.
  */
 public class RoomResponseDTO {
-	private UUID uuid;
-	private String name;
-	private LocalDateTime updatedAt;
-	private LocalDateTime createdAt;
+  private UUID uuid;
+  private String name;
+  private LocalDateTime updatedAt;
+  private LocalDateTime createdAt;
 
-	public RoomResponseDTO() {
-	}
+  public RoomResponseDTO() {
+  }
 
-	public RoomResponseDTO(UUID uuid, String name, LocalDateTime updatedAt, LocalDateTime createdAt) {
-		this.uuid = uuid;
-		this.name = name;
-		this.updatedAt = updatedAt;
-		this.createdAt = createdAt;
-	}
+  public RoomResponseDTO(UUID uuid, String name, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    this.uuid = uuid;
+    this.name = name;
+    this.updatedAt = updatedAt;
+    this.createdAt = createdAt;
+  }
 
-	public UUID getUuid() {
-		return uuid;
-	}
+  public UUID getUuid() {
+    return uuid;
+  }
 
-	public void setUuid(UUID uuid) {
-		this.uuid = uuid;
-	}
+  public void setUuid(UUID uuid) {
+    this.uuid = uuid;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
 
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
 }

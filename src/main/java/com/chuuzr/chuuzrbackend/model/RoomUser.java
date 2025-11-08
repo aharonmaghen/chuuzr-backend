@@ -27,11 +27,12 @@ public class RoomUser {
   private LocalDateTime createdAt;
 
   public RoomUser() {
+    this.roomUserId = new RoomUserId();
   }
 
-  public RoomUser(UUID uuid,Room room, User user, LocalDateTime updatedAt, LocalDateTime createdAt) {
-    this.roomUserId = new RoomUserId(room.getId(), user.getId());
-    this.uuid = UUID.randomUUID();
+  public RoomUser(UUID uuid, Room room, User user, LocalDateTime updatedAt, LocalDateTime createdAt) {
+    this.roomUserId = new RoomUserId();
+    this.uuid = uuid;
     this.room = room;
     this.user = user;
     this.updatedAt = updatedAt;
@@ -39,10 +40,25 @@ public class RoomUser {
   }
 
   @PrePersist
-  private void generateUuid() {
+  private void prePersist() {
     if (uuid == null) {
       uuid = UUID.randomUUID();
     }
+    if (createdAt == null) {
+      createdAt = LocalDateTime.now();
+    }
+    if (updatedAt == null) {
+      updatedAt = LocalDateTime.now();
+    }
+  }
+
+  @PreUpdate
+  private void preUpdate() {
+    updatedAt = LocalDateTime.now();
+  }
+
+  public RoomUserId getRoomUserId() {
+    return roomUserId;
   }
 
   public UUID getUuid() {
@@ -88,12 +104,13 @@ public class RoomUser {
   @Override
   public String toString() {
     return "RoomUser{uuid=" + this.uuid +
-        ", room=" + this.room +
-        ", user=" + this.user +
+        ", roomUuid=" + (room != null ? room.getUuid() : null) +
+        ", userUuid=" + (user != null ? user.getUuid() : null) +
         ", updatedAt=" + this.updatedAt +
         ", createdAt=" + this.createdAt + "}";
   }
 
+  @Override
   public boolean equals(Object roomUser) {
     if (roomUser == this) {
       return true;
@@ -101,26 +118,15 @@ public class RoomUser {
       return false;
     } else {
       RoomUser that = (RoomUser) roomUser;
-      return this.uuid.equals(that.uuid) &&
-          this.room.equals(that.getRoom()) &&
-          this.user.equals(that.getUser()) &&
-          this.updatedAt.equals(that.getUpdatedAt()) &&
-          this.createdAt.equals(that.getCreatedAt());
+      return this.roomUserId.equals(that.getRoomUserId());
     }
   }
 
+  @Override
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;
-    h$ ^= this.uuid.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.room.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.user.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.updatedAt.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.createdAt.hashCode();
+    h$ ^= this.roomUserId.hashCode();
     return h$;
   }
 }
