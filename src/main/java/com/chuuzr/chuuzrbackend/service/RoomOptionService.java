@@ -70,8 +70,8 @@ public class RoomOptionService {
     if (room == null || option == null) {
       return null;
     }
-    RoomOption roomOption = RoomOptionMapper.toEntity(room, option);
-    RoomOption savedRoomOption = roomOptionRepository.save(roomOption);
+    RoomOption roomOptionToSave = RoomOptionMapper.toEntity(room, option);
+    RoomOption savedRoomOption = roomOptionRepository.save(roomOptionToSave);
     return RoomOptionMapper.toResponseDTO(savedRoomOption);
   }
 }

@@ -69,8 +69,8 @@ public class RoomUserService {
     if (room == null || user == null) {
       return null;
     }
-    RoomUser roomUser = RoomUserMapper.toEntity(room, user);
-    RoomUser savedRoomUser = roomUserRepository.save(roomUser);
+    RoomUser roomUserToSave = RoomUserMapper.toEntity(room, user);
+    RoomUser savedRoomUser = roomUserRepository.save(roomUserToSave);
     return RoomUserMapper.toResponseDTO(savedRoomUser);
   }
 }

@@ -64,10 +64,10 @@ public class OptionTypeService {
    * @return The created option type as a response DTO
    */
   public OptionTypeResponseDTO createOptionType(OptionTypeRequestDTO optionTypeRequestDTO) {
-    OptionType optionType = new OptionType();
-    optionType.setName(optionTypeRequestDTO.getName());
-    optionType.setDescription(optionTypeRequestDTO.getDescription());
-    OptionType savedOptionType = optionTypeRepository.save(optionType);
+    OptionType optionTypeToSave = new OptionType();
+    optionTypeToSave.setName(optionTypeRequestDTO.getName());
+    optionTypeToSave.setDescription(optionTypeRequestDTO.getDescription());
+    OptionType savedOptionType = optionTypeRepository.save(optionTypeToSave);
     return OptionTypeMapper.toResponseDTO(savedOptionType);
   }
 
