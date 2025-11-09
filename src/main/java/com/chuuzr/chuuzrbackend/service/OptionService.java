@@ -1,8 +1,12 @@
 package com.chuuzr.chuuzrbackend.service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,21 @@ public class OptionService {
   public OptionResponseDTO findByUuid(UUID optionUuid) {
     Option option = optionRepository.findByUuid(optionUuid).orElse(null);
     return OptionMapper.toResponseDTO(option);
+  }
+
+  /**
+   * Finds all options by option type UUID (paginated).
+   *
+   * @param optionTypeUuid The UUID of the option type
+   * @param pageable       Pagination parameters
+   * @return List of options for the specified option type
+   */
+  @Transactional(readOnly = true)
+  public List<OptionResponseDTO> findByOptionTypeUuid(UUID optionTypeUuid, Pageable pageable) {
+    Page<Option> page = optionRepository.findByOptionTypeUuid(optionTypeUuid, pageable);
+    return page.getContent().stream()
+        .map(OptionMapper::toResponseDTO)
+        .collect(Collectors.toList());
   }
 
   /**
