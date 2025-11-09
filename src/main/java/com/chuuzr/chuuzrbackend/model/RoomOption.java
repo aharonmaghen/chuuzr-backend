@@ -3,7 +3,7 @@ package com.chuuzr.chuuzrbackend.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.chuuzr.chuuzrbackend.model.compositeKeys.RoomOptionId;
+import com.chuuzr.chuuzrbackend.model.compositekeys.RoomOptionId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -41,10 +41,14 @@ public class RoomOption {
    * Default constructor for RoomOption required by JPA.
    */
   public RoomOption() {
+    this.roomOptionId = new RoomOptionId();
   }
 
   /**
    * Constructs a new RoomOption instance.
+   * <p>
+   * Note: The composite key (roomOptionId) is automatically initialized.
+   * The actual key values are set when the room and option are assigned.
    *
    * @param uuid      The UUID of the room-option relationship.
    * @param room      The room associated with the room-option relationship.
@@ -53,8 +57,8 @@ public class RoomOption {
    * @param createdAt The creation timestamp of the room-option relationship.
    */
   public RoomOption(UUID uuid, Room room, Option option, LocalDateTime updatedAt, LocalDateTime createdAt) {
-    this.roomOptionId = new RoomOptionId(room.getId(), option.getId());
-    this.uuid = uuid != null ? uuid : UUID.randomUUID();
+    this.roomOptionId = new RoomOptionId();
+    this.uuid = uuid;
     this.room = room;
     this.option = option;
     this.updatedAt = updatedAt;
@@ -62,7 +66,7 @@ public class RoomOption {
   }
 
   @PrePersist
-  private void generateUuidAndCreatedAt() {
+  private void prePersist() {
     if (uuid == null) {
       uuid = UUID.randomUUID();
     }
@@ -75,7 +79,7 @@ public class RoomOption {
   }
 
   @PreUpdate
-  private void updateTimestamp() {
+  private void preUpdate() {
     updatedAt = LocalDateTime.now();
   }
 
@@ -130,12 +134,13 @@ public class RoomOption {
   @Override
   public String toString() {
     return "RoomOption{uuid=" + this.uuid +
-        ", room=" + this.room +
-        ", option=" + this.option +
+        ", roomUuid=" + (room != null ? room.getUuid() : null) +
+        ", optionUuid=" + (option != null ? option.getUuid() : null) +
         ", updatedAt=" + this.updatedAt +
         ", createdAt=" + this.createdAt + "}";
   }
 
+  @Override
   public boolean equals(Object roomOption) {
     if (roomOption == this) {
       return true;
@@ -143,27 +148,15 @@ public class RoomOption {
       return false;
     } else {
       RoomOption that = (RoomOption) roomOption;
-      return this.uuid.equals(that.uuid) &&
-          this.room.equals(that.getRoom()) &&
-          this.option.equals(that.getOption()) &&
-          this.updatedAt.equals(that.getUpdatedAt()) &&
-          this.createdAt.equals(that.getCreatedAt());
+      return this.roomOptionId.equals(that.getRoomOptionId());
     }
   }
 
+  @Override
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;
-    h$ ^= this.uuid.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.room.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.option.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.updatedAt.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.createdAt.hashCode();
+    h$ ^= this.roomOptionId.hashCode();
     return h$;
   }
 }
-
