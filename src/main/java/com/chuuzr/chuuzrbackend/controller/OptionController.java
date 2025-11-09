@@ -1,7 +1,6 @@
 package com.chuuzr.chuuzrbackend.controller;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,22 +14,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.chuuzr.chuuzrbackend.model.Option;
-import com.chuuzr.chuuzrbackend.repository.OptionRepository;
+import com.chuuzr.chuuzrbackend.dto.option.OptionRequestDTO;
+import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
+import com.chuuzr.chuuzrbackend.service.OptionService;
 
 @RestController
 @RequestMapping("/api/options")
 public class OptionController {
-  private OptionRepository optionRepository;
+  private final OptionService optionService;
 
   @Autowired
-  public OptionController(OptionRepository optionRepository) {
-    this.optionRepository = optionRepository;
+  public OptionController(OptionService optionService) {
+    this.optionService = optionService;
   }
 
   @GetMapping("/{optionUuid}")
-  public ResponseEntity<Option> findById(@PathVariable UUID optionUuid) {
-    Option option = findOption(optionUuid);
+  public ResponseEntity<OptionResponseDTO> findById(@PathVariable UUID optionUuid) {
+    OptionResponseDTO option = optionService.findByUuid(optionUuid);
     if (option != null) {
       return ResponseEntity.ok(option);
     }
@@ -38,29 +38,21 @@ public class OptionController {
   }
 
   @PostMapping
-  public ResponseEntity<Void> createOption(@RequestBody Option newOptionRequest, UriComponentsBuilder ucb) {
-    Option optionToSave = new Option(null, null, newOptionRequest.getOptionTypeId(),
-        newOptionRequest.getApiProvider(), newOptionRequest.getExternalId(), newOptionRequest.getName(),
-        newOptionRequest.getDescription(), newOptionRequest.getImageUrl(), LocalDateTime.now(), LocalDateTime.now());
-    Option savedOption = optionRepository.save(optionToSave);
-    URI locationOfNewOption = ucb.path("/api/options/{optionUuid}").buildAndExpand(savedOption.getUuid()).toUri();
-    return ResponseEntity.created(locationOfNewOption).build();
+  public ResponseEntity<OptionResponseDTO> createOption(@RequestBody OptionRequestDTO newOptionRequest, UriComponentsBuilder ucb) {
+    OptionResponseDTO createdOption = optionService.createOption(newOptionRequest);
+    if (createdOption != null) {
+      URI locationOfNewOption = ucb.path("/api/options/{optionUuid}").buildAndExpand(createdOption.getUuid()).toUri();
+      return ResponseEntity.created(locationOfNewOption).body(createdOption);
+    }
+    return ResponseEntity.badRequest().build();
   }
 
   @PutMapping("/{optionUuid}")
-  public ResponseEntity<Void> updateOption(@PathVariable UUID optionUuid, @RequestBody Option optionToUpdate) {
-    Option option = findOption(optionUuid);
-    if (option != null) {
-      Option updatedOption = new Option(option.getId(), option.getUuid(), optionToUpdate.getOptionTypeId(),
-          optionToUpdate.getApiProvider(), optionToUpdate.getExternalId(), optionToUpdate.getName(),
-          optionToUpdate.getDescription(), optionToUpdate.getImageUrl(), LocalDateTime.now(), option.getCreatedAt());
-      optionRepository.save(updatedOption);
-      return ResponseEntity.noContent().build();
+  public ResponseEntity<OptionResponseDTO> updateOption(@PathVariable UUID optionUuid, @RequestBody OptionRequestDTO optionToUpdate) {
+    OptionResponseDTO updatedOption = optionService.updateOption(optionUuid, optionToUpdate);
+    if (updatedOption != null) {
+      return ResponseEntity.ok(updatedOption);
     }
     return ResponseEntity.notFound().build();
-  }
-
-  private Option findOption(UUID optionUuid) {
-    return optionRepository.findByUuid(optionUuid).orElse(null);
   }
 }

@@ -5,11 +5,15 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -19,24 +23,31 @@ public class Option {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @JsonIgnore
   private Long id;
+
+  @Column(nullable = false, unique = true, updatable = false)
   private UUID uuid;
-  private Long optionTypeId;
+  
+  @ManyToOne
+  @JoinColumn(name = "option_type_id")
+  private OptionType optionType;
+
   private String apiProvider;
   private String externalId;
   private String name;
   private String description;
   private String imageUrl;
+  
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
   public Option() {
   }
 
-  public Option(Long id, UUID uuid, Long optionTypeId, String apiProvider, String externalId, String name,
+  public Option(Long id, UUID uuid, OptionType optionType, String apiProvider, String externalId, String name,
       String description, String imageUrl, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.id = id;
     this.uuid = uuid;
-    this.optionTypeId = optionTypeId;
+    this.optionType = optionType;
     this.apiProvider = apiProvider;
     this.externalId = externalId;
     this.name = name;
@@ -47,10 +58,21 @@ public class Option {
   }
 
   @PrePersist
-  private void generateUuid() {
+  private void prePersist() {
     if (uuid == null) {
       uuid = UUID.randomUUID();
     }
+    if (createdAt == null) {
+      createdAt = LocalDateTime.now();
+    }
+    if (updatedAt == null) {
+      updatedAt = LocalDateTime.now();
+    }
+  }
+
+  @PreUpdate
+  private void preUpdate() {
+    updatedAt = LocalDateTime.now();
   }
 
   public Long getId() {
@@ -69,12 +91,12 @@ public class Option {
     this.uuid = uuid;
   }
 
-  public Long getOptionTypeId() {
-    return optionTypeId;
+  public OptionType getOptionType() {
+    return optionType;
   }
 
-  public void setOptionTypeId(Long optionTypeId) {
-    this.optionTypeId = optionTypeId;
+  public void setOptionType(OptionType optionType) {
+    this.optionType = optionType;
   }
 
   public String getApiProvider() {
@@ -137,7 +159,7 @@ public class Option {
   public String toString() {
     return "Option{id=" + this.id +
         ", uuid=" + this.uuid +
-        ", optionTypeId=" + this.optionTypeId +
+        ", optionType=" + (optionType != null ? optionType.getName() : null) +
         ", apiProvider=" + this.apiProvider +
         ", externalId=" + this.externalId +
         ", name=" + this.name +
