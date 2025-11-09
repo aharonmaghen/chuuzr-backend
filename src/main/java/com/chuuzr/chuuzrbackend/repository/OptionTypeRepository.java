@@ -10,5 +10,3 @@ import java.util.UUID;
 public interface OptionTypeRepository extends JpaRepository<OptionType, Long> {
   Optional<OptionType> findByUuid(UUID uuid);
 }
-
-

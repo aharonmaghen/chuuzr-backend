@@ -29,11 +29,9 @@ public class OptionType {
   private UUID uuid;
 
   private String name;
-
   private String description;
 
   private LocalDateTime updatedAt;
-
   private LocalDateTime createdAt;
 
   /**
@@ -63,7 +61,7 @@ public class OptionType {
   }
 
   @PrePersist
-  private void generateUuidAndCreatedAt() {
+  private void prePersist() {
     if (uuid == null) {
       uuid = UUID.randomUUID();
     }
@@ -76,7 +74,7 @@ public class OptionType {
   }
 
   @PreUpdate
-  private void updateTimestamp() {
+  private void preUpdate() {
     updatedAt = LocalDateTime.now();
   }
 
@@ -138,6 +136,7 @@ public class OptionType {
         ", createdAt=" + this.createdAt + "}";
   }
 
+  @Override
   public boolean equals(Object optionType) {
     if (optionType == this) {
       return true;
@@ -145,24 +144,15 @@ public class OptionType {
       return false;
     } else {
       OptionType that = (OptionType) optionType;
-      return this.id.equals(that.getId()) &&
-          this.uuid.equals(that.getUuid()) &&
-          this.name.equals(that.getName()) &&
-          this.createdAt.equals(that.getCreatedAt());
+      return this.id != null && this.id.equals(that.getId());
     }
   }
 
+  @Override
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;
-    h$ ^= this.id.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.uuid.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.name.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.createdAt.hashCode();
+    h$ ^= (this.uuid != null ? this.uuid.hashCode() : 0);
     return h$;
   }
 }
-
