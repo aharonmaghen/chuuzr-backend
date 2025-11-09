@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.model.compositeKeys;
+package com.chuuzr.chuuzrbackend.model.compositekeys;
 
 import java.io.Serializable;
 
@@ -48,23 +48,26 @@ public class RoomUserId implements Serializable {
     this.userId = userId;
   }
 
+  @Override
   public String toString() {
     return "RoomUserId{roomId=" + this.roomId +
         ", userId=" + this.userId + "}";
   }
 
-  public boolean equals(Object room) {
-    if (room == this) {
+  @Override
+  public boolean equals(Object roomUserId) {
+    if (roomUserId == this) {
       return true;
-    } else if (!(room instanceof RoomUserId)) {
+    } else if (!(roomUserId instanceof RoomUserId)) {
       return false;
     } else {
-      RoomUserId that = (RoomUserId) room;
+      RoomUserId that = (RoomUserId) roomUserId;
       return this.roomId.equals(that.getRoomId()) &&
           this.userId.equals(that.getUserId());
     }
   }
 
+  @Override
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;

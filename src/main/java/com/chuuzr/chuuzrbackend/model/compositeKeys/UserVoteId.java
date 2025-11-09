@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.model.compositeKeys;
+package com.chuuzr.chuuzrbackend.model.compositekeys;
 
 import java.io.Serializable;
 
@@ -6,7 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 /**
- * Represents a composite key of room_id, user_id, and option_id for the UserVote entity.
+ * Represents a composite key of room_id, user_id, and option_id for the
+ * UserVote entity.
  */
 @Embeddable
 public class UserVoteId implements Serializable {
@@ -60,12 +61,14 @@ public class UserVoteId implements Serializable {
     this.optionId = optionId;
   }
 
+  @Override
   public String toString() {
     return "UserVoteId{roomId=" + this.roomId +
         ", userId=" + this.userId +
         ", optionId=" + this.optionId + "}";
   }
 
+  @Override
   public boolean equals(Object userVoteId) {
     if (userVoteId == this) {
       return true;
@@ -79,6 +82,7 @@ public class UserVoteId implements Serializable {
     }
   }
 
+  @Override
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;
@@ -90,4 +94,3 @@ public class UserVoteId implements Serializable {
     return h$;
   }
 }
-

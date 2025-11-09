@@ -3,7 +3,7 @@ package com.chuuzr.chuuzrbackend.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.chuuzr.chuuzrbackend.model.compositeKeys.RoomUserId;
+import com.chuuzr.chuuzrbackend.model.compositekeys.RoomUserId;
 
 import jakarta.persistence.*;
 
@@ -23,6 +23,7 @@ public class RoomUser {
   @ManyToOne
   @MapsId("userId")
   private User user;
+  
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
