@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.chuuzr.chuuzrbackend.model.RoomUser;
-import com.chuuzr.chuuzrbackend.model.compositeKeys.RoomUserId;
+import com.chuuzr.chuuzrbackend.model.compositekeys.RoomUserId;
 
 import java.util.UUID;
 

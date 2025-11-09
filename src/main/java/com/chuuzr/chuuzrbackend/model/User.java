@@ -14,13 +14,16 @@ public class User {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @JsonIgnore
   private Long id;
+
   @Column(nullable = false, unique = true, updatable = false)
   private UUID uuid;
+
   private String name;
   private String nickname;
   private String countryCode;
   private String phoneNumber;
   private URL profilePicture;
+
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
@@ -138,6 +141,7 @@ public class User {
     this.createdAt = createdAt;
   }
 
+  @Override
   public String toString() {
     return "User{id=" + this.id +
         ", uuid=" + this.uuid +
@@ -150,6 +154,7 @@ public class User {
         ", createdAt=" + this.createdAt + "}";
   }
 
+  @Override
   public boolean equals(Object user) {
     if (user == this) {
       return true;
@@ -157,38 +162,15 @@ public class User {
       return false;
     } else {
       User that = (User) user;
-      return this.id.equals(that.getId()) &&
-          this.uuid.equals(that.getUuid()) &&
-          this.name.equals(that.getName()) &&
-          this.nickname.equals(that.getNickname()) &&
-          this.countryCode.equals(that.getCountryCode()) &&
-          this.phoneNumber.equals(that.getPhoneNumber()) &&
-          this.profilePicture.equals(that.getProfilePicture()) &&
-          this.updatedAt.equals(that.getUpdatedAt()) &&
-          this.createdAt.equals(that.getCreatedAt());
+      return this.id != null && this.id.equals(that.getId());
     }
   }
 
+  @Override
   public int hashCode() {
     int h$ = 1;
     h$ *= 1000003;
-    h$ ^= this.id.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.uuid.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.name.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.nickname.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.countryCode.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.phoneNumber.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.profilePicture.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.updatedAt.hashCode();
-    h$ *= 1000003;
-    h$ ^= this.createdAt.hashCode();
+    h$ ^= (this.uuid != null ? this.uuid.hashCode() : 0);
     return h$;
   }
 }
