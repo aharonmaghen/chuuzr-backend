@@ -58,10 +58,10 @@ public class OptionService {
     if (optionType == null) {
       return null;
     }
-    Option option = OptionMapper.toEntity(optionRequestDTO);
-    option.setOptionType(optionType);
+    Option optionToSave = OptionMapper.toEntity(optionRequestDTO);
+    optionToSave.setOptionType(optionType);
 
-    Option savedOption = optionRepository.save(option);
+    Option savedOption = optionRepository.save(optionToSave);
     return OptionMapper.toResponseDTO(savedOption);
   }
 
