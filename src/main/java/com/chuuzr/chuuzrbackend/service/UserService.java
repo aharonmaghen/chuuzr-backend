@@ -54,7 +54,7 @@ public class UserService {
   /**
    * Updates an existing user.
    *
-   * @param userUuid The UUID of the user to update
+   * @param userUuid       The UUID of the user to update
    * @param userRequestDTO The updated user data
    * @return The updated user as a response DTO, or null if user not found
    */
@@ -68,4 +68,3 @@ public class UserService {
     return UserMapper.toResponseDTO(updatedUser);
   }
 }
-
