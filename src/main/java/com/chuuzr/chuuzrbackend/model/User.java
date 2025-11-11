@@ -5,7 +5,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -24,6 +31,14 @@ public class User {
   private String phoneNumber;
   private URL profilePicture;
 
+  @JsonIgnore
+  @Column(name = "otp_code")
+  private String otpCode;
+
+  @JsonIgnore
+  @Column(name = "otp_expiration_time")
+  private LocalDateTime otpExpirationTime;
+
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
@@ -38,6 +53,8 @@ public class User {
       String countryCode,
       String phoneNumber,
       URL profilePicture,
+      String otpCode,
+      LocalDateTime otpExpirationTime,
       LocalDateTime updatedAt,
       LocalDateTime createdAt) {
     this.id = id;
@@ -47,8 +64,23 @@ public class User {
     this.countryCode = countryCode;
     this.phoneNumber = phoneNumber;
     this.profilePicture = profilePicture;
+    this.otpCode = otpCode;
+    this.otpExpirationTime = otpExpirationTime;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
+  }
+
+  public User(
+      Long id,
+      UUID uuid,
+      String name,
+      String nickname,
+      String countryCode,
+      String phoneNumber,
+      URL profilePicture,
+      LocalDateTime updatedAt,
+      LocalDateTime createdAt) {
+    this(id, uuid, name, nickname, countryCode, phoneNumber, profilePicture, null, null, updatedAt, createdAt);
   }
 
   @PrePersist
@@ -123,6 +155,22 @@ public class User {
 
   public void setProfilePicture(URL profilePicture) {
     this.profilePicture = profilePicture;
+  }
+
+  public String getOtpCode() {
+    return otpCode;
+  }
+
+  public void setOtpCode(String otpCode) {
+    this.otpCode = otpCode;
+  }
+
+  public LocalDateTime getOtpExpirationTime() {
+    return otpExpirationTime;
+  }
+
+  public void setOtpExpirationTime(LocalDateTime otpExpirationTime) {
+    this.otpExpirationTime = otpExpirationTime;
   }
 
   public LocalDateTime getUpdatedAt() {

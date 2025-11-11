@@ -1,5 +1,11 @@
 package com.chuuzr.chuuzrbackend.dto.user;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+
+import com.chuuzr.chuuzrbackend.dto.auth.UserAuthResponse;
+import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
 import com.chuuzr.chuuzrbackend.model.User;
 
 /**
@@ -55,5 +61,17 @@ public class UserMapper {
     user.setCountryCode(dto.getCountryCode());
     user.setPhoneNumber(dto.getPhoneNumber());
     user.setProfilePicture(dto.getProfilePicture());
+  }
+
+  public static UserInternalDTO toInternalDTO(User user) {
+    if (user == null) {
+      return null;
+    }
+    Set<String> roles = Collections.emptySet();
+    return new UserInternalDTO(user.getUuid(), user.getName(), user.getNickname(), roles);
+  }
+
+  public static UserAuthResponse toAuthResponse(String jwt, UUID userUuid) {
+    return new UserAuthResponse(jwt, userUuid);
   }
 }
