@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,12 +19,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.option.OptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
 import com.chuuzr.chuuzrbackend.service.OptionService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/options")
+@Tag(name = "Options")
+@SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class OptionController {
   private final OptionService optionService;
 

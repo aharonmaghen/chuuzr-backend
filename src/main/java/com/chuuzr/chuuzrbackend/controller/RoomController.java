@@ -14,12 +14,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.room.RoomRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.room.RoomResponseDTO;
 import com.chuuzr.chuuzrbackend.service.RoomService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/rooms")
+@Tag(name = "Rooms")
+@SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class RoomController {
   private final RoomService roomService;
 

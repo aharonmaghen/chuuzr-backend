@@ -12,8 +12,11 @@ import com.chuuzr.chuuzrbackend.dto.auth.UserOtpRequest;
 import com.chuuzr.chuuzrbackend.dto.auth.UserOtpVerifyRequest;
 import com.chuuzr.chuuzrbackend.service.auth.AuthService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication")
 public class AuthController {
   private final AuthService authService;
 
