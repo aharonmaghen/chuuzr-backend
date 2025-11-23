@@ -42,10 +42,7 @@ public class OptionController {
   @GetMapping("/{optionUuid}")
   public ResponseEntity<OptionResponseDTO> findById(@PathVariable UUID optionUuid) {
     OptionResponseDTO option = optionService.findByUuid(optionUuid);
-    if (option != null) {
-      return ResponseEntity.ok(option);
-    }
-    return ResponseEntity.notFound().build();
+    return ResponseEntity.ok(option);
   }
 
   @GetMapping
@@ -60,20 +57,14 @@ public class OptionController {
   public ResponseEntity<OptionResponseDTO> createOption(@RequestBody OptionRequestDTO newOptionRequest,
       UriComponentsBuilder ucb) {
     OptionResponseDTO createdOption = optionService.createOption(newOptionRequest);
-    if (createdOption != null) {
-      URI locationOfNewOption = ucb.path("/api/options/{optionUuid}").buildAndExpand(createdOption.getUuid()).toUri();
-      return ResponseEntity.created(locationOfNewOption).body(createdOption);
-    }
-    return ResponseEntity.badRequest().build();
+    URI locationOfNewOption = ucb.path("/api/options/{optionUuid}").buildAndExpand(createdOption.getUuid()).toUri();
+    return ResponseEntity.created(locationOfNewOption).body(createdOption);
   }
 
   @PutMapping("/{optionUuid}")
   public ResponseEntity<OptionResponseDTO> updateOption(@PathVariable UUID optionUuid,
       @RequestBody OptionRequestDTO optionToUpdate) {
     OptionResponseDTO updatedOption = optionService.updateOption(optionUuid, optionToUpdate);
-    if (updatedOption != null) {
-      return ResponseEntity.ok(updatedOption);
-    }
-    return ResponseEntity.notFound().build();
+    return ResponseEntity.ok(updatedOption);
   }
 }

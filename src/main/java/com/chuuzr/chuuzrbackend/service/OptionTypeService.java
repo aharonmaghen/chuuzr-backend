@@ -13,13 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeMapper;
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeResponseDTO;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.OptionType;
 import com.chuuzr.chuuzrbackend.repository.OptionTypeRepository;
 
-/**
- * Service layer for OptionType business logic.
- * Handles transactions and coordinates between controller and repository.
- */
 @Service
 @Transactional
 public class OptionTypeService {
@@ -31,24 +29,14 @@ public class OptionTypeService {
     this.optionTypeRepository = optionTypeRepository;
   }
 
-  /**
-   * Finds an option type by UUID and returns the DTO.
-   *
-   * @param optionTypeUuid The UUID of the option type to find
-   * @return OptionTypeResponseDTO if found, null otherwise
-   */
   @Transactional(readOnly = true)
   public OptionTypeResponseDTO findByUuid(UUID optionTypeUuid) {
-    OptionType optionType = optionTypeRepository.findByUuid(optionTypeUuid).orElse(null);
+    OptionType optionType = optionTypeRepository.findByUuid(optionTypeUuid)
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
+            "Option type with UUID " + optionTypeUuid + " not found"));
     return OptionTypeMapper.toResponseDTO(optionType);
   }
 
-  /**
-   * Gets all option types (paginated).
-   *
-   * @param pageable Pagination parameters
-   * @return List of option types
-   */
   @Transactional(readOnly = true)
   public List<OptionTypeResponseDTO> getAllOptionTypes(Pageable pageable) {
     Page<OptionType> page = optionTypeRepository.findAll(pageable);
@@ -57,12 +45,6 @@ public class OptionTypeService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Creates a new option type.
-   *
-   * @param optionTypeRequestDTO The option type data to create
-   * @return The created option type as a response DTO
-   */
   public OptionTypeResponseDTO createOptionType(OptionTypeRequestDTO optionTypeRequestDTO) {
     OptionType optionTypeToSave = new OptionType();
     optionTypeToSave.setName(optionTypeRequestDTO.getName());
@@ -71,19 +53,11 @@ public class OptionTypeService {
     return OptionTypeMapper.toResponseDTO(savedOptionType);
   }
 
-  /**
-   * Updates an existing option type.
-   *
-   * @param optionTypeUuid       The UUID of the option type to update
-   * @param optionTypeRequestDTO The updated option type data
-   * @return The updated option type as a response DTO, or null if option type not
-   *         found
-   */
   public OptionTypeResponseDTO updateOptionType(UUID optionTypeUuid, OptionTypeRequestDTO optionTypeRequestDTO) {
-    OptionType optionType = optionTypeRepository.findByUuid(optionTypeUuid).orElse(null);
-    if (optionType == null) {
-      return null;
-    }
+    OptionType optionType = optionTypeRepository.findByUuid(optionTypeUuid)
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
+            "Option type with UUID " + optionTypeUuid + " not found"));
+
     OptionTypeMapper.updateEntityFromDTO(optionType, optionTypeRequestDTO);
     OptionType updatedOptionType = optionTypeRepository.save(optionType);
     return OptionTypeMapper.toResponseDTO(updatedOptionType);

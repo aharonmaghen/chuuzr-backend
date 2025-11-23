@@ -41,10 +41,7 @@ public class OptionTypeController {
   @GetMapping("/{optionTypeUuid}")
   public ResponseEntity<OptionTypeResponseDTO> findById(@PathVariable UUID optionTypeUuid) {
     OptionTypeResponseDTO optionType = optionTypeService.findByUuid(optionTypeUuid);
-    if (optionType != null) {
-      return ResponseEntity.ok(optionType);
-    }
-    return ResponseEntity.notFound().build();
+    return ResponseEntity.ok(optionType);
   }
 
   @GetMapping
@@ -67,9 +64,6 @@ public class OptionTypeController {
   public ResponseEntity<OptionTypeResponseDTO> updateOptionType(@PathVariable UUID optionTypeUuid,
       @RequestBody OptionTypeRequestDTO optionTypeToUpdate) {
     OptionTypeResponseDTO updatedOptionType = optionTypeService.updateOptionType(optionTypeUuid, optionTypeToUpdate);
-    if (updatedOptionType != null) {
-      return ResponseEntity.ok(updatedOptionType);
-    }
-    return ResponseEntity.notFound().build();
+    return ResponseEntity.ok(updatedOptionType);
   }
 }

@@ -13,15 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.chuuzr.chuuzrbackend.dto.option.OptionMapper;
 import com.chuuzr.chuuzrbackend.dto.option.OptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
+import com.chuuzr.chuuzrbackend.exception.ValidationException;
 import com.chuuzr.chuuzrbackend.model.Option;
 import com.chuuzr.chuuzrbackend.model.OptionType;
 import com.chuuzr.chuuzrbackend.repository.OptionRepository;
 import com.chuuzr.chuuzrbackend.repository.OptionTypeRepository;
 
-/**
- * Service layer for Option business logic.
- * Handles transactions and coordinates between controller and repository.
- */
 @Service
 @Transactional
 public class OptionService {
@@ -35,25 +34,14 @@ public class OptionService {
     this.optionTypeRepository = optionTypeRepository;
   }
 
-  /**
-   * Finds an option by UUID and returns the DTO.
-   *
-   * @param optionUuid The UUID of the option to find
-   * @return OptionResponseDTO if found, null otherwise
-   */
   @Transactional(readOnly = true)
   public OptionResponseDTO findByUuid(UUID optionUuid) {
-    Option option = optionRepository.findByUuid(optionUuid).orElse(null);
+    Option option = optionRepository.findByUuid(optionUuid)
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND,
+            "Option with UUID " + optionUuid + " not found"));
     return OptionMapper.toResponseDTO(option);
   }
 
-  /**
-   * Finds all options by option type UUID (paginated).
-   *
-   * @param optionTypeUuid The UUID of the option type
-   * @param pageable       Pagination parameters
-   * @return List of options for the specified option type
-   */
   @Transactional(readOnly = true)
   public List<OptionResponseDTO> findByOptionTypeUuid(UUID optionTypeUuid, Pageable pageable) {
     Page<Option> page = optionRepository.findByOptionTypeUuid(optionTypeUuid, pageable);
@@ -62,21 +50,13 @@ public class OptionService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Creates a new option.
-   *
-   * @param optionRequestDTO The option data to create
-   * @return The created option as a response DTO, or null if option type not
-   *         found
-   */
   public OptionResponseDTO createOption(OptionRequestDTO optionRequestDTO) {
     if (optionRequestDTO.getOptionTypeUuid() == null) {
-      return null;
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type UUID is required");
     }
-    OptionType optionType = optionTypeRepository.findByUuid(optionRequestDTO.getOptionTypeUuid()).orElse(null);
-    if (optionType == null) {
-      return null;
-    }
+    OptionType optionType = optionTypeRepository.findByUuid(optionRequestDTO.getOptionTypeUuid())
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
+            "Option type with UUID " + optionRequestDTO.getOptionTypeUuid() + " not found"));
     Option optionToSave = OptionMapper.toEntity(optionRequestDTO);
     optionToSave.setOptionType(optionType);
 
@@ -84,28 +64,19 @@ public class OptionService {
     return OptionMapper.toResponseDTO(savedOption);
   }
 
-  /**
-   * Updates an existing option.
-   *
-   * @param optionUuid       The UUID of the option to update
-   * @param optionRequestDTO The updated option data
-   * @return The updated option as a response DTO, or null if option or option
-   *         type not found
-   */
   public OptionResponseDTO updateOption(UUID optionUuid, OptionRequestDTO optionRequestDTO) {
-    Option option = optionRepository.findByUuid(optionUuid).orElse(null);
-    if (option == null) {
-      return null;
-    }
+    Option option = optionRepository.findByUuid(optionUuid)
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND,
+            "Option with UUID " + optionUuid + " not found"));
+
     if (optionRequestDTO.getOptionTypeUuid() != null) {
-      OptionType optionType = optionTypeRepository.findByUuid(optionRequestDTO.getOptionTypeUuid()).orElse(null);
-      if (optionType == null) {
-        return null;
-      }
+      OptionType optionType = optionTypeRepository.findByUuid(optionRequestDTO.getOptionTypeUuid())
+          .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
+              "Option type with UUID " + optionRequestDTO.getOptionTypeUuid() + " not found"));
       option.setOptionType(optionType);
     }
-    OptionMapper.updateEntityFromDTO(option, optionRequestDTO);
 
+    OptionMapper.updateEntityFromDTO(option, optionRequestDTO);
     Option updatedOption = optionRepository.save(option);
     return OptionMapper.toResponseDTO(updatedOption);
   }

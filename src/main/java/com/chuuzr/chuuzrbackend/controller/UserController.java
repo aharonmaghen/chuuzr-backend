@@ -37,10 +37,7 @@ public class UserController {
   @GetMapping("/{userUuid}")
   public ResponseEntity<UserResponseDTO> findById(@PathVariable UUID userUuid) {
     UserResponseDTO user = userService.findByUuid(userUuid);
-    if (user != null) {
-      return ResponseEntity.ok(user);
-    }
-    return ResponseEntity.notFound().build();
+    return ResponseEntity.ok(user);
   }
 
   @PostMapping
@@ -52,10 +49,7 @@ public class UserController {
 
   @PutMapping("/{userUuid}")
   public ResponseEntity<Void> updateUser(@PathVariable UUID userUuid, @RequestBody UserRequestDTO userToUpdate) {
-    UserResponseDTO updatedUser = userService.updateUser(userUuid, userToUpdate);
-    if (updatedUser != null) {
-      return ResponseEntity.noContent().build();
-    }
-    return ResponseEntity.notFound().build();
+    userService.updateUser(userUuid, userToUpdate);
+    return ResponseEntity.noContent().build();
   }
 }

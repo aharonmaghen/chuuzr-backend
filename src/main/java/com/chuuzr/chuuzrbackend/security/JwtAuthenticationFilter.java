@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -42,8 +43,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     if (authorizationHeader != null && authorizationHeader.startsWith(BEARER_PREFIX)) {
       String token = authorizationHeader.substring(BEARER_PREFIX.length());
-      if (jwtUtil.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
-        try {
+
+      try {
+        jwtUtil.validateToken(token);
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
           UUID userUuid = jwtUtil.extractUserUuid(token);
           UserInternalDTO userContext = authService.getInternalUserContext(userUuid);
 
@@ -51,10 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
               null, toAuthorities(userContext.getRoles()));
           authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        } catch (ResponseStatusException ex) {
-          SecurityContextHolder.clearContext();
         }
+      } catch (io.jsonwebtoken.JwtException ex) {
+        SecurityContextHolder.clearContext();
+        throw new BadCredentialsException("Invalid JWT token", ex);
+      } catch (ResponseStatusException ex) {
+        SecurityContextHolder.clearContext();
+        throw new BadCredentialsException("Authentication failed", ex);
       }
     }
 

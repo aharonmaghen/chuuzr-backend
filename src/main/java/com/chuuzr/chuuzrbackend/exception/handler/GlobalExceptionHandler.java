@@ -1,0 +1,111 @@
+package com.chuuzr.chuuzrbackend.exception.handler;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorMapper;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.BaseException;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+  @ExceptionHandler(BaseException.class)
+  public ErrorDTO handleBaseException(BaseException ex, HttpServletRequest request) {
+    return ErrorMapper.toErrorDTO(ex.getErrorCode(), ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(ResponseStatusException.class)
+  public ErrorDTO handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+    if (status == null) {
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+    String code = status.name();
+    String message = ex.getReason() != null ? ex.getReason() : status.getReasonPhrase();
+    return ErrorMapper.toErrorDTO(status, code, message, request.getRequestURI());
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ErrorDTO handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
+    return ErrorMapper.toErrorDTO(ErrorCode.INVALID_INPUT, ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler({
+      io.jsonwebtoken.ExpiredJwtException.class,
+      io.jsonwebtoken.MalformedJwtException.class,
+      io.jsonwebtoken.security.SignatureException.class,
+      io.jsonwebtoken.UnsupportedJwtException.class,
+      io.jsonwebtoken.security.SecurityException.class
+  })
+  public ErrorDTO handleJwtException(Exception ex, HttpServletRequest request) {
+    return ErrorMapper.toErrorDTO(ErrorCode.JWT_INVALID, null, request.getRequestURI());
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ErrorDTO handleDataIntegrityViolationException(DataIntegrityViolationException ex,
+      HttpServletRequest request) {
+    String message = ex.getMessage();
+    if (message != null && (message.contains("duplicate") || message.contains("unique"))) {
+      return ErrorMapper.toErrorDTO(ErrorCode.DUPLICATE_RESOURCE, "Resource already exists",
+          request.getRequestURI());
+    }
+    return ErrorMapper.toErrorDTO(ErrorCode.INVALID_INPUT, "Data integrity violation", request.getRequestURI());
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ErrorDTO handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
+      HttpServletRequest request) {
+    StringBuilder messageBuilder = new StringBuilder("Validation failed: ");
+    ex.getBindingResult().getFieldErrors().forEach(error -> {
+      messageBuilder.append(error.getField()).append(" ").append(error.getDefaultMessage()).append("; ");
+    });
+    String message = messageBuilder.toString().trim();
+    return ErrorMapper.toErrorDTO(ErrorCode.INVALID_INPUT, message, request.getRequestURI());
+  }
+
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ErrorDTO handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex,
+      HttpServletRequest request) {
+    String message = String.format("Method '%s' is not supported for this endpoint", ex.getMethod());
+    return ErrorMapper.toErrorDTO(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", message,
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ErrorDTO handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex,
+      HttpServletRequest request) {
+    String message = String.format("Media type '%s' is not supported", ex.getContentType());
+    return ErrorMapper.toErrorDTO(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE", message,
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ErrorDTO handleMissingServletRequestParameterException(MissingServletRequestParameterException ex,
+      HttpServletRequest request) {
+    String message = String.format("Required parameter '%s' is missing", ex.getParameterName());
+    return ErrorMapper.toErrorDTO(ErrorCode.INVALID_INPUT, message, request.getRequestURI());
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ErrorDTO handleHttpMessageNotReadableException(HttpMessageNotReadableException ex,
+      HttpServletRequest request) {
+    return ErrorMapper.toErrorDTO(ErrorCode.INVALID_INPUT, "Malformed request body", request.getRequestURI());
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ErrorDTO handleGenericException(Exception ex, HttpServletRequest request) {
+    return ErrorMapper.toErrorDTO(ErrorCode.INTERNAL_SERVER_ERROR, null, request.getRequestURI());
+  }
+}

@@ -14,6 +14,9 @@ import com.chuuzr.chuuzrbackend.dto.roomuser.RoomUserMapper;
 import com.chuuzr.chuuzrbackend.dto.roomuser.RoomUserResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserMapper;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
+import com.chuuzr.chuuzrbackend.exception.UserNotFoundException;
 import com.chuuzr.chuuzrbackend.model.Room;
 import com.chuuzr.chuuzrbackend.model.RoomUser;
 import com.chuuzr.chuuzrbackend.model.User;
@@ -21,10 +24,6 @@ import com.chuuzr.chuuzrbackend.repository.RoomRepository;
 import com.chuuzr.chuuzrbackend.repository.RoomUserRepository;
 import com.chuuzr.chuuzrbackend.repository.UserRepository;
 
-/**
- * Service layer for RoomUser business logic.
- * Handles transactions and coordinates between controller and repository.
- */
 @Service
 @Transactional
 public class RoomUserService {
@@ -41,13 +40,6 @@ public class RoomUserService {
     this.userRepository = userRepository;
   }
 
-  /**
-   * Gets all users in a room (paginated).
-   *
-   * @param roomUuid The UUID of the room
-   * @param pageable Pagination parameters
-   * @return List of users in the room
-   */
   @Transactional(readOnly = true)
   public List<UserResponseDTO> getRoomUsers(UUID roomUuid, Pageable pageable) {
     Page<RoomUser> page = roomUserRepository.findByRoomUuid(roomUuid, pageable);
@@ -55,20 +47,14 @@ public class RoomUserService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Adds a user to a room.
-   *
-   * @param roomUuid The UUID of the room
-   * @param userUuid The UUID of the user to add
-   * @return The created RoomUser relationship as a response DTO, or null if room
-   *         or user not found
-   */
   public RoomUserResponseDTO addUserToRoom(UUID roomUuid, UUID userUuid) {
-    Room room = roomRepository.findByUuid(roomUuid).orElse(null);
-    User user = userRepository.findByUuid(userUuid).orElse(null);
-    if (room == null || user == null) {
-      return null;
-    }
+    Room room = roomRepository.findByUuid(roomUuid)
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND,
+            "Room with UUID " + roomUuid + " not found"));
+
+    User user = userRepository.findByUuid(userUuid)
+        .orElseThrow(() -> new UserNotFoundException("User with UUID " + userUuid + " not found"));
+
     RoomUser roomUserToSave = RoomUserMapper.toEntity(room, user);
     RoomUser savedRoomUser = roomUserRepository.save(roomUserToSave);
     return RoomUserMapper.toResponseDTO(savedRoomUser);

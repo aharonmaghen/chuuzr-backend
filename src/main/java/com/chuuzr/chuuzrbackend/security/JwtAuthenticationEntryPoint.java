@@ -30,12 +30,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
       throws IOException, ServletException {
     ErrorCode errorCode = ErrorCode.AUTHENTICATION_FAILED;
 
+    Throwable cause = authException != null ? authException.getCause() : null;
+    if (cause instanceof io.jsonwebtoken.JwtException) {
+      errorCode = ErrorCode.JWT_INVALID;
+    }
+
     response.setStatus(errorCode.getStatus().value());
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding("UTF-8");
 
-    String message = authException != null ? authException.getMessage() : null;
-    ErrorDTO error = ErrorMapper.toErrorDTO(errorCode, message, request.getRequestURI());
+    ErrorDTO error = ErrorMapper.toErrorDTO(errorCode, null, request.getRequestURI());
 
     objectMapper.writeValue(response.getWriter(), error);
   }

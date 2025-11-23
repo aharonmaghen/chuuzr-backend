@@ -37,10 +37,7 @@ public class RoomController {
   @GetMapping("/{roomUuid}")
   public ResponseEntity<RoomResponseDTO> findById(@PathVariable UUID roomUuid) {
     RoomResponseDTO room = roomService.findByUuid(roomUuid);
-    if (room != null) {
-      return ResponseEntity.ok(room);
-    }
-    return ResponseEntity.notFound().build();
+    return ResponseEntity.ok(room);
   }
 
   @PostMapping
@@ -55,9 +52,6 @@ public class RoomController {
   public ResponseEntity<RoomResponseDTO> updateRoom(@PathVariable UUID roomUuid,
       @RequestBody RoomRequestDTO roomToUpdate) {
     RoomResponseDTO updatedRoom = roomService.updateRoom(roomUuid, roomToUpdate);
-    if (updatedRoom != null) {
-      return ResponseEntity.ok(updatedRoom);
-    }
-    return ResponseEntity.notFound().build();
+    return ResponseEntity.ok(updatedRoom);
   }
 }
