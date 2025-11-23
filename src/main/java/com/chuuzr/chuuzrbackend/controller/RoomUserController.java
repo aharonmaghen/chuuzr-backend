@@ -50,14 +50,8 @@ public class RoomUserController {
       @RequestBody RoomUserRequestDTO roomUserRequest,
       UriComponentsBuilder ucb) {
     RoomUserResponseDTO addedRoomUser = roomUserService.addUserToRoom(roomUuid, roomUserRequest.getUserUuid());
-
-    if (addedRoomUser != null) {
-      URI locationOfNewUser = ucb.path("/api/room-users/{roomUuid}/users")
-          .buildAndExpand(addedRoomUser.getRoom().getUuid())
-          .toUri();
-      return ResponseEntity.created(locationOfNewUser).body(addedRoomUser);
-    }
-
-    return ResponseEntity.notFound().build();
+    URI locationOfNewUser = ucb.path("/api/room-users/{roomUuid}/users")
+        .buildAndExpand(addedRoomUser.getRoom().getUuid()).toUri();
+    return ResponseEntity.created(locationOfNewUser).body(addedRoomUser);
   }
 }

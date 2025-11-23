@@ -14,6 +14,8 @@ import com.chuuzr.chuuzrbackend.dto.option.OptionMapper;
 import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionMapper;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.Option;
 import com.chuuzr.chuuzrbackend.model.Room;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
@@ -21,10 +23,6 @@ import com.chuuzr.chuuzrbackend.repository.OptionRepository;
 import com.chuuzr.chuuzrbackend.repository.RoomOptionRepository;
 import com.chuuzr.chuuzrbackend.repository.RoomRepository;
 
-/**
- * Service layer for RoomOption business logic.
- * Handles transactions and coordinates between controller and repository.
- */
 @Service
 @Transactional
 public class RoomOptionService {
@@ -41,13 +39,6 @@ public class RoomOptionService {
     this.optionRepository = optionRepository;
   }
 
-  /**
-   * Gets all options in a room (paginated).
-   *
-   * @param roomUuid The UUID of the room
-   * @param pageable Pagination parameters
-   * @return List of options in the room
-   */
   @Transactional(readOnly = true)
   public List<OptionResponseDTO> getRoomOptions(UUID roomUuid, Pageable pageable) {
     Page<RoomOption> page = roomOptionRepository.findByRoomUuid(roomUuid, pageable);
@@ -55,21 +46,15 @@ public class RoomOptionService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Adds an option to a room.
-   *
-   * @param roomUuid   The UUID of the room
-   * @param optionUuid The UUID of the option to add
-   * @return The created RoomOption relationship as a response DTO, or null if
-   *         room
-   *         or option not found
-   */
   public RoomOptionResponseDTO addOptionToRoom(UUID roomUuid, UUID optionUuid) {
-    Room room = roomRepository.findByUuid(roomUuid).orElse(null);
-    Option option = optionRepository.findByUuid(optionUuid).orElse(null);
-    if (room == null || option == null) {
-      return null;
-    }
+    Room room = roomRepository.findByUuid(roomUuid).orElseThrow(
+        () -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND,
+            "Room with UUID " + roomUuid + " not found"));
+
+    Option option = optionRepository.findByUuid(optionUuid)
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND,
+            "Option with UUID " + optionUuid + " not found"));
+
     RoomOption roomOptionToSave = RoomOptionMapper.toEntity(room, option);
     RoomOption savedRoomOption = roomOptionRepository.save(roomOptionToSave);
     return RoomOptionMapper.toResponseDTO(savedRoomOption);

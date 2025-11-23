@@ -2,20 +2,20 @@ package com.chuuzr.chuuzrbackend.service.auth;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.chuuzr.chuuzrbackend.dto.auth.UserAuthResponse;
 import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
 import com.chuuzr.chuuzrbackend.dto.auth.UserOtpRequest;
 import com.chuuzr.chuuzrbackend.dto.auth.UserOtpVerifyRequest;
 import com.chuuzr.chuuzrbackend.dto.user.UserMapper;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.AuthorizationException;
+import com.chuuzr.chuuzrbackend.exception.UserNotFoundException;
 import com.chuuzr.chuuzrbackend.model.User;
 import com.chuuzr.chuuzrbackend.repository.UserRepository;
 import com.chuuzr.chuuzrbackend.security.JwtUtil;
@@ -41,7 +41,8 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public void requestOtp(UserOtpRequest request) {
     User user = userRepository.findByPhoneNumberAndCountryCode(request.getPhoneNumber(), request.getCountryCode())
-        .orElseGet(() -> createUser(request));
+        .orElseThrow(() -> new UserNotFoundException("User with phone number " + request.getPhoneNumber()
+            + " and country code " + request.getCountryCode() + " not found"));
 
     String otp = generateOtp();
     user.setOtpCode(otp);
@@ -53,27 +54,21 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public UserAuthResponse verifyOtp(UserOtpVerifyRequest request) {
-    Optional<User> optionalUser = userRepository.findByPhoneNumberAndCountryCode(request.getPhoneNumber(),
-        request.getCountryCode());
-
-    if (optionalUser.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-    }
-
-    User user = optionalUser.get();
+    User user = userRepository.findByPhoneNumberAndCountryCode(request.getPhoneNumber(), request.getCountryCode())
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
 
     if (user.getOtpCode() == null || user.getOtpExpirationTime() == null) {
-      throw unauthorized("No OTP request found for this user.");
-    }
-
-    if (!user.getOtpCode().equals(request.getOtp())) {
-      throw unauthorized("Invalid OTP code.");
+      throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid OTP code");
     }
 
     if (user.getOtpExpirationTime().isBefore(LocalDateTime.now())) {
       clearOtp(user);
       userRepository.save(user);
-      throw unauthorized("OTP code has expired.");
+      throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid OTP code");
+    }
+
+    if (!user.getOtpCode().equals(request.getOtp())) {
+      throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid OTP code");
     }
 
     clearOtp(user);
@@ -86,15 +81,9 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional(readOnly = true)
   public UserInternalDTO getInternalUserContext(UUID userUuid) {
-    return userRepository.findByUuid(userUuid).map(UserMapper::toInternalDTO)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-  }
-
-  private User createUser(UserOtpRequest request) {
-    User user = new User();
-    user.setCountryCode(request.getCountryCode());
-    user.setPhoneNumber(request.getPhoneNumber());
-    return userRepository.save(user);
+    User user = userRepository.findByUuid(userUuid).orElseThrow(
+        () -> new UserNotFoundException("User with UUID " + userUuid + " not found"));
+    return UserMapper.toInternalDTO(user);
   }
 
   private String generateOtp() {
@@ -105,9 +94,5 @@ public class AuthServiceImpl implements AuthService {
   private void clearOtp(User user) {
     user.setOtpCode(null);
     user.setOtpExpirationTime(null);
-  }
-
-  private ResponseStatusException unauthorized(String message) {
-    return new ResponseStatusException(HttpStatus.UNAUTHORIZED, message);
   }
 }

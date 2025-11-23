@@ -68,13 +68,8 @@ public class RoomOptionController {
       @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {
     RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid,
         roomOptionRequest.getOptionUuid());
-
-    if (addedRoomOption != null) {
-      URI locationOfNewOption = ucb.path("/api/room-options/{roomUuid}/options")
-          .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
-      return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
-    }
-
-    return ResponseEntity.notFound().build();
+    URI locationOfNewOption = ucb.path("/api/room-options/{roomUuid}/options")
+        .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
+    return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
   }
 }

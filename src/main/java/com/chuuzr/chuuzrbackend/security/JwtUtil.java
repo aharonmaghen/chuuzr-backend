@@ -42,12 +42,8 @@ public class JwtUtil {
   }
 
   public boolean validateToken(String token) {
-    try {
-      parseClaims(token);
-      return true;
-    } catch (RuntimeException ex) {
-      return false;
-    }
+    parseClaims(token);
+    return true;
   }
 
   public UUID extractUserUuid(String token) {
