@@ -1,8 +1,17 @@
 package com.chuuzr.chuuzrbackend.exception.handler;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,11 +24,21 @@ import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.error.ErrorMapper;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 import com.chuuzr.chuuzrbackend.exception.BaseException;
+import com.chuuzr.chuuzrbackend.exception.ValidationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(ValidationException.class)
+  public ErrorDTO handleValidationException(ValidationException ex, HttpServletRequest request) {
+    if (ex.hasValidationErrors()) {
+      return ErrorMapper.toErrorDTO(ex.getErrorCode(), ex.getMessage(), request.getRequestURI(),
+          ex.getValidationErrors());
+    }
+    return ErrorMapper.toErrorDTO(ex.getErrorCode(), ex.getMessage(), request.getRequestURI());
+  }
 
   @ExceptionHandler(BaseException.class)
   public ErrorDTO handleBaseException(BaseException ex, HttpServletRequest request) {
@@ -67,12 +86,38 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ErrorDTO handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
       HttpServletRequest request) {
-    StringBuilder messageBuilder = new StringBuilder("Validation failed: ");
-    ex.getBindingResult().getFieldErrors().forEach(error -> {
-      messageBuilder.append(error.getField()).append(" ").append(error.getDefaultMessage()).append("; ");
-    });
-    String message = messageBuilder.toString().trim();
-    return ErrorMapper.toErrorDTO(ErrorCode.INVALID_INPUT, message, request.getRequestURI());
+    Map<String, List<String>> validationErrors = new HashMap<>();
+
+    for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+      validationErrors.computeIfAbsent(error.getField(), k -> new ArrayList<>()).add(error.getDefaultMessage());
+    }
+
+    boolean hasCountryCodeErrors = validationErrors.containsKey("countryCode");
+
+    if (!hasCountryCodeErrors) {
+      ex.getBindingResult().getGlobalErrors().forEach(error -> {
+        validationErrors.computeIfAbsent("phoneNumber", k -> new ArrayList<>()).add(error.getDefaultMessage());
+      });
+    }
+
+    return ErrorMapper.toErrorDTO(ErrorCode.VALIDATION_FAILED,
+        "Validation failed for one or more fields", request.getRequestURI(), validationErrors);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ErrorDTO handleConstraintViolationException(ConstraintViolationException ex,
+      HttpServletRequest request) {
+    Map<String, List<String>> validationErrors = new HashMap<>();
+
+    for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+      String propertyPath = violation.getPropertyPath().toString();
+      String fieldName = propertyPath.substring(propertyPath.lastIndexOf('.') + 1);
+
+      validationErrors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(violation.getMessage());
+    }
+
+    return ErrorMapper.toErrorDTO(ErrorCode.CONSTRAINT_VIOLATION,
+        "Constraint violation occurred", request.getRequestURI(), validationErrors);
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

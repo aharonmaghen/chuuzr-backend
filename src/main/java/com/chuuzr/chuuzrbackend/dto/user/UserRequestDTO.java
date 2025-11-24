@@ -1,22 +1,51 @@
 package com.chuuzr.chuuzrbackend.dto.user;
 
-import java.net.URL;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import com.chuuzr.chuuzrbackend.util.validation.ValidCountryCode;
+import com.chuuzr.chuuzrbackend.util.validation.ValidImageUrl;
+import com.chuuzr.chuuzrbackend.util.validation.ValidName;
+import com.chuuzr.chuuzrbackend.util.validation.ValidNickname;
+import com.chuuzr.chuuzrbackend.util.validation.ValidPhoneNumberPair;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * DTO for creating or updating a User.
  * Does not include UUID or timestamps as these are managed by the server.
  */
+@ValidPhoneNumberPair
 public class UserRequestDTO {
+  @Schema(description = "User's full name", example = "John Doe", minLength = 2, maxLength = 50)
+  @NotBlank(message = "Name is required")
+  @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
+  @ValidName
   private String name;
+
+  @Schema(description = "User's unique nickname", example = "johndoe123", minLength = 3, maxLength = 30)
+  @NotBlank(message = "Nickname is required")
+  @Size(min = 3, max = 30, message = "Nickname must be between 3 and 30 characters")
+  @ValidNickname
   private String nickname;
+
+  @Schema(description = "2-letter country code supported by phone number validation", example = "US", minLength = 2, maxLength = 2)
+  @NotBlank(message = "Country code is required")
+  @ValidCountryCode
   private String countryCode;
+
+  @Schema(description = "Phone number without country code", example = "5551234567", minLength = 7, maxLength = 15)
+  @NotBlank(message = "Phone number is required")
   private String phoneNumber;
-  private URL profilePicture;
+
+  @Schema(description = "URL to user's profile picture", example = "https://example.com/profile.jpg", format = "uri")
+  @ValidImageUrl
+  private String profilePicture;
 
   public UserRequestDTO() {
   }
 
-  public UserRequestDTO(String name, String nickname, String countryCode, String phoneNumber, URL profilePicture) {
+  public UserRequestDTO(String name, String nickname, String countryCode, String phoneNumber, String profilePicture) {
     this.name = name;
     this.nickname = nickname;
     this.countryCode = countryCode;
@@ -56,11 +85,11 @@ public class UserRequestDTO {
     this.phoneNumber = phoneNumber;
   }
 
-  public URL getProfilePicture() {
+  public String getProfilePicture() {
     return profilePicture;
   }
 
-  public void setProfilePicture(URL profilePicture) {
+  public void setProfilePicture(String profilePicture) {
     this.profilePicture = profilePicture;
   }
 }

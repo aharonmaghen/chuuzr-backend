@@ -3,6 +3,8 @@ package com.chuuzr.chuuzrbackend.controller;
 import java.net.URI;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,11 @@ import com.chuuzr.chuuzrbackend.dto.user.UserRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
 import com.chuuzr.chuuzrbackend.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -35,20 +42,40 @@ public class UserController {
   }
 
   @GetMapping("/{userUuid}")
+  @Operation(summary = "Get user by UUID", description = "Retrieve a specific user by their unique identifier", operationId = "getUserById")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+      @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+  })
   public ResponseEntity<UserResponseDTO> findById(@PathVariable UUID userUuid) {
     UserResponseDTO user = userService.findByUuid(userUuid);
     return ResponseEntity.ok(user);
   }
 
   @PostMapping
-  public ResponseEntity<Void> createUser(@RequestBody UserRequestDTO newUserRequest, UriComponentsBuilder ucb) {
+  @Operation(summary = "Create a new user", description = "Create a new user with the provided information. All fields are required except profile picture.", operationId = "createUser")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content),
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+      @ApiResponse(responseCode = "409", description = "User already exists", content = @Content)
+  })
+  public ResponseEntity<Void> createUser(@Valid @RequestBody UserRequestDTO newUserRequest, UriComponentsBuilder ucb) {
     UserResponseDTO createdUser = userService.createUser(newUserRequest);
     URI locationOfNewUser = ucb.path("/api/users/{userUuid}").buildAndExpand(createdUser.getUuid()).toUri();
     return ResponseEntity.created(locationOfNewUser).build();
   }
 
   @PutMapping("/{userUuid}")
-  public ResponseEntity<Void> updateUser(@PathVariable UUID userUuid, @RequestBody UserRequestDTO userToUpdate) {
+  @Operation(summary = "Update an existing user", description = "Update user information for the specified user UUID. All fields are required except profile picture.", operationId = "updateUser")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "User updated successfully", content = @Content),
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+      @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+  })
+  public ResponseEntity<Void> updateUser(@PathVariable UUID userUuid, @Valid @RequestBody UserRequestDTO userToUpdate) {
     userService.updateUser(userUuid, userToUpdate);
     return ResponseEntity.noContent().build();
   }

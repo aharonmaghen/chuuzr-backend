@@ -1,10 +1,14 @@
 package com.chuuzr.chuuzrbackend.dto.room;
 
-/**
- * DTO for creating or updating a Room.
- * Does not include UUID or timestamps as these are managed by the server.
- */
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import com.chuuzr.chuuzrbackend.util.validation.ValidName;
+
 public class RoomRequestDTO {
+  @NotBlank(message = "Room name is required")
+  @Size(min = 1, max = 100, message = "Room name must be between 1 and 100 characters")
+  @ValidName
   private String name;
 
   public RoomRequestDTO() {

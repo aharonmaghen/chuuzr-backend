@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,6 +25,11 @@ import com.chuuzr.chuuzrbackend.dto.roomuser.RoomUserResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
 import com.chuuzr.chuuzrbackend.service.RoomUserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -39,6 +46,11 @@ public class RoomUserController {
   }
 
   @GetMapping("/{roomUuid}/users")
+  @Operation(summary = "Get users in a room", description = "Retrieve all users that are members of a specific room with pagination support", operationId = "getRoomUsers")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Users retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+  })
   public ResponseEntity<List<UserResponseDTO>> getRoomUsers(@PathVariable UUID roomUuid,
       @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
     List<UserResponseDTO> users = roomUserService.getRoomUsers(roomUuid, pageable);
@@ -46,8 +58,16 @@ public class RoomUserController {
   }
 
   @PostMapping("/{roomUuid}/add-user")
+  @Operation(summary = "Add user to room", description = "Add a user to a specific room", operationId = "addUserToRoom")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "User added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomUserResponseDTO.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+      @ApiResponse(responseCode = "404", description = "Room or user not found", content = @Content),
+      @ApiResponse(responseCode = "409", description = "User already in room", content = @Content)
+  })
   public ResponseEntity<RoomUserResponseDTO> addUserToRoom(@PathVariable UUID roomUuid,
-      @RequestBody RoomUserRequestDTO roomUserRequest,
+      @Valid @RequestBody RoomUserRequestDTO roomUserRequest,
       UriComponentsBuilder ucb) {
     RoomUserResponseDTO addedRoomUser = roomUserService.addUserToRoom(roomUuid, roomUserRequest.getUserUuid());
     URI locationOfNewUser = ucb.path("/api/room-users/{roomUuid}/users")

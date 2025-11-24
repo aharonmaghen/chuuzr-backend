@@ -2,9 +2,6 @@ package com.chuuzr.chuuzrbackend.error;
 
 import org.springframework.http.HttpStatus;
 
-/**
- * Global catalog of API error codes to ensure consistent responses.
- */
 public enum ErrorCode {
   // Authentication & Authorization
   AUTHENTICATION_FAILED("AUTHENTICATION_FAILED", HttpStatus.UNAUTHORIZED, "Authentication failed"),
@@ -22,6 +19,13 @@ public enum ErrorCode {
 
   // Validation & Input Errors
   INVALID_INPUT("INVALID_INPUT", HttpStatus.BAD_REQUEST, "Invalid input provided"),
+  VALIDATION_FAILED("VALIDATION_FAILED", HttpStatus.BAD_REQUEST, "Validation failed for one or more fields"),
+  FIELD_REQUIRED("FIELD_REQUIRED", HttpStatus.BAD_REQUEST, "Required field is missing"),
+  FIELD_INVALID_FORMAT("FIELD_INVALID_FORMAT", HttpStatus.BAD_REQUEST, "Field has invalid format"),
+  FIELD_TOO_SHORT("FIELD_TOO_SHORT", HttpStatus.BAD_REQUEST, "Field value is too short"),
+  FIELD_TOO_LONG("FIELD_TOO_LONG", HttpStatus.BAD_REQUEST, "Field value is too long"),
+  FIELD_INVALID_VALUE("FIELD_INVALID_VALUE", HttpStatus.BAD_REQUEST, "Field contains invalid value"),
+  CONSTRAINT_VIOLATION("CONSTRAINT_VIOLATION", HttpStatus.BAD_REQUEST, "Constraint violation occurred"),
 
   // Conflict Errors
   VOTING_CONFLICT("VOTING_CONFLICT", HttpStatus.CONFLICT, "Voting conflict occurred"),

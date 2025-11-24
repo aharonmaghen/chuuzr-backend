@@ -7,12 +7,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.tags.Tag;
 
@@ -38,13 +41,21 @@ public class OpenApiConfig {
     return new OpenAPI()
         .info(new Info()
             .title("Chuuzr Backend API")
-            .version("v1")
-            .description("REST API for Chuuzr's backend services."))
+            .version("v1.0.0")
+            .description(
+                "REST API for chuuzr's backend services. A versatile decision-making and group voting application.")
+            .contact(new Contact()
+                .name("Chuuzr Development Team")
+                .email("dev@chuuzr.com"))
+            .license(new License()
+                .name("MIT License")
+                .url("https://opensource.org/licenses/MIT")))
         .components(new Components()
             .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
-                .bearerFormat("JWT")))
+                .bearerFormat("JWT")
+                .description("JWT token obtained from OTP verification")))
         .tags(List.of(
             new Tag().name("Authentication").description("OTP-driven authentication and JWT issuance."),
             new Tag().name("Users").description("User profile management endpoints."),
@@ -53,6 +64,22 @@ public class OpenApiConfig {
             new Tag().name("Options").description("CRUD operations for standalone options."),
             new Tag().name("Room Users").description("Manage users invited to rooms."),
             new Tag().name("Room Options").description("Manage options linked to a specific room.")));
+  }
+
+  @Bean
+  public OperationCustomizer operationCustomizer() {
+    return (operation, handlerMethod) -> {
+      return operation;
+    };
+  }
+
+  @Bean
+  public OpenApiCustomizer globalResponseCustomizer() {
+    return openApi -> {
+      openApi.getComponents().addSchemas("ErrorDTO",
+          new io.swagger.v3.oas.models.media.Schema<>()
+              .$ref("#/components/schemas/ErrorDTO"));
+    };
   }
 
   @Bean
