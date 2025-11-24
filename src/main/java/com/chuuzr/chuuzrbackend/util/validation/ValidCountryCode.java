@@ -13,7 +13,7 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = CountryCodeValidator.class)
 public @interface ValidCountryCode {
 
-  String message() default "Country code must be a valid 2-letter country code supported by phone number validation";
+  String message() default "Country code must be a valid 2-letter country code (ISO 3166-1 alpha-2 standard)";
 
   Class<?>[] groups() default {};
 
