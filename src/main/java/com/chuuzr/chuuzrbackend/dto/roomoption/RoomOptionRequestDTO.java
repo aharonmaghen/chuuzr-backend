@@ -2,11 +2,10 @@ package com.chuuzr.chuuzrbackend.dto.roomoption;
 
 import java.util.UUID;
 
-/**
- * DTO for adding an option to a room.
- * The room UUID comes from the path parameter.
- */
+import jakarta.validation.constraints.NotNull;
+
 public class RoomOptionRequestDTO {
+  @NotNull(message = "Option UUID is required")
   private UUID optionUuid;
 
   public RoomOptionRequestDTO() {

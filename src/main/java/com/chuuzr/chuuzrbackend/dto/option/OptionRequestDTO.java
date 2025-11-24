@@ -2,16 +2,38 @@ package com.chuuzr.chuuzrbackend.dto.option;
 
 import java.util.UUID;
 
-/**
- * DTO for creating or updating an Option.
- * Does not include UUID or timestamps as these are managed by the server.
- */
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+import com.chuuzr.chuuzrbackend.util.validation.ValidImageUrl;
+import com.chuuzr.chuuzrbackend.util.validation.ValidName;
+
 public class OptionRequestDTO {
+  @NotNull(message = "Option type UUID is required")
   private UUID optionTypeUuid;
+
+  @NotBlank(message = "API provider is required")
+  @Size(min = 1, max = 50, message = "API provider must be between 1 and 50 characters")
+  @Pattern(regexp = "^[a-zA-Z0-9_-]{1,50}$", message = "API provider can only contain letters, numbers, underscores, and hyphens")
   private String apiProvider;
+
+  @NotBlank(message = "External ID is required")
+  @Size(min = 1, max = 100, message = "External ID must be between 1 and 100 characters")
+  @Pattern(regexp = "^[a-zA-Z0-9_.-]{1,100}$", message = "External ID can only contain letters, numbers, underscores, hyphens, and dots")
   private String externalId;
+
+  @NotBlank(message = "Name is required")
+  @Size(min = 1, max = 100, message = "Name must be between 1 and 100 characters")
+  @ValidName
   private String name;
+
+  @NotBlank(message = "Description is required")
+  @Size(min = 1, max = 500, message = "Description must be between 1 and 500 characters")
   private String description;
+
+  @ValidImageUrl
   private String imageUrl;
 
   public OptionRequestDTO() {

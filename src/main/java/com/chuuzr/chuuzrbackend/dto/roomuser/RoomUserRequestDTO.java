@@ -2,11 +2,10 @@ package com.chuuzr.chuuzrbackend.dto.roomuser;
 
 import java.util.UUID;
 
-/**
- * DTO for adding a user to a room.
- * The room UUID comes from the path parameter.
- */
+import jakarta.validation.constraints.NotNull;
+
 public class RoomUserRequestDTO {
+  @NotNull(message = "User UUID is required")
   private UUID userUuid;
 
   public RoomUserRequestDTO() {

@@ -4,18 +4,32 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * DTO for returning User data to API clients.
- * Only exposes UUID (not internal ID) and includes timestamps.
- */
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "User information response")
 public class UserResponseDTO {
+  @Schema(description = "Unique identifier for the user", example = "550e8400-e29b-41d4-a716-446655440000", format = "uuid")
   private UUID uuid;
+
+  @Schema(description = "User's full name", example = "John Doe")
   private String name;
+
+  @Schema(description = "User's unique nickname", example = "johndoe123")
   private String nickname;
+
+  @Schema(description = "2-letter country code supported by phone number validation", example = "US")
   private String countryCode;
+
+  @Schema(description = "Phone number without country code", example = "5551234567")
   private String phoneNumber;
+
+  @Schema(description = "URL to user's profile picture", example = "https://example.com/profile.jpg", format = "uri")
   private URL profilePicture;
+
+  @Schema(description = "Last update timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime updatedAt;
+
+  @Schema(description = "Creation timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime createdAt;
 
   public UserResponseDTO() {

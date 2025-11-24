@@ -1,21 +1,21 @@
 package com.chuuzr.chuuzrbackend.dto.user;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import com.chuuzr.chuuzrbackend.dto.auth.UserAuthResponse;
 import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.ValidationException;
 import com.chuuzr.chuuzrbackend.model.User;
 
-/**
- * Mapper utility for converting between User entity and DTOs.
- */
 public class UserMapper {
 
-  /**
-   * Converts a User entity to a UserResponseDTO.
-   */
   public static UserResponseDTO toResponseDTO(User user) {
     if (user == null) {
       return null;
@@ -31,10 +31,6 @@ public class UserMapper {
         user.getCreatedAt());
   }
 
-  /**
-   * Converts a UserRequestDTO to a User entity.
-   * Note: ID, UUID, and timestamps should be set separately.
-   */
   public static User toEntity(UserRequestDTO dto) {
     if (dto == null) {
       return null;
@@ -44,14 +40,19 @@ public class UserMapper {
     user.setNickname(dto.getNickname());
     user.setCountryCode(dto.getCountryCode());
     user.setPhoneNumber(dto.getPhoneNumber());
-    user.setProfilePicture(dto.getProfilePicture());
+
+    if (dto.getProfilePicture() != null && !dto.getProfilePicture().trim().isEmpty()) {
+      try {
+        user.setProfilePicture(new URL(dto.getProfilePicture().trim()));
+      } catch (MalformedURLException e) {
+        throw new ValidationException(ErrorCode.FIELD_INVALID_FORMAT,
+            Map.of("profilePicture", List.of("Invalid URL format: " + e.getMessage())));
+      }
+    }
+
     return user;
   }
 
-  /**
-   * Updates an existing User entity with data from UserRequestDTO.
-   * Preserves ID, UUID, and createdAt timestamp.
-   */
   public static void updateEntityFromDTO(User user, UserRequestDTO dto) {
     if (user == null || dto == null) {
       return;
@@ -60,7 +61,17 @@ public class UserMapper {
     user.setNickname(dto.getNickname());
     user.setCountryCode(dto.getCountryCode());
     user.setPhoneNumber(dto.getPhoneNumber());
-    user.setProfilePicture(dto.getProfilePicture());
+
+    if (dto.getProfilePicture() != null && !dto.getProfilePicture().trim().isEmpty()) {
+      try {
+        user.setProfilePicture(new URL(dto.getProfilePicture().trim()));
+      } catch (MalformedURLException e) {
+        throw new ValidationException(ErrorCode.FIELD_INVALID_FORMAT,
+            Map.of("profilePicture", List.of("Invalid URL format: " + e.getMessage())));
+      }
+    } else {
+      user.setProfilePicture(null);
+    }
   }
 
   public static UserInternalDTO toInternalDTO(User user) {
