@@ -8,12 +8,16 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
+/**
+ * Validates that a name contains only letters, spaces, hyphens, and apostrophes.
+ * Only validates non-blank values (works with @NotBlank).
+ */
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = PhoneNumberValidator.class)
-public @interface ValidPhoneNumber {
+@Constraint(validatedBy = NameValidator.class)
+public @interface ValidName {
 
-  String message() default "Phone number must contain only digits (7-15 characters)";
+  String message() default "Name can only contain letters, spaces, hyphens, and apostrophes";
 
   Class<?>[] groups() default {};
 
