@@ -1,20 +1,22 @@
 package com.chuuzr.chuuzrbackend.model;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import com.chuuzr.chuuzrbackend.model.compositekeys.RoomUserId;
 
-import jakarta.persistence.*;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "room_users")
 public class RoomUser {
   @EmbeddedId
   private RoomUserId roomUserId;
-
-  @Column(nullable = false, unique = true, updatable = false)
-  private UUID uuid;
 
   @ManyToOne
   @MapsId("roomId")
@@ -23,7 +25,7 @@ public class RoomUser {
   @ManyToOne
   @MapsId("userId")
   private User user;
-  
+
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
@@ -31,9 +33,8 @@ public class RoomUser {
     this.roomUserId = new RoomUserId();
   }
 
-  public RoomUser(UUID uuid, Room room, User user, LocalDateTime updatedAt, LocalDateTime createdAt) {
+  public RoomUser(Room room, User user, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.roomUserId = new RoomUserId();
-    this.uuid = uuid;
     this.room = room;
     this.user = user;
     this.updatedAt = updatedAt;
@@ -42,9 +43,6 @@ public class RoomUser {
 
   @PrePersist
   private void prePersist() {
-    if (uuid == null) {
-      uuid = UUID.randomUUID();
-    }
     if (createdAt == null) {
       createdAt = LocalDateTime.now();
     }
@@ -60,14 +58,6 @@ public class RoomUser {
 
   public RoomUserId getRoomUserId() {
     return roomUserId;
-  }
-
-  public UUID getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(UUID uuid) {
-    this.uuid = uuid;
   }
 
   public Room getRoom() {
@@ -104,8 +94,7 @@ public class RoomUser {
 
   @Override
   public String toString() {
-    return "RoomUser{uuid=" + this.uuid +
-        ", roomUuid=" + (room != null ? room.getUuid() : null) +
+    return "RoomUser{roomUuid=" + (room != null ? room.getUuid() : null) +
         ", userUuid=" + (user != null ? user.getUuid() : null) +
         ", updatedAt=" + this.updatedAt +
         ", createdAt=" + this.createdAt + "}";

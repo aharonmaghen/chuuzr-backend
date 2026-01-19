@@ -1,10 +1,13 @@
 package com.chuuzr.chuuzrbackend.model;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
+import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,6 +39,10 @@ public class Option {
   private String name;
   private String description;
   private String imageUrl;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> metadata;
   
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
@@ -44,7 +51,7 @@ public class Option {
   }
 
   public Option(Long id, UUID uuid, OptionType optionType, String apiProvider, String externalId, String name,
-      String description, String imageUrl, LocalDateTime updatedAt, LocalDateTime createdAt) {
+      String description, String imageUrl, Map<String, Object> metadata, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.id = id;
     this.uuid = uuid;
     this.optionType = optionType;
@@ -53,6 +60,7 @@ public class Option {
     this.name = name;
     this.description = description;
     this.imageUrl = imageUrl;
+    this.metadata = metadata;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }
@@ -137,6 +145,14 @@ public class Option {
 
   public void setImageUrl(String imageUrl) {
     this.imageUrl = imageUrl;
+  }
+
+  public Map<String, Object> getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(Map<String, Object> metadata) {
+    this.metadata = metadata;
   }
 
   public LocalDateTime getUpdatedAt() {
