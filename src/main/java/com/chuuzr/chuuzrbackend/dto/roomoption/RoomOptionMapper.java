@@ -19,7 +19,6 @@ public class RoomOptionMapper {
       return null;
     }
     return new RoomOptionResponseDTO(
-        roomOption.getUuid(),
         RoomMapper.toResponseDTO(roomOption.getRoom()),
         OptionMapper.toResponseDTO(roomOption.getOption()),
         roomOption.getUpdatedAt(),

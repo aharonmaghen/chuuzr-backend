@@ -19,7 +19,6 @@ public class RoomUserMapper {
       return null;
     }
     return new RoomUserResponseDTO(
-        roomUser.getUuid(),
         RoomMapper.toResponseDTO(roomUser.getRoom()),
         UserMapper.toResponseDTO(roomUser.getUser()),
         roomUser.getUpdatedAt(),

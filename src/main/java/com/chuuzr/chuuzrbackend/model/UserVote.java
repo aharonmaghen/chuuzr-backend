@@ -13,9 +13,6 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/**
- * Represents a vote by a user in a room for a particular option.
- */
 @Entity
 @Table(name = "user_votes")
 public class UserVote {
@@ -35,26 +32,16 @@ public class UserVote {
       @JoinColumn(name = "option_id", referencedColumnName = "option_id", insertable = false, updatable = false)
   })
   private RoomOption roomOption;
+  
   @Enumerated(EnumType.STRING)
   private VoteType voteType;
+  
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
-  /**
-   * Default constructor for UserVote required by JPA.
-   */
   public UserVote() {
   }
 
-  /**
-   * Constructs a new UserVote instance.
-   *
-   * @param roomUser   The room-user relationship associated with the user vote.
-   * @param roomOption The room-option relationship associated with the user vote.
-   * @param voteType   The type of vote (UP, DOWN, or NONE).
-   * @param updatedAt  The last updated timestamp of the user vote.
-   * @param createdAt  The creation timestamp of the user vote.
-   */
   public UserVote(RoomUser roomUser, RoomOption roomOption, VoteType voteType, LocalDateTime updatedAt,
       LocalDateTime createdAt) {
     this.userVoteId = new UserVoteId(roomUser.getRoom().getId(), roomUser.getUser().getId(),

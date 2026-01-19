@@ -1,11 +1,9 @@
 package com.chuuzr.chuuzrbackend.model;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import com.chuuzr.chuuzrbackend.model.compositekeys.RoomOptionId;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -14,17 +12,11 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
-/**
- * Represents a relationship between a room and an option.
- */
 @Entity
 @Table(name = "room_options")
 public class RoomOption {
   @EmbeddedId
   private RoomOptionId roomOptionId;
-
-  @Column(nullable = false, unique = true, updatable = false)
-  private UUID uuid;
 
   @ManyToOne
   @MapsId("roomId")
@@ -34,31 +26,17 @@ public class RoomOption {
   @MapsId("optionId")
   private Option option;
 
+  Integer score;
+
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
-  /**
-   * Default constructor for RoomOption required by JPA.
-   */
   public RoomOption() {
     this.roomOptionId = new RoomOptionId();
   }
 
-  /**
-   * Constructs a new RoomOption instance.
-   * <p>
-   * Note: The composite key (roomOptionId) is automatically initialized.
-   * The actual key values are set when the room and option are assigned.
-   *
-   * @param uuid      The UUID of the room-option relationship.
-   * @param room      The room associated with the room-option relationship.
-   * @param option    The option associated with the room-option relationship.
-   * @param updatedAt The last updated timestamp of the room-option relationship.
-   * @param createdAt The creation timestamp of the room-option relationship.
-   */
-  public RoomOption(UUID uuid, Room room, Option option, LocalDateTime updatedAt, LocalDateTime createdAt) {
+  public RoomOption(Room room, Option option, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.roomOptionId = new RoomOptionId();
-    this.uuid = uuid;
     this.room = room;
     this.option = option;
     this.updatedAt = updatedAt;
@@ -67,9 +45,6 @@ public class RoomOption {
 
   @PrePersist
   private void prePersist() {
-    if (uuid == null) {
-      uuid = UUID.randomUUID();
-    }
     if (createdAt == null) {
       createdAt = LocalDateTime.now();
     }
@@ -91,14 +66,6 @@ public class RoomOption {
     this.roomOptionId = roomOptionId;
   }
 
-  public UUID getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(UUID uuid) {
-    this.uuid = uuid;
-  }
-
   public Room getRoom() {
     return room;
   }
@@ -113,6 +80,14 @@ public class RoomOption {
 
   public void setOption(Option option) {
     this.option = option;
+  }
+
+  public Integer getScore() {
+    return score;
+  }
+
+  public void setScore(Integer score) {
+    this.score = score;
   }
 
   public LocalDateTime getUpdatedAt() {
@@ -133,9 +108,9 @@ public class RoomOption {
 
   @Override
   public String toString() {
-    return "RoomOption{uuid=" + this.uuid +
-        ", roomUuid=" + (room != null ? room.getUuid() : null) +
+    return "RoomOption{roomUuid=" + (room != null ? room.getUuid() : null) +
         ", optionUuid=" + (option != null ? option.getUuid() : null) +
+        ", score=" + this.score +
         ", updatedAt=" + this.updatedAt +
         ", createdAt=" + this.createdAt + "}";
   }
