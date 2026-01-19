@@ -41,9 +41,11 @@ dependencies {
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
-	// DB
+	// DB, Hibernate and Flyway
 	implementation 'org.postgresql:postgresql:42.7.2'
-	implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.14.1")
+	implementation "io.hypersistence:hypersistence-utils-hibernate-63:3.14.1"
+	implementation "org.flywaydb:flyway-core:11.20.2"
+	implementation "org.flywaydb:flyway-database-postgresql:11.20.2"
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
