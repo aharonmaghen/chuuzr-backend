@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
-import com.chuuzr.chuuzrbackend.model.User;
 import com.chuuzr.chuuzrbackend.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +41,31 @@ public class UserController {
   @Autowired
   public UserController(UserService userService) {
     this.userService = userService;
+  }
+
+  @GetMapping("/me")
+  @Operation(summary = "Get current user profile", description = "Retrieve the authenticated user's profile information", operationId = "getCurrentUserProfile")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User profile retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required or invalid token", content = @Content)
+  })
+  public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
+    UserInternalDTO userContext = (UserInternalDTO) authentication.getPrincipal();
+    UserResponseDTO user = userService.findByUuid(userContext.getUuid());
+    return ResponseEntity.ok(user);
+  }
+
+  @PutMapping("/me")
+  @Operation(summary = "Update current user profile", description = "Update the authenticated user's profile information. All fields are required except profile picture.", operationId = "updateCurrentUserProfile")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User profile updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
+      @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required or invalid token", content = @Content)
+  })
+  public ResponseEntity<UserResponseDTO> updateCurrentUser(Authentication authentication, @Valid @RequestBody UserRequestDTO userToUpdate) {
+    UserInternalDTO userContext = (UserInternalDTO) authentication.getPrincipal();
+    UserResponseDTO updatedUser = userService.updateUser(userContext.getUuid(), userToUpdate);
+    return ResponseEntity.ok(updatedUser);
   }
 
   @GetMapping("/{userUuid}")
