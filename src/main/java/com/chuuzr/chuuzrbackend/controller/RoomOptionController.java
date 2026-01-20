@@ -34,8 +34,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/room-options")
-@Tag(name = "Room Options")
+@RequestMapping("/api/rooms")
+@Tag(name = "Rooms")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class RoomOptionController {
   private final RoomOptionService roomOptionService;
@@ -57,7 +57,7 @@ public class RoomOptionController {
     return ResponseEntity.ok(options);
   }
 
-  @PostMapping("/{roomUuid}/add-option")
+  @PostMapping("/{roomUuid}/options")
   @Operation(summary = "Add option to room", description = "Add an option to a specific room", operationId = "addOptionToRoom")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Option added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
@@ -70,7 +70,7 @@ public class RoomOptionController {
       @Valid @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {
     RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid,
         roomOptionRequest.getOptionUuid());
-    URI locationOfNewOption = ucb.path("/api/room-options/{roomUuid}/options")
+    URI locationOfNewOption = ucb.path("/api/rooms/{roomUuid}/options")
         .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
     return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
   }
