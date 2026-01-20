@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.user.UserRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
+import com.chuuzr.chuuzrbackend.model.User;
 import com.chuuzr.chuuzrbackend.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,27 +57,27 @@ public class UserController {
   @PostMapping
   @Operation(summary = "Create a new user", description = "Create a new user with the provided information. All fields are required except profile picture.", operationId = "createUser")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content),
+      @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
       @ApiResponse(responseCode = "409", description = "User already exists", content = @Content)
   })
-  public ResponseEntity<Void> createUser(@Valid @RequestBody UserRequestDTO newUserRequest, UriComponentsBuilder ucb) {
+  public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO newUserRequest, UriComponentsBuilder ucb) {
     UserResponseDTO createdUser = userService.createUser(newUserRequest);
     URI locationOfNewUser = ucb.path("/api/users/{userUuid}").buildAndExpand(createdUser.getUuid()).toUri();
-    return ResponseEntity.created(locationOfNewUser).build();
+    return ResponseEntity.created(locationOfNewUser).body(createdUser);
   }
 
   @PutMapping("/{userUuid}")
   @Operation(summary = "Update an existing user", description = "Update user information for the specified user UUID. All fields are required except profile picture.", operationId = "updateUser")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "204", description = "User updated successfully", content = @Content),
+      @ApiResponse(responseCode = "200", description = "User updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
       @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
   })
-  public ResponseEntity<Void> updateUser(@PathVariable UUID userUuid, @Valid @RequestBody UserRequestDTO userToUpdate) {
-    userService.updateUser(userUuid, userToUpdate);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID userUuid, @Valid @RequestBody UserRequestDTO userToUpdate) {
+    UserResponseDTO updatedUser = userService.updateUser(userUuid, userToUpdate);
+    return ResponseEntity.ok(updatedUser);
   }
 }
