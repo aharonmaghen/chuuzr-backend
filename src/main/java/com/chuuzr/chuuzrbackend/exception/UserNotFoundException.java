@@ -3,6 +3,7 @@ package com.chuuzr.chuuzrbackend.exception;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 
 public class UserNotFoundException extends BaseException {
+
   public UserNotFoundException() {
     super(ErrorCode.USER_NOT_FOUND);
   }

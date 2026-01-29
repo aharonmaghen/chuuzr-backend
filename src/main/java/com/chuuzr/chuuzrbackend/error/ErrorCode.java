@@ -14,6 +14,8 @@ public enum ErrorCode {
   RESOURCE_NOT_FOUND("RESOURCE_NOT_FOUND", HttpStatus.NOT_FOUND, "Resource not found"),
   USER_NOT_FOUND("USER_NOT_FOUND", HttpStatus.NOT_FOUND, "User not found"),
   ROOM_NOT_FOUND("ROOM_NOT_FOUND", HttpStatus.NOT_FOUND, "Room not found"),
+  ROOM_USER_NOT_FOUND("ROOM_USER_NOT_FOUND", HttpStatus.NOT_FOUND, "Room user not found"),
+  ROOM_OPTION_NOT_FOUND("ROOM_OPTION_NOT_FOUND", HttpStatus.NOT_FOUND, "Room option not found"),
   OPTION_NOT_FOUND("OPTION_NOT_FOUND", HttpStatus.NOT_FOUND, "Option not found"),
   OPTION_TYPE_NOT_FOUND("OPTION_TYPE_NOT_FOUND", HttpStatus.NOT_FOUND, "Option type not found"),
 
@@ -29,6 +31,7 @@ public enum ErrorCode {
 
   // Conflict Errors
   VOTING_CONFLICT("VOTING_CONFLICT", HttpStatus.CONFLICT, "Voting conflict occurred"),
+  INVALID_VOTE_TRANSITION("INVALID_VOTE_TRANSITION", HttpStatus.BAD_REQUEST, "Invalid vote transition"),
   DUPLICATE_RESOURCE("DUPLICATE_RESOURCE", HttpStatus.CONFLICT, "Resource already exists"),
 
   // Server Errors

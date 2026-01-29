@@ -47,6 +47,7 @@ public class RoomUserService {
         .collect(Collectors.toList());
   }
 
+  @Transactional
   public RoomUserResponseDTO addUserToRoom(UUID roomUuid, UUID userUuid) {
     Room room = roomRepository.findByUuid(roomUuid)
         .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND,

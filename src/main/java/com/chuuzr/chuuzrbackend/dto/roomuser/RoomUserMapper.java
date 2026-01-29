@@ -6,14 +6,8 @@ import com.chuuzr.chuuzrbackend.model.Room;
 import com.chuuzr.chuuzrbackend.model.RoomUser;
 import com.chuuzr.chuuzrbackend.model.User;
 
-/**
- * Mapper utility for converting between RoomUser entity and DTOs.
- */
 public class RoomUserMapper {
 
-  /**
-   * Converts a RoomUser entity to a RoomUserResponseDTO.
-   */
   public static RoomUserResponseDTO toResponseDTO(RoomUser roomUser) {
     if (roomUser == null) {
       return null;
@@ -25,10 +19,6 @@ public class RoomUserMapper {
         roomUser.getCreatedAt());
   }
 
-  /**
-   * Creates a RoomUser entity from Room and User entities.
-   * The composite key will be set automatically.
-   */
   public static RoomUser toEntity(Room room, User user) {
     if (room == null || user == null) {
       return null;
