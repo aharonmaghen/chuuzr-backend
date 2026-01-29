@@ -2,8 +2,12 @@ package com.chuuzr.chuuzrbackend.model;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.chuuzr.chuuzrbackend.model.compositekeys.UserVoteId;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,6 +15,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -32,25 +38,42 @@ public class UserVote {
       @JoinColumn(name = "option_id", referencedColumnName = "option_id", insertable = false, updatable = false)
   })
   private RoomOption roomOption;
-  
+
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  @Column(name = "vote_type", columnDefinition = "vote_type")
   private VoteType voteType;
-  
+
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
   public UserVote() {
+    this.userVoteId = new UserVoteId();
   }
 
   public UserVote(RoomUser roomUser, RoomOption roomOption, VoteType voteType, LocalDateTime updatedAt,
       LocalDateTime createdAt) {
-    this.userVoteId = new UserVoteId(roomUser.getRoom().getId(), roomUser.getUser().getId(),
-        roomOption.getOption().getId());
+    this.userVoteId = new UserVoteId();
     this.roomUser = roomUser;
     this.roomOption = roomOption;
     this.voteType = voteType;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
+  }
+
+  @PrePersist
+  private void prePersist() {
+    if (createdAt == null) {
+      createdAt = LocalDateTime.now();
+    }
+    if (updatedAt == null) {
+      updatedAt = LocalDateTime.now();
+    }
+  }
+
+  @PreUpdate
+  private void preUpdate() {
+    updatedAt = LocalDateTime.now();
   }
 
   public UserVoteId getUserVoteId() {

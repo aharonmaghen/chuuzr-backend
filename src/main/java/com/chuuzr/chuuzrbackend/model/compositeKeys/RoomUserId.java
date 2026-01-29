@@ -5,9 +5,6 @@ import java.io.Serializable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-/**
- * Represents a composite key of room_id and user_id for the RoomUser entity.
- */
 @Embeddable
 public class RoomUserId implements Serializable {
   @Column(name = "room_id")
@@ -15,18 +12,9 @@ public class RoomUserId implements Serializable {
   @Column(name = "user_id")
   private Long userId;
 
-  /**
-   * Default constructor for RoomUserId required by JPA.
-   */
   public RoomUserId() {
   }
 
-  /**
-   * Constructs a new RoomUserId instance.
-   *
-   * @param roomId the ID of the room
-   * @param userId the ID of the user
-   */
   public RoomUserId(Long roomId, Long userId) {
     this.roomId = roomId;
     this.userId = userId;

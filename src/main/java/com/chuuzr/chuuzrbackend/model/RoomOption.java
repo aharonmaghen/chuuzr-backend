@@ -35,10 +35,11 @@ public class RoomOption {
     this.roomOptionId = new RoomOptionId();
   }
 
-  public RoomOption(Room room, Option option, LocalDateTime updatedAt, LocalDateTime createdAt) {
+  public RoomOption(Room room, Option option, Integer score, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.roomOptionId = new RoomOptionId();
     this.room = room;
     this.option = option;
+    this.score = score;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }

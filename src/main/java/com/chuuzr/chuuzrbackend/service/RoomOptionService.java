@@ -56,6 +56,7 @@ public class RoomOptionService {
             "Option with UUID " + optionUuid + " not found"));
 
     RoomOption roomOptionToSave = RoomOptionMapper.toEntity(room, option);
+    roomOptionToSave.setScore(0);
     RoomOption savedRoomOption = roomOptionRepository.save(roomOptionToSave);
     return RoomOptionMapper.toResponseDTO(savedRoomOption);
   }

@@ -6,14 +6,8 @@ import com.chuuzr.chuuzrbackend.model.Option;
 import com.chuuzr.chuuzrbackend.model.Room;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
 
-/**
- * Mapper utility for converting between RoomOption entity and DTOs.
- */
 public class RoomOptionMapper {
 
-  /**
-   * Converts a RoomOption entity to a RoomOptionResponseDTO.
-   */
   public static RoomOptionResponseDTO toResponseDTO(RoomOption roomOption) {
     if (roomOption == null) {
       return null;
@@ -25,10 +19,6 @@ public class RoomOptionMapper {
         roomOption.getCreatedAt());
   }
 
-  /**
-   * Creates a RoomOption entity from Room and Option entities.
-   * The composite key will be set automatically.
-   */
   public static RoomOption toEntity(Room room, Option option) {
     if (room == null || option == null) {
       return null;
