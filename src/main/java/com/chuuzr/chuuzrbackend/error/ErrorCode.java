@@ -9,6 +9,7 @@ public enum ErrorCode {
   JWT_INVALID("JWT_INVALID", HttpStatus.UNAUTHORIZED, "Invalid authentication token"),
   AUTHORIZATION_FAILED("AUTHORIZATION_FAILED", HttpStatus.FORBIDDEN, "Authorization failed"),
   FORBIDDEN_OPERATION("FORBIDDEN_OPERATION", HttpStatus.FORBIDDEN, "Operation not allowed"),
+  SMS_SEND_FAILED("SMS_SEND_FAILED", HttpStatus.SERVICE_UNAVAILABLE, "Failed to send SMS"),
 
   // Resource Not Found
   RESOURCE_NOT_FOUND("RESOURCE_NOT_FOUND", HttpStatus.NOT_FOUND, "Resource not found"),

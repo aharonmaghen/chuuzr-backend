@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.util.validation;
+package com.chuuzr.chuuzrbackend.util.validation.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import com.chuuzr.chuuzrbackend.util.validation.validators.PhoneNumberPairValidator;
 
 /**
  * Validates that a phone number is valid for the given country code.

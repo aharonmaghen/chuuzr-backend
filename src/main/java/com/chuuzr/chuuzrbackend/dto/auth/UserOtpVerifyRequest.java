@@ -3,8 +3,8 @@ package com.chuuzr.chuuzrbackend.dto.auth;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-import com.chuuzr.chuuzrbackend.util.validation.ValidCountryCode;
-import com.chuuzr.chuuzrbackend.util.validation.ValidPhoneNumberPair;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidCountryCode;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberPair;
 
 @ValidPhoneNumberPair
 public class UserOtpVerifyRequest {

@@ -2,6 +2,7 @@ package com.chuuzr.chuuzrbackend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,8 +35,8 @@ public class DevSecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html")
                 .permitAll()
-                .anyRequest()
-                .authenticated())
+                .requestMatchers(HttpMethod.POST, "/api/users").hasRole("PRE_REGISTER")
+                .anyRequest().hasRole("USER"))
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

@@ -1,10 +1,11 @@
-package com.chuuzr.chuuzrbackend.util.validation;
+package com.chuuzr.chuuzrbackend.util.validation.validators;
 
 import java.lang.reflect.Field;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import com.chuuzr.chuuzrbackend.util.ValidationUtil;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberPair;
 
 /**
  * Validator for {@link ValidPhoneNumberPair} annotation.

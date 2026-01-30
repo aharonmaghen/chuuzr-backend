@@ -3,7 +3,7 @@ package com.chuuzr.chuuzrbackend.dto.optiontype;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import com.chuuzr.chuuzrbackend.util.validation.ValidName;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidName;
 
 public class OptionTypeRequestDTO {
   @NotBlank(message = "Name is required")

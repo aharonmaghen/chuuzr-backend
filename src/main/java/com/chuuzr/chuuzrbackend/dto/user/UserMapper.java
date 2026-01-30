@@ -2,7 +2,6 @@ package com.chuuzr.chuuzrbackend.dto.user;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +12,7 @@ import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 import com.chuuzr.chuuzrbackend.exception.ValidationException;
 import com.chuuzr.chuuzrbackend.model.User;
+import com.chuuzr.chuuzrbackend.util.ValidationUtil;
 
 public class UserMapper {
 
@@ -39,7 +39,13 @@ public class UserMapper {
     user.setName(dto.getName());
     user.setNickname(dto.getNickname());
     user.setCountryCode(dto.getCountryCode());
-    user.setPhoneNumber(dto.getPhoneNumber());
+
+    String normalizedPhone = ValidationUtil.normalizePhoneNumber(dto.getPhoneNumber(), dto.getCountryCode());
+    if (normalizedPhone == null) {
+      throw new ValidationException(ErrorCode.FIELD_INVALID_FORMAT,
+          Map.of("phoneNumber", List.of("Invalid phone number for country code: " + dto.getCountryCode())));
+    }
+    user.setPhoneNumber(normalizedPhone);
 
     if (dto.getProfilePicture() != null && !dto.getProfilePicture().trim().isEmpty()) {
       try {
@@ -60,7 +66,13 @@ public class UserMapper {
     user.setName(dto.getName());
     user.setNickname(dto.getNickname());
     user.setCountryCode(dto.getCountryCode());
-    user.setPhoneNumber(dto.getPhoneNumber());
+
+    String normalizedPhone = ValidationUtil.normalizePhoneNumber(dto.getPhoneNumber(), dto.getCountryCode());
+    if (normalizedPhone == null) {
+      throw new ValidationException(ErrorCode.FIELD_INVALID_FORMAT,
+          Map.of("phoneNumber", List.of("Invalid phone number for country code: " + dto.getCountryCode())));
+    }
+    user.setPhoneNumber(normalizedPhone);
 
     if (dto.getProfilePicture() != null && !dto.getProfilePicture().trim().isEmpty()) {
       try {
@@ -78,11 +90,11 @@ public class UserMapper {
     if (user == null) {
       return null;
     }
-    Set<String> roles = Collections.emptySet();
+    Set<String> roles = Set.of("ROLE_USER");
     return new UserInternalDTO(user.getUuid(), user.getName(), user.getNickname(), roles);
   }
 
-  public static UserAuthResponse toAuthResponse(String jwt, UUID userUuid) {
-    return new UserAuthResponse(jwt, userUuid);
+  public static UserAuthResponse toAuthResponse(String jwt, UUID userUuid, boolean requiresRegistration) {
+    return new UserAuthResponse(jwt, userUuid, requiresRegistration);
   }
 }

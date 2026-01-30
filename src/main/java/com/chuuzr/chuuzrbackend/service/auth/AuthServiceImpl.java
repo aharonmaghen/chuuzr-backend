@@ -1,10 +1,11 @@
 package com.chuuzr.chuuzrbackend.service.auth;
 
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,19 +21,24 @@ import com.chuuzr.chuuzrbackend.model.User;
 import com.chuuzr.chuuzrbackend.repository.UserRepository;
 import com.chuuzr.chuuzrbackend.security.JwtUtil;
 import com.chuuzr.chuuzrbackend.service.sms.SmsService;
+import com.chuuzr.chuuzrbackend.util.CountryCodeUtil;
+import com.chuuzr.chuuzrbackend.util.ValidationUtil;
 
 @Service
 @Transactional
 public class AuthServiceImpl implements AuthService {
   private final UserRepository userRepository;
+  private final StringRedisTemplate stringRedisTemplate;
   private final SmsService smsService;
   private final JwtUtil jwtUtil;
-  private final long otpExpirationMinutes;
+  private final Long otpExpirationMinutes;
   private final SecureRandom otpGenerator = new SecureRandom();
 
-  public AuthServiceImpl(UserRepository userRepository, SmsService smsService, JwtUtil jwtUtil,
-      @Value("${otp.expiration.minutes}") long otpExpirationMinutes) {
+  public AuthServiceImpl(UserRepository userRepository, StringRedisTemplate stringRedisTemplate, SmsService smsService,
+      JwtUtil jwtUtil,
+      @Value("${otp.expiration.minutes}") Long otpExpirationMinutes) {
     this.userRepository = userRepository;
+    this.stringRedisTemplate = stringRedisTemplate;
     this.smsService = smsService;
     this.jwtUtil = jwtUtil;
     this.otpExpirationMinutes = otpExpirationMinutes;
@@ -40,42 +46,51 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public void requestOtp(UserOtpRequest request) {
-    User user = userRepository.findByPhoneNumberAndCountryCode(request.getPhoneNumber(), request.getCountryCode())
-        .orElseThrow(() -> new UserNotFoundException("User with phone number " + request.getPhoneNumber()
-            + " and country code " + request.getCountryCode() + " not found"));
+    String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), request.getCountryCode());
+    if (normalizedPhone == null) {
+      throw new IllegalArgumentException("Invalid phone number for country code: " + request.getCountryCode());
+    }
 
+    String fullPhoneNumber = CountryCodeUtil.toDialCode(request.getCountryCode()) + normalizedPhone;
     String otp = generateOtp();
-    user.setOtpCode(otp);
-    user.setOtpExpirationTime(LocalDateTime.now().plusMinutes(otpExpirationMinutes));
-    userRepository.save(user);
 
-    smsService.sendOtp(request.getCountryCode(), request.getPhoneNumber(), otp);
+    stringRedisTemplate.opsForValue().set(
+        "otp:" + fullPhoneNumber,
+        otp,
+        otpExpirationMinutes,
+        TimeUnit.MINUTES);
+
+    smsService.sendOtp(request.getCountryCode(), normalizedPhone, otp);
   }
 
   @Override
   public UserAuthResponse verifyOtp(UserOtpVerifyRequest request) {
-    User user = userRepository.findByPhoneNumberAndCountryCode(request.getPhoneNumber(), request.getCountryCode())
-        .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-    if (user.getOtpCode() == null || user.getOtpExpirationTime() == null) {
-      throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid OTP code");
+    String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), request.getCountryCode());
+    if (normalizedPhone == null) {
+      throw new AuthorizationException(ErrorCode.OTP_INVALID,
+          "Invalid phone number for country code: " + request.getCountryCode());
     }
 
-    if (user.getOtpExpirationTime().isBefore(LocalDateTime.now())) {
-      clearOtp(user);
-      userRepository.save(user);
-      throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid OTP code");
+    String fullPhone = CountryCodeUtil.toDialCode(request.getCountryCode()) + normalizedPhone;
+    String redisKey = "otp:" + fullPhone;
+
+    String storedOtp = stringRedisTemplate.opsForValue().get(redisKey);
+
+    if (storedOtp == null || !storedOtp.equals(request.getOtp())) {
+      throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid or expired OTP");
     }
 
-    if (!user.getOtpCode().equals(request.getOtp())) {
-      throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid OTP code");
-    }
+    stringRedisTemplate.delete(redisKey);
 
-    clearOtp(user);
-    userRepository.save(user);
-
-    String jwt = jwtUtil.generateToken(user.getUuid());
-    return UserMapper.toAuthResponse(jwt, user.getUuid());
+    return userRepository.findByPhoneNumberAndCountryCode(normalizedPhone, request.getCountryCode())
+        .map(user -> {
+          String jwt = jwtUtil.generateToken(user.getUuid());
+          return UserMapper.toAuthResponse(jwt, user.getUuid(), false);
+        })
+        .orElseGet(() -> {
+          String tempJwt = jwtUtil.generateRegistrationToken(fullPhone);
+          return UserMapper.toAuthResponse(tempJwt, null, true);
+        });
   }
 
   @Override
@@ -89,10 +104,5 @@ public class AuthServiceImpl implements AuthService {
   private String generateOtp() {
     int code = otpGenerator.nextInt(900_000) + 100_000;
     return String.format("%06d", code);
-  }
-
-  private void clearOtp(User user) {
-    user.setOtpCode(null);
-    user.setOtpExpirationTime(null);
   }
 }
