@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.util.validation;
+package com.chuuzr.chuuzrbackend.util.validation.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,17 +7,18 @@ import java.lang.annotation.Target;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import com.chuuzr.chuuzrbackend.util.validation.validators.NameValidator;
 
 /**
- * Validates that a nickname contains only letters, numbers, and underscores.
+ * Validates that a name contains only letters, spaces, hyphens, and apostrophes.
  * Only validates non-blank values (works with @NotBlank).
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = NicknameValidator.class)
-public @interface ValidNickname {
+@Constraint(validatedBy = NameValidator.class)
+public @interface ValidName {
 
-  String message() default "Nickname can only contain letters, numbers, and underscores";
+  String message() default "Name can only contain letters, spaces, hyphens, and apostrophes";
 
   Class<?>[] groups() default {};
 

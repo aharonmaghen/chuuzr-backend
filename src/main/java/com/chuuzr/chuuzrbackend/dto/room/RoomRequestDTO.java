@@ -3,7 +3,7 @@ package com.chuuzr.chuuzrbackend.dto.room;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import com.chuuzr.chuuzrbackend.util.validation.ValidName;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidName;
 
 public class RoomRequestDTO {
   @NotBlank(message = "Room name is required")

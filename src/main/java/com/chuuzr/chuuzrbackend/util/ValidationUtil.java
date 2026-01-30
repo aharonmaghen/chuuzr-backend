@@ -66,6 +66,32 @@ public final class ValidationUtil {
     }
   }
 
+  public static String normalizePhoneNumber(String phoneNumber, String countryCode) {
+    if (phoneNumber == null || phoneNumber.trim().isEmpty() || countryCode == null || countryCode.trim().isEmpty()) {
+      return null;
+    }
+
+    String trimmedPhone = phoneNumber.trim();
+    String normalizedCountry = countryCode.trim().toUpperCase();
+
+    try {
+      // Parse the phone number (Google's library handles leading 0 in many regions)
+      PhoneNumber parsedNumber = PHONE_NUMBER_UTIL.parse(trimmedPhone, normalizedCountry);
+
+      // Validate for the region
+      if (!PHONE_NUMBER_UTIL.isValidNumberForRegion(parsedNumber, normalizedCountry)) {
+        return null;
+      }
+
+      // Get the national number without country code (this strips the leading 0 for
+      // many regions)
+      long nationalNumber = parsedNumber.getNationalNumber();
+      return String.valueOf(nationalNumber);
+    } catch (NumberParseException e) {
+      return null;
+    }
+  }
+
   public static boolean isValidCountryCode(String countryCode) {
     if (countryCode == null || countryCode.trim().isEmpty()) {
       return false;

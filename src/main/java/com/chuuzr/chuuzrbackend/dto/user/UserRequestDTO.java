@@ -3,18 +3,15 @@ package com.chuuzr.chuuzrbackend.dto.user;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import com.chuuzr.chuuzrbackend.util.validation.ValidCountryCode;
-import com.chuuzr.chuuzrbackend.util.validation.ValidImageUrl;
-import com.chuuzr.chuuzrbackend.util.validation.ValidName;
-import com.chuuzr.chuuzrbackend.util.validation.ValidNickname;
-import com.chuuzr.chuuzrbackend.util.validation.ValidPhoneNumberPair;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidCountryCode;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidImageUrl;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidName;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidNickname;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberFormat;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberPair;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/**
- * DTO for creating or updating a User.
- * Does not include UUID or timestamps as these are managed by the server.
- */
 @ValidPhoneNumberPair
 public class UserRequestDTO {
   @Schema(description = "User's full name", example = "John Doe", minLength = 2, maxLength = 50)
@@ -34,8 +31,9 @@ public class UserRequestDTO {
   @ValidCountryCode
   private String countryCode;
 
-  @Schema(description = "Phone number without country code", example = "5551234567", minLength = 7, maxLength = 15)
+  @Schema(description = "Phone number without country code (leading 0 will be stripped automatically)", example = "5551234567", minLength = 7, maxLength = 15)
   @NotBlank(message = "Phone number is required")
+  @ValidPhoneNumberFormat
   private String phoneNumber;
 
   @Schema(description = "URL to user's profile picture", example = "https://example.com/profile.jpg", format = "uri")

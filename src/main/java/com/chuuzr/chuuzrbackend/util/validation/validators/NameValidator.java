@@ -1,9 +1,10 @@
-package com.chuuzr.chuuzrbackend.util.validation;
+package com.chuuzr.chuuzrbackend.util.validation.validators;
 
 import java.util.regex.Pattern;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidName;
 
 /**
  * Validator for {@link ValidName} annotation.

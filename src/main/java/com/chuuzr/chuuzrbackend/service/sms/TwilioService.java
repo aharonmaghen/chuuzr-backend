@@ -5,10 +5,14 @@ import com.twilio.exception.ApiException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import com.chuuzr.chuuzrbackend.util.CountryCodeUtil;
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.SmsException;
+import org.springframework.context.annotation.Profile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@Profile("!dev")
 public class TwilioService implements SmsService {
   private final String fromPhoneNumber;
 
@@ -32,7 +36,7 @@ public class TwilioService implements SmsService {
           new PhoneNumber(fromPhoneNumber),
           messageBody).create();
     } catch (ApiException ex) {
-      throw new IllegalStateException("Failed to send OTP via Twilio", ex);
+      throw new SmsException(ErrorCode.SMS_SEND_FAILED, "Failed to send OTP via Twilio: " + ex.getMessage(), ex);
     }
   }
 }

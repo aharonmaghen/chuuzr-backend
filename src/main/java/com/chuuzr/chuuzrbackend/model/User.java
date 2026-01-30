@@ -31,32 +31,14 @@ public class User {
   private String phoneNumber;
   private URL profilePicture;
 
-  @JsonIgnore
-  @Column(name = "otp_code")
-  private String otpCode;
-
-  @JsonIgnore
-  @Column(name = "otp_expiration_time")
-  private LocalDateTime otpExpirationTime;
-
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
   public User() {
   }
 
-  public User(
-      Long id,
-      UUID uuid,
-      String name,
-      String nickname,
-      String countryCode,
-      String phoneNumber,
-      URL profilePicture,
-      String otpCode,
-      LocalDateTime otpExpirationTime,
-      LocalDateTime updatedAt,
-      LocalDateTime createdAt) {
+  public User(Long id, UUID uuid, String name, String nickname, String countryCode, String phoneNumber,
+      URL profilePicture, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.id = id;
     this.uuid = uuid;
     this.name = name;
@@ -64,23 +46,8 @@ public class User {
     this.countryCode = countryCode;
     this.phoneNumber = phoneNumber;
     this.profilePicture = profilePicture;
-    this.otpCode = otpCode;
-    this.otpExpirationTime = otpExpirationTime;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
-  }
-
-  public User(
-      Long id,
-      UUID uuid,
-      String name,
-      String nickname,
-      String countryCode,
-      String phoneNumber,
-      URL profilePicture,
-      LocalDateTime updatedAt,
-      LocalDateTime createdAt) {
-    this(id, uuid, name, nickname, countryCode, phoneNumber, profilePicture, null, null, updatedAt, createdAt);
   }
 
   @PrePersist
@@ -155,22 +122,6 @@ public class User {
 
   public void setProfilePicture(URL profilePicture) {
     this.profilePicture = profilePicture;
-  }
-
-  public String getOtpCode() {
-    return otpCode;
-  }
-
-  public void setOtpCode(String otpCode) {
-    this.otpCode = otpCode;
-  }
-
-  public LocalDateTime getOtpExpirationTime() {
-    return otpExpirationTime;
-  }
-
-  public void setOtpExpirationTime(LocalDateTime otpExpirationTime) {
-    this.otpExpirationTime = otpExpirationTime;
   }
 
   public LocalDateTime getUpdatedAt() {

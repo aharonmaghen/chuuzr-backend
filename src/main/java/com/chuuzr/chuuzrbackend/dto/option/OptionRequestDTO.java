@@ -7,8 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import com.chuuzr.chuuzrbackend.util.validation.ValidImageUrl;
-import com.chuuzr.chuuzrbackend.util.validation.ValidName;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidImageUrl;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidName;
 
 public class OptionRequestDTO {
   @NotNull(message = "Option type UUID is required")

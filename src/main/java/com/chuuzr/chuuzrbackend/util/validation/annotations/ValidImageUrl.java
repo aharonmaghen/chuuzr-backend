@@ -1,4 +1,4 @@
-package com.chuuzr.chuuzrbackend.util.validation;
+package com.chuuzr.chuuzrbackend.util.validation.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,13 +7,14 @@ import java.lang.annotation.Target;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import com.chuuzr.chuuzrbackend.util.validation.validators.ImageUrlValidator;
 
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = CountryCodeValidator.class)
-public @interface ValidCountryCode {
+@Constraint(validatedBy = ImageUrlValidator.class)
+public @interface ValidImageUrl {
 
-  String message() default "Country code must be a valid 2-letter country code (ISO 3166-1 alpha-2 standard)";
+  String message() default "Invalid image URL format";
 
   Class<?>[] groups() default {};
 

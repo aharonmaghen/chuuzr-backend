@@ -2,8 +2,9 @@ package com.chuuzr.chuuzrbackend.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 
-import com.chuuzr.chuuzrbackend.util.validation.ValidCountryCode;
-import com.chuuzr.chuuzrbackend.util.validation.ValidPhoneNumberPair;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidCountryCode;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberFormat;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberPair;
 
 @ValidPhoneNumberPair
 public class UserOtpRequest {
@@ -12,11 +13,12 @@ public class UserOtpRequest {
   private final String countryCode;
 
   @NotBlank(message = "Phone number is required")
+  @ValidPhoneNumberFormat
   private final String phoneNumber;
 
   public UserOtpRequest(
       @NotBlank(message = "Country code is required") @ValidCountryCode String countryCode,
-      @NotBlank(message = "Phone number is required") String phoneNumber) {
+      @NotBlank(message = "Phone number is required") @ValidPhoneNumberFormat String phoneNumber) {
     this.countryCode = countryCode;
     this.phoneNumber = phoneNumber;
   }

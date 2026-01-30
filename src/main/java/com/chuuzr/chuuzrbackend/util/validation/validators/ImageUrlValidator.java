@@ -1,8 +1,9 @@
-package com.chuuzr.chuuzrbackend.util.validation;
+package com.chuuzr.chuuzrbackend.util.validation.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import com.chuuzr.chuuzrbackend.util.ValidationUtil;
+import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidImageUrl;
 
 public class ImageUrlValidator implements ConstraintValidator<ValidImageUrl, String> {
 

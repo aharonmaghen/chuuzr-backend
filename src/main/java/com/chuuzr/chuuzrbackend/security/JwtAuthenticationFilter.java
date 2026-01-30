@@ -6,14 +6,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
 import com.chuuzr.chuuzrbackend.service.auth.AuthService;
@@ -45,23 +43,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String token = authorizationHeader.substring(BEARER_PREFIX.length());
 
       try {
-        jwtUtil.validateToken(token);
+        if (jwtUtil.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-          UUID userUuid = jwtUtil.extractUserUuid(token);
-          UserInternalDTO userContext = authService.getInternalUserContext(userUuid);
+          String role = jwtUtil.extractRole(token);
+          String subject = jwtUtil.extractSubject(token);
 
-          UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userContext,
-              null, toAuthorities(userContext.getRoles()));
+          UsernamePasswordAuthenticationToken authentication;
+
+          if ("ROLE_PRE_REGISTER".equals(role)) {
+            authentication = new UsernamePasswordAuthenticationToken(
+                subject,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_PRE_REGISTER")));
+          } else if ("ROLE_USER".equals(role)) {
+            UUID userUuid = UUID.fromString(subject);
+            UserInternalDTO userContext = authService.getInternalUserContext(userUuid);
+
+            authentication = new UsernamePasswordAuthenticationToken(
+                userContext,
+                null,
+                toAuthorities(userContext.getRoles()));
+          } else {
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
+            return;
+          }
+
           authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-      } catch (io.jsonwebtoken.JwtException ex) {
+      } catch (Exception ex) {
         SecurityContextHolder.clearContext();
-        throw new BadCredentialsException("Invalid JWT token", ex);
-      } catch (ResponseStatusException ex) {
-        SecurityContextHolder.clearContext();
-        throw new BadCredentialsException("Authentication failed", ex);
       }
     }
 
