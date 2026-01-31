@@ -44,6 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       try {
         if (jwtUtil.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+          // Validate token type is ACCESS
+          if (!jwtUtil.validateAccessToken(token)) {
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request, response);
+            return;
+          }
 
           String role = jwtUtil.extractRole(token);
           String subject = jwtUtil.extractSubject(token);

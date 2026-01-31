@@ -3,18 +3,18 @@ package com.chuuzr.chuuzrbackend.dto.auth;
 import java.util.UUID;
 
 public class UserAuthResponse {
-  private final String jwt;
+  private final String accessToken;
   private final UUID userUuid;
   private final boolean requiresRegistration;
 
-  public UserAuthResponse(String jwt, UUID userUuid, boolean requiresRegistration) {
-    this.jwt = jwt;
+  public UserAuthResponse(String accessToken, UUID userUuid, boolean requiresRegistration) {
+    this.accessToken = accessToken;
     this.userUuid = userUuid;
     this.requiresRegistration = requiresRegistration;
   }
 
-  public String getJwt() {
-    return jwt;
+  public String getAccessToken() {
+    return accessToken;
   }
 
   public UUID getUserUuid() {

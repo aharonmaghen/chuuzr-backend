@@ -12,5 +12,7 @@ public interface AuthService {
 
   UserAuthResponse verifyOtp(UserOtpVerifyRequest request);
 
+  UserAuthResponse refreshAccessToken(String refreshToken);
+
   UserInternalDTO getInternalUserContext(UUID userUuid);
 }
