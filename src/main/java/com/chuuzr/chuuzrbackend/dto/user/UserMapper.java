@@ -94,7 +94,7 @@ public class UserMapper {
     return new UserInternalDTO(user.getUuid(), user.getName(), user.getNickname(), roles);
   }
 
-  public static UserAuthResponse toAuthResponse(String jwt, UUID userUuid, boolean requiresRegistration) {
-    return new UserAuthResponse(jwt, userUuid, requiresRegistration);
+  public static UserAuthResponse toAuthResponse(String accessToken, UUID userUuid, boolean requiresRegistration) {
+    return new UserAuthResponse(accessToken, userUuid, requiresRegistration);
   }
 }

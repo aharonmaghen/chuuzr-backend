@@ -7,6 +7,7 @@ public enum ErrorCode {
   AUTHENTICATION_FAILED("AUTHENTICATION_FAILED", HttpStatus.UNAUTHORIZED, "Authentication failed"),
   OTP_INVALID("OTP_INVALID", HttpStatus.UNAUTHORIZED, "Invalid authentication credentials"),
   JWT_INVALID("JWT_INVALID", HttpStatus.UNAUTHORIZED, "Invalid authentication token"),
+  REFRESH_TOKEN_INVALID("REFRESH_TOKEN_INVALID", HttpStatus.UNAUTHORIZED, "Invalid or expired refresh token"),
   AUTHORIZATION_FAILED("AUTHORIZATION_FAILED", HttpStatus.FORBIDDEN, "Authorization failed"),
   FORBIDDEN_OPERATION("FORBIDDEN_OPERATION", HttpStatus.FORBIDDEN, "Operation not allowed"),
   SMS_SEND_FAILED("SMS_SEND_FAILED", HttpStatus.SERVICE_UNAVAILABLE, "Failed to send SMS"),

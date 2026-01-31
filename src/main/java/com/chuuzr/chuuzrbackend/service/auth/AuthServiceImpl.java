@@ -31,16 +31,18 @@ public class AuthServiceImpl implements AuthService {
   private final StringRedisTemplate stringRedisTemplate;
   private final SmsService smsService;
   private final JwtUtil jwtUtil;
-  private final Long otpExpirationMinutes;
+  private final RefreshTokenService refreshTokenService;
+  private final long otpExpirationMinutes;
   private final SecureRandom otpGenerator = new SecureRandom();
 
   public AuthServiceImpl(UserRepository userRepository, StringRedisTemplate stringRedisTemplate, SmsService smsService,
-      JwtUtil jwtUtil,
-      @Value("${otp.expiration.minutes}") Long otpExpirationMinutes) {
+      JwtUtil jwtUtil, RefreshTokenService refreshTokenService,
+      @Value("${otp.expiration.minutes}") long otpExpirationMinutes) {
     this.userRepository = userRepository;
     this.stringRedisTemplate = stringRedisTemplate;
     this.smsService = smsService;
     this.jwtUtil = jwtUtil;
+    this.refreshTokenService = refreshTokenService;
     this.otpExpirationMinutes = otpExpirationMinutes;
   }
 
@@ -99,6 +101,21 @@ public class AuthServiceImpl implements AuthService {
     User user = userRepository.findByUuid(userUuid).orElseThrow(
         () -> new UserNotFoundException("User with UUID " + userUuid + " not found"));
     return UserMapper.toInternalDTO(user);
+  }
+
+  @Override
+  public UserAuthResponse refreshAccessToken(String refreshToken) {
+    var userUuid = refreshTokenService.validateRefreshToken(refreshToken);
+
+    if (userUuid.isEmpty()) {
+      throw new AuthorizationException(ErrorCode.REFRESH_TOKEN_INVALID, "Invalid or expired refresh token");
+    }
+
+    refreshTokenService.revokeRefreshToken(refreshToken);
+
+    String newAccessToken = jwtUtil.generateAccessToken(userUuid.get().toString(), "ROLE_USER");
+
+    return UserMapper.toAuthResponse(newAccessToken, userUuid.get(), false);
   }
 
   private String generateOtp() {

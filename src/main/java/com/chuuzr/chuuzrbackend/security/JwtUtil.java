@@ -15,18 +15,22 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 
+import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.AuthorizationException;
+
 @Component
 public class JwtUtil {
   private final String secret;
-  private final Long expirationMs;
-  private final Long registrationExpirationMs;
+  private final long registrationExpirationMs;
+  private final long accessTokenExpirationMs;
   private SecretKey secretKey;
 
-  public JwtUtil(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration}") Long expirationMs,
-      @Value("${jwt.registrationExpiration}") Long registrationExpirationMs) {
+  public JwtUtil(@Value("${jwt.secret}") String secret,
+      @Value("${jwt.registration-expiration-ms}") long registrationExpirationMs,
+      @Value("${jwt.access-token-expiration-ms}") long accessTokenExpirationMs) {
     this.secret = secret;
-    this.expirationMs = expirationMs;
     this.registrationExpirationMs = registrationExpirationMs;
+    this.accessTokenExpirationMs = accessTokenExpirationMs;
   }
 
   @PostConstruct
@@ -35,18 +39,23 @@ public class JwtUtil {
   }
 
   public String generateToken(UUID userUuid) {
-    return buildToken(userUuid.toString(), expirationMs, "ROLE_USER");
+    return buildToken(userUuid.toString(), accessTokenExpirationMs, "ROLE_USER", "ACCESS");
+  }
+
+  public String generateAccessToken(String subject, String role) {
+    return buildToken(subject, accessTokenExpirationMs, role, "ACCESS");
   }
 
   public String generateRegistrationToken(String phoneNumber) {
-    return buildToken(phoneNumber, registrationExpirationMs, "ROLE_PRE_REGISTER");
+    return buildToken(phoneNumber, registrationExpirationMs, "ROLE_PRE_REGISTER", "ACCESS");
   }
 
-  private String buildToken(String subject, long duration, String role) {
+  private String buildToken(String subject, long duration, String role, String tokenType) {
     Instant now = Instant.now();
     return Jwts.builder()
         .subject(subject)
         .claim("role", role)
+        .claim("tokenType", tokenType)
         .issuedAt(Date.from(now))
         .expiration(Date.from(now.plusMillis(duration)))
         .signWith(secretKey)
@@ -91,6 +100,26 @@ public class JwtUtil {
       parseClaims(token);
       return true;
     } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  public String extractTokenType(String token) {
+    try {
+      return parseClaims(token).getPayload().get("tokenType", String.class);
+    } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+      throw new AuthorizationException(ErrorCode.JWT_INVALID, "Failed to extract token type from JWT");
+    }
+  }
+
+  public boolean validateAccessToken(String token) {
+    try {
+      String tokenType = extractTokenType(token);
+      if (!"ACCESS".equals(tokenType)) {
+        return false;
+      }
+      return validateToken(token);
+    } catch (Exception e) {
       return false;
     }
   }

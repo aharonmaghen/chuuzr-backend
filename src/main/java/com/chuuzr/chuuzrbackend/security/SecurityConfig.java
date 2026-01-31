@@ -29,7 +29,8 @@ public class SecurityConfig {
         .exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint))
         .authorizeHttpRequests(
             authorize -> authorize
-                .requestMatchers("/api/auth/**")
+                .requestMatchers("/api/auth/otp/request", "/api/auth/otp/verify", "/api/auth/refresh",
+                    "/api/auth/logout")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").hasRole("PRE_REGISTER")
                 .anyRequest().hasRole("USER"))
