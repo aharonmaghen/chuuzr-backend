@@ -3,6 +3,8 @@ package com.chuuzr.chuuzrbackend.controller.auth;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -20,6 +22,7 @@ import com.chuuzr.chuuzrbackend.exception.RefreshTokenException;
 import com.chuuzr.chuuzrbackend.service.auth.AuthService;
 import com.chuuzr.chuuzrbackend.service.auth.RefreshTokenService;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.util.PiiMaskingUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,6 +36,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication")
 public class AuthController {
+  private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
   private final AuthService authService;
   private final RefreshTokenService refreshTokenService;
   private final String refreshCookieName;
@@ -64,7 +69,12 @@ public class AuthController {
       @ApiResponse(responseCode = "400", description = "Invalid phone number or country code", content = @Content)
   })
   public ResponseEntity<Void> requestOtp(@Valid @RequestBody UserOtpRequest request) {
+    logger.debug("OTP request received for phone: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()));
+
     authService.requestOtp(request);
+    logger.info("OTP successfully sent to phone: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()));
     return ResponseEntity.accepted().build();
   }
 
@@ -77,15 +87,20 @@ public class AuthController {
   })
   public ResponseEntity<UserAuthResponse> verifyOtp(@Valid @RequestBody UserOtpVerifyRequest request,
       HttpServletResponse response) {
-    UserAuthResponse authResponse = authService.verifyOtp(request);
+    logger.debug("OTP verification request for phone: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()));
 
-    // Generate and set refresh token in cookie only if user exists (not
-    // pre-registration)
+    UserAuthResponse authResponse = authService.verifyOtp(request);
+    logger.info("OTP verified successfully for phone: {}, user: {}, requires registration: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()),
+        authResponse.getUserUuid(), authResponse.isRequiresRegistration());
+
     if (!authResponse.isRequiresRegistration()) {
       String refreshToken = refreshTokenService.generateAndStoreRefreshToken(
           authResponse.getUserUuid(),
           refreshTokenExpirationDays);
 
+      logger.debug("Refresh token generated for user: {}", authResponse.getUserUuid());
       setRefreshTokenCookie(response, refreshToken);
     }
 
@@ -104,16 +119,21 @@ public class AuthController {
       HttpServletResponse response) {
 
     if (refreshToken == null || refreshToken.isEmpty()) {
+      logger.warn("Refresh token refresh attempt without valid token cookie");
       throw new RefreshTokenException(ErrorCode.AUTHENTICATION_FAILED,
           "Refresh token not found in cookie. Please provide a valid refresh token via secure httpOnly cookie.");
     }
 
+    logger.debug("Token refresh request received, token: {}", PiiMaskingUtil.maskToken(refreshToken));
+
     UserAuthResponse authResponse = authService.refreshAccessToken(refreshToken);
+    logger.info("Access token refreshed for user: {}", authResponse.getUserUuid());
 
     String newRefreshToken = refreshTokenService.generateAndStoreRefreshToken(
         authResponse.getUserUuid(),
         refreshTokenExpirationDays);
 
+    logger.debug("New refresh token generated for user: {}", authResponse.getUserUuid());
     setRefreshTokenCookie(response, newRefreshToken);
 
     return ResponseEntity.ok(authResponse);
@@ -128,8 +148,13 @@ public class AuthController {
       @Parameter(hidden = true) @CookieValue(name = "${jwt.refresh-cookie-name}", required = false) String refreshToken,
       HttpServletResponse response) {
 
-    if (refreshToken != null) {
+    logger.debug("Logout request received");
+
+    if (refreshToken != null && !refreshToken.isEmpty()) {
       refreshTokenService.revokeRefreshToken(refreshToken);
+      logger.info("Refresh token revoked and user logged out");
+    } else {
+      logger.debug("Logout request without valid refresh token cookie");
     }
 
     clearRefreshTokenCookie(response);
