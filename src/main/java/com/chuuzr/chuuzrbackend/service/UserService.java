@@ -2,6 +2,8 @@ package com.chuuzr.chuuzrbackend.service;
 
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +27,8 @@ import com.chuuzr.chuuzrbackend.util.ValidationUtil;
 @Transactional
 public class UserService {
 
+  private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
   private final UserRepository userRepository;
   private final JwtUtil jwtUtil;
 
@@ -36,16 +40,19 @@ public class UserService {
 
   @Transactional(readOnly = true)
   public UserResponseDTO findByUuid(UUID userUuid) {
+    logger.debug("Finding user by uuid={}", userUuid);
     User user = userRepository.findByUuid(userUuid).orElseThrow(
         () -> new UserNotFoundException("User with UUID " + userUuid + " not found"));
     return UserMapper.toResponseDTO(user);
   }
 
   public UserCreatedResponseDTO createUser(UserRequestDTO userRequestDTO) {
+    logger.debug("Creating user from registration token");
     validatePreRegisterTokenPhoneNumber(userRequestDTO);
 
     User userToSave = UserMapper.toEntity(userRequestDTO);
     User savedUser = userRepository.save(userToSave);
+    logger.debug("User created and token generated for uuid={}", savedUser.getUuid());
     UserResponseDTO userResponseDTO = UserMapper.toResponseDTO(savedUser);
     String token = jwtUtil.generateToken(savedUser.getUuid());
     return new UserCreatedResponseDTO(token, userResponseDTO);
@@ -71,10 +78,12 @@ public class UserService {
   }
 
   public UserResponseDTO updateUser(UUID userUuid, UserRequestDTO userRequestDTO) {
+    logger.debug("Updating user with uuid={}", userUuid);
     User user = userRepository.findByUuid(userUuid).orElseThrow(
         () -> new UserNotFoundException("User with UUID " + userUuid + " not found"));
     UserMapper.updateEntityFromDTO(user, userRequestDTO);
     User updatedUser = userRepository.save(user);
+    logger.info("User updated with uuid={}", userUuid);
     return UserMapper.toResponseDTO(updatedUser);
   }
 }

@@ -1,9 +1,12 @@
 package com.chuuzr.chuuzrbackend.service.auth;
 
 import java.security.SecureRandom;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -22,11 +25,14 @@ import com.chuuzr.chuuzrbackend.repository.UserRepository;
 import com.chuuzr.chuuzrbackend.security.JwtUtil;
 import com.chuuzr.chuuzrbackend.service.sms.SmsService;
 import com.chuuzr.chuuzrbackend.util.CountryCodeUtil;
+import com.chuuzr.chuuzrbackend.util.PiiMaskingUtil;
 import com.chuuzr.chuuzrbackend.util.ValidationUtil;
 
 @Service
 @Transactional
 public class AuthServiceImpl implements AuthService {
+  private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+
   private final UserRepository userRepository;
   private final StringRedisTemplate stringRedisTemplate;
   private final SmsService smsService;
@@ -48,6 +54,9 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public void requestOtp(UserOtpRequest request) {
+    logger.debug("OTP request received for phone: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()));
+
     String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), request.getCountryCode());
     if (normalizedPhone == null) {
       throw new IllegalArgumentException("Invalid phone number for country code: " + request.getCountryCode());
@@ -56,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
     String fullPhoneNumber = CountryCodeUtil.toDialCode(request.getCountryCode()) + normalizedPhone;
     String otp = generateOtp();
 
+    logger.debug("Storing OTP in Redis with expiration of {} minutes", otpExpirationMinutes);
     stringRedisTemplate.opsForValue().set(
         "otp:" + fullPhoneNumber,
         otp,
@@ -67,6 +77,9 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public UserAuthResponse verifyOtp(UserOtpVerifyRequest request) {
+    logger.debug("OTP verification request for phone: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()));
+
     String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), request.getCountryCode());
     if (normalizedPhone == null) {
       throw new AuthorizationException(ErrorCode.OTP_INVALID,
@@ -77,20 +90,29 @@ public class AuthServiceImpl implements AuthService {
     String redisKey = "otp:" + fullPhone;
 
     String storedOtp = stringRedisTemplate.opsForValue().get(redisKey);
+    logger.debug("Comparing OTP - provided: {}, stored: {}",
+        PiiMaskingUtil.maskOtp(request.getOtp()),
+        storedOtp != null ? PiiMaskingUtil.maskOtp(storedOtp) : "null");
 
     if (storedOtp == null || !storedOtp.equals(request.getOtp())) {
+      logger.warn("OTP verification failed for phone: {} - provided: {}",
+          PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()),
+          PiiMaskingUtil.maskOtp(request.getOtp()));
       throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid or expired OTP");
     }
 
     stringRedisTemplate.delete(redisKey);
+    logger.debug("OTP verified and deleted from Redis");
 
     return userRepository.findByPhoneNumberAndCountryCode(normalizedPhone, request.getCountryCode())
         .map(user -> {
           String jwt = jwtUtil.generateToken(user.getUuid());
+          logger.debug("Access token generated for existing user: {}", user.getUuid());
           return UserMapper.toAuthResponse(jwt, user.getUuid(), false);
         })
         .orElseGet(() -> {
           String tempJwt = jwtUtil.generateRegistrationToken(fullPhone);
+          logger.debug("Registration token generated for new user");
           return UserMapper.toAuthResponse(tempJwt, null, true);
         });
   }
@@ -98,22 +120,27 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional(readOnly = true)
   public UserInternalDTO getInternalUserContext(UUID userUuid) {
+    logger.debug("Loading user context for userUuid: {}", userUuid);
     User user = userRepository.findByUuid(userUuid).orElseThrow(
         () -> new UserNotFoundException("User with UUID " + userUuid + " not found"));
+    logger.debug("User context loaded successfully");
     return UserMapper.toInternalDTO(user);
   }
 
   @Override
   public UserAuthResponse refreshAccessToken(String refreshToken) {
-    var userUuid = refreshTokenService.validateRefreshToken(refreshToken);
+    Optional<UUID> userUuid = refreshTokenService.validateRefreshToken(refreshToken);
 
     if (userUuid.isEmpty()) {
+      logger.warn("Refresh token validation failed - token invalid or expired");
       throw new AuthorizationException(ErrorCode.REFRESH_TOKEN_INVALID, "Invalid or expired refresh token");
     }
 
     refreshTokenService.revokeRefreshToken(refreshToken);
+    logger.debug("Old refresh token revoked");
 
     String newAccessToken = jwtUtil.generateAccessToken(userUuid.get().toString(), "ROLE_USER");
+    logger.debug("New access token generated for user: {}", userUuid.get());
 
     return UserMapper.toAuthResponse(newAccessToken, userUuid.get(), false);
   }

@@ -2,6 +2,8 @@ package com.chuuzr.chuuzrbackend.service;
 
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,8 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class UserVoteService {
 
+  private static final Logger logger = LoggerFactory.getLogger(UserVoteService.class);
+
   private final UserVoteRepository userVoteRepository;
   private final RoomUserRepository roomUserRepository;
   private final RoomOptionRepository roomOptionRepository;
@@ -39,6 +43,8 @@ public class UserVoteService {
 
   @Transactional
   public UserVoteResponseDTO castVote(UUID roomUuid, UUID userUuid, UUID optionUuid, VoteType voteType) {
+    logger.debug("Casting vote roomUuid={}, userUuid={}, optionUuid={}, voteType={}", roomUuid, userUuid, optionUuid,
+        voteType);
     RoomUser roomUser = roomUserRepository.findByUuids(roomUuid, userUuid)
         .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.ROOM_USER_NOT_FOUND,
             "User with UUID " + userUuid + " not found in room " + roomUuid));
@@ -57,6 +63,7 @@ public class UserVoteService {
     VoteType oldType = existingUserVote.getVoteType();
 
     if (oldType == voteType) {
+      logger.debug("Vote unchanged for userUuid={}, optionUuid={}", userUuid, optionUuid);
       return UserVoteMapper.toResponseDTO(existingUserVote);
     } else if (oldType != VoteType.NONE && voteType != VoteType.NONE) {
       throw new InvalidVoteTransitionException(
