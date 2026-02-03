@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +40,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Rooms")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class RoomOptionController {
+  private static final Logger logger = LoggerFactory.getLogger(RoomOptionController.class);
+
   private final RoomOptionService roomOptionService;
 
   @Autowired
@@ -53,7 +57,9 @@ public class RoomOptionController {
   })
   public ResponseEntity<List<OptionResponseDTO>> getRoomOptions(@PathVariable UUID roomUuid,
       @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
+    logger.debug("Get room options request for roomUuid={}", roomUuid);
     List<OptionResponseDTO> options = roomOptionService.getRoomOptions(roomUuid, pageable);
+    logger.info("Room options retrieved for roomUuid={}, count={}", roomUuid, options.size());
     return ResponseEntity.ok(options);
   }
 
@@ -68,10 +74,14 @@ public class RoomOptionController {
   })
   public ResponseEntity<RoomOptionResponseDTO> addOptionToRoom(@PathVariable UUID roomUuid,
       @Valid @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {
+    logger.debug("Add option to room request for roomUuid={}, optionUuid={}", roomUuid,
+        roomOptionRequest.getOptionUuid());
     RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid,
         roomOptionRequest.getOptionUuid());
     URI locationOfNewOption = ucb.path("/api/rooms/{roomUuid}/options")
         .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
+    logger.info("Option added to room for roomUuid={}, optionUuid={}", roomUuid,
+        roomOptionRequest.getOptionUuid());
     return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
   }
 }

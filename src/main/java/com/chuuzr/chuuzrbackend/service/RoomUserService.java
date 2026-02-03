@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,8 @@ import com.chuuzr.chuuzrbackend.repository.UserRepository;
 @Transactional
 public class RoomUserService {
 
+  private static final Logger logger = LoggerFactory.getLogger(RoomUserService.class);
+
   private final RoomUserRepository roomUserRepository;
   private final RoomRepository roomRepository;
   private final UserRepository userRepository;
@@ -42,6 +46,7 @@ public class RoomUserService {
 
   @Transactional(readOnly = true)
   public List<UserResponseDTO> getRoomUsers(UUID roomUuid, Pageable pageable) {
+    logger.debug("Fetching room users for roomUuid={}", roomUuid);
     Page<RoomUser> page = roomUserRepository.findByRoomUuid(roomUuid, pageable);
     return page.getContent().stream().map(RoomUser::getUser).map(UserMapper::toResponseDTO)
         .collect(Collectors.toList());
@@ -49,6 +54,7 @@ public class RoomUserService {
 
   @Transactional
   public RoomUserResponseDTO addUserToRoom(UUID roomUuid, UUID userUuid) {
+    logger.debug("Adding user to room roomUuid={}, userUuid={}", roomUuid, userUuid);
     Room room = roomRepository.findByUuid(roomUuid)
         .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND,
             "Room with UUID " + roomUuid + " not found"));

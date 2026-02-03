@@ -2,6 +2,8 @@ package com.chuuzr.chuuzrbackend.controller;
 
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,6 +33,8 @@ import jakarta.validation.Valid;
 @Tag(name = "Rooms")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class UserVoteController {
+  private static final Logger logger = LoggerFactory.getLogger(UserVoteController.class);
+
   private final UserVoteService userVoteService;
 
   @Autowired
@@ -50,8 +54,12 @@ public class UserVoteController {
       @PathVariable("optionUuid") UUID optionUuid, @Valid @RequestBody UserVoteRequestDTO userVoteRequestDTO,
       Authentication authentication) {
     UserInternalDTO userContext = (UserInternalDTO) authentication.getPrincipal();
+    logger.debug("Cast vote request for roomUuid={}, optionUuid={}, userUuid={}", roomUuid, optionUuid,
+        userContext.getUuid());
     UserVoteResponseDTO voteResponse = userVoteService.castVote(roomUuid, userContext.getUuid(), optionUuid,
         userVoteRequestDTO.getVoteType());
+    logger.info("Vote recorded for roomUuid={}, optionUuid={}, userUuid={}, voteType={}", roomUuid, optionUuid,
+        userContext.getUuid(), userVoteRequestDTO.getVoteType());
     return ResponseEntity.ok(voteResponse);
   }
 }

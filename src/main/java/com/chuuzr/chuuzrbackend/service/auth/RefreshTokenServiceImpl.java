@@ -4,11 +4,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
+  private static final Logger logger = LoggerFactory.getLogger(RefreshTokenServiceImpl.class);
   private static final String REFRESH_TOKEN_PREFIX = "refresh_token:";
   private final StringRedisTemplate stringRedisTemplate;
 
@@ -21,6 +24,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     String opaqueToken = UUID.randomUUID().toString();
     String key = REFRESH_TOKEN_PREFIX + opaqueToken;
 
+    logger.debug("Generating refresh token for user: {} with {} day expiration", userUuid, expirationDays);
     stringRedisTemplate.opsForValue().set(
         key,
         userUuid.toString(),
@@ -36,9 +40,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     String userUuidStr = stringRedisTemplate.opsForValue().get(key);
 
     if (userUuidStr == null) {
+      logger.debug("Refresh token validation failed - token not found or expired");
       return Optional.empty();
     }
 
+    logger.debug("Refresh token valid for user: {}", userUuidStr);
     return Optional.of(UUID.fromString(userUuidStr));
   }
 

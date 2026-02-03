@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Rooms")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class RoomController {
+  private static final Logger logger = LoggerFactory.getLogger(RoomController.class);
+
   private final RoomService roomService;
 
   @Autowired
@@ -49,7 +53,9 @@ public class RoomController {
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
   })
   public ResponseEntity<RoomResponseDTO> findById(@PathVariable UUID roomUuid) {
+    logger.debug("Get room by UUID request for roomUuid={}", roomUuid);
     RoomResponseDTO room = roomService.findByUuid(roomUuid);
+    logger.info("Room retrieved for roomUuid={}", roomUuid);
     return ResponseEntity.ok(room);
   }
 
@@ -63,8 +69,10 @@ public class RoomController {
   })
   public ResponseEntity<RoomResponseDTO> createRoom(@Valid @RequestBody RoomRequestDTO newRoomRequest,
       UriComponentsBuilder ucb) {
+    logger.debug("Create room request received");
     RoomResponseDTO createdRoom = roomService.createRoom(newRoomRequest);
     URI locationOfNewRoom = ucb.path("/api/rooms/{roomUuid}").buildAndExpand(createdRoom.getUuid()).toUri();
+    logger.info("Room created with roomUuid={}", createdRoom.getUuid());
     return ResponseEntity.created(locationOfNewRoom).body(createdRoom);
   }
 
@@ -78,7 +86,9 @@ public class RoomController {
   })
   public ResponseEntity<RoomResponseDTO> updateRoom(@PathVariable UUID roomUuid,
       @Valid @RequestBody RoomRequestDTO roomToUpdate) {
+    logger.debug("Update room request for roomUuid={}", roomUuid);
     RoomResponseDTO updatedRoom = roomService.updateRoom(roomUuid, roomToUpdate);
+    logger.info("Room updated for roomUuid={}", roomUuid);
     return ResponseEntity.ok(updatedRoom);
   }
 }

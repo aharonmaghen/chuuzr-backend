@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,6 +39,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Users")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class UserController {
+  private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
   private final UserService userService;
 
   @Autowired
@@ -52,7 +56,9 @@ public class UserController {
   })
   public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
     UserInternalDTO userContext = (UserInternalDTO) authentication.getPrincipal();
+    logger.debug("Get current user profile request for userUuid={}", userContext.getUuid());
     UserResponseDTO user = userService.findByUuid(userContext.getUuid());
+    logger.info("User profile retrieved for userUuid={}", userContext.getUuid());
     return ResponseEntity.ok(user);
   }
 
@@ -66,7 +72,9 @@ public class UserController {
   public ResponseEntity<UserResponseDTO> updateCurrentUser(Authentication authentication,
       @Valid @RequestBody UserRequestDTO userToUpdate) {
     UserInternalDTO userContext = (UserInternalDTO) authentication.getPrincipal();
+    logger.debug("Update current user profile request for userUuid={}", userContext.getUuid());
     UserResponseDTO updatedUser = userService.updateUser(userContext.getUuid(), userToUpdate);
+    logger.info("User profile updated for userUuid={}", userContext.getUuid());
     return ResponseEntity.ok(updatedUser);
   }
 
@@ -78,7 +86,9 @@ public class UserController {
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
   })
   public ResponseEntity<UserResponseDTO> findById(@PathVariable UUID userUuid) {
+    logger.debug("Get user by UUID request for userUuid={}", userUuid);
     UserResponseDTO user = userService.findByUuid(userUuid);
+    logger.info("User retrieved for userUuid={}", userUuid);
     return ResponseEntity.ok(user);
   }
 
@@ -92,8 +102,10 @@ public class UserController {
   })
   public ResponseEntity<UserCreatedResponseDTO> createUser(@Valid @RequestBody UserRequestDTO newUserRequest,
       UriComponentsBuilder ucb) {
+    logger.debug("Create user request received");
     UserCreatedResponseDTO createdUser = userService.createUser(newUserRequest);
     URI locationOfNewUser = ucb.path("/api/users/{userUuid}").buildAndExpand(createdUser.getUser().getUuid()).toUri();
+    logger.info("User created with userUuid={}", createdUser.getUser().getUuid());
     return ResponseEntity.created(locationOfNewUser).body(createdUser);
   }
 
@@ -107,7 +119,9 @@ public class UserController {
   })
   public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID userUuid,
       @Valid @RequestBody UserRequestDTO userToUpdate) {
+    logger.debug("Update user request for userUuid={}", userUuid);
     UserResponseDTO updatedUser = userService.updateUser(userUuid, userToUpdate);
+    logger.info("User updated for userUuid={}", userUuid);
     return ResponseEntity.ok(updatedUser);
   }
 }

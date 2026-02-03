@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,8 @@ import com.chuuzr.chuuzrbackend.repository.RoomRepository;
 @Transactional
 public class RoomOptionService {
 
+  private static final Logger logger = LoggerFactory.getLogger(RoomOptionService.class);
+
   private final RoomOptionRepository roomOptionRepository;
   private final RoomRepository roomRepository;
   private final OptionRepository optionRepository;
@@ -41,12 +45,14 @@ public class RoomOptionService {
 
   @Transactional(readOnly = true)
   public List<OptionResponseDTO> getRoomOptions(UUID roomUuid, Pageable pageable) {
+    logger.debug("Fetching room options for roomUuid={}", roomUuid);
     Page<RoomOption> page = roomOptionRepository.findByRoomUuid(roomUuid, pageable);
     return page.getContent().stream().map(RoomOption::getOption).map(OptionMapper::toResponseDTO)
         .collect(Collectors.toList());
   }
 
   public RoomOptionResponseDTO addOptionToRoom(UUID roomUuid, UUID optionUuid) {
+    logger.debug("Adding option to room roomUuid={}, optionUuid={}", roomUuid, optionUuid);
     Room room = roomRepository.findByUuid(roomUuid).orElseThrow(
         () -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND,
             "Room with UUID " + roomUuid + " not found"));

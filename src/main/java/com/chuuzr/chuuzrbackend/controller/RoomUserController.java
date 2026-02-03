@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +40,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Rooms")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class RoomUserController {
+  private static final Logger logger = LoggerFactory.getLogger(RoomUserController.class);
+
   private final RoomUserService roomUserService;
 
   @Autowired
@@ -53,7 +57,9 @@ public class RoomUserController {
   })
   public ResponseEntity<List<UserResponseDTO>> getRoomUsers(@PathVariable UUID roomUuid,
       @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    logger.debug("Get room users request for roomUuid={}", roomUuid);
     List<UserResponseDTO> users = roomUserService.getRoomUsers(roomUuid, pageable);
+    logger.info("Room users retrieved for roomUuid={}, count={}", roomUuid, users.size());
     return ResponseEntity.ok(users);
   }
 
@@ -69,9 +75,13 @@ public class RoomUserController {
   public ResponseEntity<RoomUserResponseDTO> addUserToRoom(@PathVariable UUID roomUuid,
       @Valid @RequestBody RoomUserRequestDTO roomUserRequest,
       UriComponentsBuilder ucb) {
+    logger.debug("Add user to room request for roomUuid={}, userUuid={}", roomUuid,
+        roomUserRequest.getUserUuid());
     RoomUserResponseDTO addedRoomUser = roomUserService.addUserToRoom(roomUuid, roomUserRequest.getUserUuid());
     URI locationOfNewUser = ucb.path("/api/rooms/{roomUuid}/users")
         .buildAndExpand(addedRoomUser.getRoom().getUuid()).toUri();
+    logger.info("User added to room for roomUuid={}, userUuid={}", roomUuid,
+        roomUserRequest.getUserUuid());
     return ResponseEntity.created(locationOfNewUser).body(addedRoomUser);
   }
 }

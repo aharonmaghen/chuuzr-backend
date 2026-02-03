@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +40,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Option Types")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class OptionTypeController {
+  private static final Logger logger = LoggerFactory.getLogger(OptionTypeController.class);
+
   private final OptionTypeService optionTypeService;
 
   @Autowired
@@ -53,7 +57,9 @@ public class OptionTypeController {
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
   })
   public ResponseEntity<OptionTypeResponseDTO> findById(@PathVariable UUID optionTypeUuid) {
+    logger.debug("Get option type by UUID request for optionTypeUuid={}", optionTypeUuid);
     OptionTypeResponseDTO optionType = optionTypeService.findByUuid(optionTypeUuid);
+    logger.info("Option type retrieved for optionTypeUuid={}", optionTypeUuid);
     return ResponseEntity.ok(optionType);
   }
 
@@ -65,7 +71,9 @@ public class OptionTypeController {
   })
   public ResponseEntity<List<OptionTypeResponseDTO>> getAllOptionTypes(
       @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+    logger.debug("Get all option types request received");
     List<OptionTypeResponseDTO> optionTypes = optionTypeService.getAllOptionTypes(pageable);
+    logger.info("Option types retrieved, count={}", optionTypes.size());
     return ResponseEntity.ok(optionTypes);
   }
 
@@ -80,9 +88,11 @@ public class OptionTypeController {
   public ResponseEntity<OptionTypeResponseDTO> createOptionType(
       @Valid @RequestBody OptionTypeRequestDTO newOptionTypeRequest,
       UriComponentsBuilder ucb) {
+    logger.debug("Create option type request received");
     OptionTypeResponseDTO createdOptionType = optionTypeService.createOptionType(newOptionTypeRequest);
     URI locationOfNewOptionType = ucb.path("/api/option-types/{optionTypeUuid}")
         .buildAndExpand(createdOptionType.getUuid()).toUri();
+    logger.info("Option type created with optionTypeUuid={}", createdOptionType.getUuid());
     return ResponseEntity.created(locationOfNewOptionType).body(createdOptionType);
   }
 
@@ -96,7 +106,9 @@ public class OptionTypeController {
   })
   public ResponseEntity<OptionTypeResponseDTO> updateOptionType(@PathVariable UUID optionTypeUuid,
       @Valid @RequestBody OptionTypeRequestDTO optionTypeToUpdate) {
+    logger.debug("Update option type request for optionTypeUuid={}", optionTypeUuid);
     OptionTypeResponseDTO updatedOptionType = optionTypeService.updateOptionType(optionTypeUuid, optionTypeToUpdate);
+    logger.info("Option type updated for optionTypeUuid={}", optionTypeUuid);
     return ResponseEntity.ok(updatedOptionType);
   }
 }
