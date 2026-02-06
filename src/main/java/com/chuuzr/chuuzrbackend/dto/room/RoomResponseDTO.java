@@ -3,6 +3,8 @@ package com.chuuzr.chuuzrbackend.dto.room;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeResponseDTO;
+
 /**
  * DTO for returning Room data to API clients.
  * Only exposes UUID (not internal ID) and includes timestamps.
@@ -10,15 +12,18 @@ import java.util.UUID;
 public class RoomResponseDTO {
   private UUID uuid;
   private String name;
+  private OptionTypeResponseDTO optionType;
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
   public RoomResponseDTO() {
   }
 
-  public RoomResponseDTO(UUID uuid, String name, LocalDateTime updatedAt, LocalDateTime createdAt) {
+  public RoomResponseDTO(UUID uuid, String name, OptionTypeResponseDTO optionType, LocalDateTime updatedAt,
+      LocalDateTime createdAt) {
     this.uuid = uuid;
     this.name = name;
+    this.optionType = optionType;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }
@@ -37,6 +42,14 @@ public class RoomResponseDTO {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public OptionTypeResponseDTO getOptionType() {
+    return optionType;
+  }
+
+  public void setOptionType(OptionTypeResponseDTO optionType) {
+    this.optionType = optionType;
   }
 
   public LocalDateTime getUpdatedAt() {

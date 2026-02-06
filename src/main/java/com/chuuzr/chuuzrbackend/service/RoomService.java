@@ -13,7 +13,10 @@ import com.chuuzr.chuuzrbackend.dto.room.RoomRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.room.RoomResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
+import com.chuuzr.chuuzrbackend.exception.ValidationException;
+import com.chuuzr.chuuzrbackend.model.OptionType;
 import com.chuuzr.chuuzrbackend.model.Room;
+import com.chuuzr.chuuzrbackend.repository.OptionTypeRepository;
 import com.chuuzr.chuuzrbackend.repository.RoomRepository;
 
 @Service
@@ -23,10 +26,12 @@ public class RoomService {
   private static final Logger logger = LoggerFactory.getLogger(RoomService.class);
 
   private final RoomRepository roomRepository;
+  private final OptionTypeRepository optionTypeRepository;
 
   @Autowired
-  public RoomService(RoomRepository roomRepository) {
+  public RoomService(RoomRepository roomRepository, OptionTypeRepository optionTypeRepository) {
     this.roomRepository = roomRepository;
+    this.optionTypeRepository = optionTypeRepository;
   }
 
   @Transactional(readOnly = true)
@@ -39,9 +44,18 @@ public class RoomService {
 
   public RoomResponseDTO createRoom(RoomRequestDTO roomRequestDTO) {
     logger.debug("Creating room");
+    if (roomRequestDTO.getOptionTypeUuid() == null) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type UUID is required");
+    }
+    OptionType optionType = optionTypeRepository.findByUuid(roomRequestDTO.getOptionTypeUuid())
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
+            "Option type with UUID " + roomRequestDTO.getOptionTypeUuid() + " not found"));
     Room roomToSave = RoomMapper.toEntity(roomRequestDTO);
+    roomToSave.setOptionType(optionType);
     Room savedRoom = roomRepository.save(roomToSave);
+
     logger.debug("Room saved with uuid={}", savedRoom.getUuid());
+
     return RoomMapper.toResponseDTO(savedRoom);
   }
 
@@ -49,9 +63,19 @@ public class RoomService {
     logger.debug("Updating room with uuid={}", roomUuid);
     Room room = roomRepository.findByUuid(roomUuid).orElseThrow(
         () -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND, "Room with UUID " + roomUuid + " not found"));
+
+    if (roomRequestDTO.getOptionTypeUuid() == null) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type UUID is required");
+    }
+    OptionType optionType = optionTypeRepository.findByUuid(roomRequestDTO.getOptionTypeUuid())
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
+            "Option type with UUID " + roomRequestDTO.getOptionTypeUuid() + " not found"));
+    room.setOptionType(optionType);
+
     RoomMapper.updateEntityFromDTO(room, roomRequestDTO);
     Room updatedRoom = roomRepository.save(room);
     logger.info("Room updated with uuid={}", roomUuid);
+
     return RoomMapper.toResponseDTO(updatedRoom);
   }
 }

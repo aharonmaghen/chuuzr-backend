@@ -81,16 +81,18 @@ public class OptionService {
         .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND,
             "Option with UUID " + optionUuid + " not found"));
 
-    if (optionRequestDTO.getOptionTypeUuid() != null) {
-      OptionType optionType = optionTypeRepository.findByUuid(optionRequestDTO.getOptionTypeUuid())
-          .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
-              "Option type with UUID " + optionRequestDTO.getOptionTypeUuid() + " not found"));
-      option.setOptionType(optionType);
+    if (optionRequestDTO.getOptionTypeUuid() == null) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type UUID is required");
     }
+    OptionType optionType = optionTypeRepository.findByUuid(optionRequestDTO.getOptionTypeUuid())
+        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
+            "Option type with UUID " + optionRequestDTO.getOptionTypeUuid() + " not found"));
+    option.setOptionType(optionType);
 
     OptionMapper.updateEntityFromDTO(option, optionRequestDTO);
     Option updatedOption = optionRepository.save(option);
     logger.info("Option updated with uuid={}", optionUuid);
+
     return OptionMapper.toResponseDTO(updatedOption);
   }
 }
