@@ -18,17 +18,23 @@ public class Room {
   private UUID uuid;
 
   private String name;
-  
+
+  @ManyToOne
+  @JoinColumn(name = "option_type_id", nullable = false)
+  private OptionType optionType;
+
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
   public Room() {
   }
 
-  public Room(Long id, UUID uuid, String name, LocalDateTime updatedAt, LocalDateTime createdAt) {
+  public Room(Long id, UUID uuid, String name, OptionType optionType, LocalDateTime updatedAt,
+      LocalDateTime createdAt) {
     this.id = id;
     this.uuid = uuid;
     this.name = name;
+    this.optionType = optionType;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }
@@ -75,6 +81,14 @@ public class Room {
     this.name = name;
   }
 
+  public OptionType getOptionType() {
+    return optionType;
+  }
+
+  public void setOptionType(OptionType optionType) {
+    this.optionType = optionType;
+  }
+
   public LocalDateTime getUpdatedAt() {
     return updatedAt;
   }
@@ -96,6 +110,7 @@ public class Room {
     return "Room{id=" + this.id +
         ", uuid=" + this.uuid +
         ", name=" + this.name +
+        ", optionType=" + (optionType != null ? optionType.getName() : null) +
         ", updatedAt=" + this.updatedAt +
         ", createdAt=" + this.createdAt + "}";
   }

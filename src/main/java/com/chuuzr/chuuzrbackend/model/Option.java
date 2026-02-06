@@ -31,7 +31,7 @@ public class Option {
   private UUID uuid;
   
   @ManyToOne
-  @JoinColumn(name = "option_type_id")
+  @JoinColumn(name = "option_type_id", nullable = false)
   private OptionType optionType;
 
   private String apiProvider;
