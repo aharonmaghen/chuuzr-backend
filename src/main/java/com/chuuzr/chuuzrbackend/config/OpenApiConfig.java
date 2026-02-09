@@ -32,6 +32,7 @@ public class OpenApiConfig {
     TAG_ORDER.put("Rooms", 2);
     TAG_ORDER.put("Option Types", 3);
     TAG_ORDER.put("Options", 4);
+    TAG_ORDER.put("Search", 5);
   }
 
   @Bean
@@ -59,7 +60,9 @@ public class OpenApiConfig {
             new Tag().name("Users").description("User profile management endpoints."),
             new Tag().name("Rooms").description("Create, update, and retrieve rooms."),
             new Tag().name("Option Types").description("Define and manage option categories."),
-            new Tag().name("Options").description("CRUD operations for standalone options.")));
+            new Tag().name("Options").description("CRUD operations for standalone options."),
+            new Tag().name("Search")
+                .description("Search external providers for options based on the room's option type.")));
   }
 
   @Bean
