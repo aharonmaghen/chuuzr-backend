@@ -2,6 +2,7 @@ package com.chuuzr.chuuzrbackend.service.search;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -78,7 +79,7 @@ public class SearchProviderFactory {
   }
 
   private String normalizeKey(String value) {
-    return value == null ? "" : value.trim().toUpperCase();
+    return value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
   }
 
 }
