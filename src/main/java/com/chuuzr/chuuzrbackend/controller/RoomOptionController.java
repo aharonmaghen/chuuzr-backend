@@ -64,13 +64,12 @@ public class RoomOptionController {
   }
 
   @PostMapping("/{roomUuid}/options")
-  @Operation(summary = "Add option to room", description = "Add an option to a specific room. If the option already exists (based on apiProvider, externalId, and optionTypeUuid), it will be recycled and added to the room. Otherwise, a new option will be created and added to the room.", operationId = "addOptionToRoom")
+  @Operation(summary = "Add option to room", description = "Add an option to a specific room. If the option already exists (based on apiProvider, externalId, and optionTypeUuid), it will be recycled and added to the room. If the option is already in the room, the existing relationship is returned (idempotent operation). Otherwise, a new option will be created and added to the room.", operationId = "addOptionToRoom")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "Option added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
+      @ApiResponse(responseCode = "201", description = "Option added to room successfully, or option already exists in room (idempotent)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room or option type not found", content = @Content),
-      @ApiResponse(responseCode = "409", description = "Option already in room", content = @Content)
+      @ApiResponse(responseCode = "404", description = "Room or option type not found, or option creation failed", content = @Content)
   })
   public ResponseEntity<RoomOptionResponseDTO> addOptionToRoom(@PathVariable UUID roomUuid,
       @Valid @RequestBody OptionRequestDTO optionRequest, UriComponentsBuilder ucb) {
