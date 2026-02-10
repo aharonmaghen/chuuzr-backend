@@ -1,6 +1,7 @@
 package com.chuuzr.chuuzrbackend.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -12,9 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.chuuzr.chuuzrbackend.dto.option.OptionDetailResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionMapper;
 import com.chuuzr.chuuzrbackend.dto.option.OptionRequestDTO;
-import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.exception.ValidationException;
@@ -22,6 +24,9 @@ import com.chuuzr.chuuzrbackend.model.Option;
 import com.chuuzr.chuuzrbackend.model.OptionType;
 import com.chuuzr.chuuzrbackend.repository.OptionRepository;
 import com.chuuzr.chuuzrbackend.repository.OptionTypeRepository;
+import com.chuuzr.chuuzrbackend.repository.SearchProviderRepository;
+import com.chuuzr.chuuzrbackend.service.search.SearchProviderService;
+import com.chuuzr.chuuzrbackend.service.search.SearchProviderFactory;
 
 @Service
 @Transactional
@@ -31,33 +36,39 @@ public class OptionService {
 
   private final OptionRepository optionRepository;
   private final OptionTypeRepository optionTypeRepository;
+  private final SearchProviderFactory searchProviderFactory;
+  private final SearchProviderRepository searchProviderRepository;
 
   @Autowired
-  public OptionService(OptionRepository optionRepository, OptionTypeRepository optionTypeRepository) {
+  public OptionService(OptionRepository optionRepository, OptionTypeRepository optionTypeRepository,
+      SearchProviderFactory searchProviderFactory,
+      SearchProviderRepository searchProviderRepository) {
     this.optionRepository = optionRepository;
     this.optionTypeRepository = optionTypeRepository;
+    this.searchProviderFactory = searchProviderFactory;
+    this.searchProviderRepository = searchProviderRepository;
   }
 
   @Transactional(readOnly = true)
-  public OptionResponseDTO findByUuid(UUID optionUuid) {
+  public OptionDetailResponseDTO findByUuid(UUID optionUuid) {
     logger.debug("Finding option by uuid={}", optionUuid);
     Option option = optionRepository.findByUuid(optionUuid)
         .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND,
             "Option with UUID " + optionUuid + " not found"));
 
-    return OptionMapper.toResponseDTO(option);
+    return OptionMapper.toDetailDTO(option);
   }
 
   @Transactional(readOnly = true)
-  public List<OptionResponseDTO> findByOptionTypeUuid(UUID optionTypeUuid, Pageable pageable) {
+  public List<OptionSummaryResponseDTO> findByOptionTypeUuid(UUID optionTypeUuid, Pageable pageable) {
     logger.debug("Finding options by optionTypeUuid={}", optionTypeUuid);
     Page<Option> page = optionRepository.findByOptionTypeUuid(optionTypeUuid, pageable);
     return page.getContent().stream()
-        .map(OptionMapper::toResponseDTO)
+          .map(OptionMapper::toSummaryDTO)
         .collect(Collectors.toList());
   }
 
-  public OptionResponseDTO createOption(OptionRequestDTO optionRequestDTO) {
+        public OptionDetailResponseDTO createOption(OptionRequestDTO optionRequestDTO) {
     logger.debug("Creating option");
     if (optionRequestDTO.getOptionTypeUuid() == null) {
       throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type UUID is required");
@@ -66,16 +77,26 @@ public class OptionService {
         .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_TYPE_NOT_FOUND,
             "Option type with UUID " + optionRequestDTO.getOptionTypeUuid() + " not found"));
 
+    validateProviderMapping(optionType, optionRequestDTO.getApiProvider());
+
     Option optionToSave = OptionMapper.toEntity(optionRequestDTO);
     optionToSave.setOptionType(optionType);
+
+    SearchProviderService provider = searchProviderFactory.getProviderByKey(optionRequestDTO.getApiProvider());
+    Map<String, Object> metadata = provider.fetchOptionMetadata(optionRequestDTO.getExternalId());
+    optionToSave.setMetadata(metadata);
+    provider.applyMetadataToOption(optionToSave, metadata);
+
+    validateOptionFields(optionToSave);
+
     Option savedOption = optionRepository.save(optionToSave);
 
     logger.debug("Option saved with uuid={}", savedOption.getUuid());
 
-    return OptionMapper.toResponseDTO(savedOption);
+    return OptionMapper.toDetailDTO(savedOption);
   }
 
-  public OptionResponseDTO updateOption(UUID optionUuid, OptionRequestDTO optionRequestDTO) {
+  public OptionDetailResponseDTO updateOption(UUID optionUuid, OptionRequestDTO optionRequestDTO) {
     logger.debug("Updating option with uuid={}", optionUuid);
     Option option = optionRepository.findByUuid(optionUuid)
         .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND,
@@ -89,10 +110,47 @@ public class OptionService {
             "Option type with UUID " + optionRequestDTO.getOptionTypeUuid() + " not found"));
     option.setOptionType(optionType);
 
+    validateProviderMapping(optionType, optionRequestDTO.getApiProvider());
+
     OptionMapper.updateEntityFromDTO(option, optionRequestDTO);
+
+    SearchProviderService provider = searchProviderFactory.getProviderByKey(optionRequestDTO.getApiProvider());
+    Map<String, Object> metadata = provider.fetchOptionMetadata(optionRequestDTO.getExternalId());
+    option.setMetadata(metadata);
+    provider.applyMetadataToOption(option, metadata);
+
+    validateOptionFields(option);
+
     Option updatedOption = optionRepository.save(option);
     logger.info("Option updated with uuid={}", optionUuid);
 
-    return OptionMapper.toResponseDTO(updatedOption);
+    return OptionMapper.toDetailDTO(updatedOption);
+  }
+
+  private void validateOptionFields(Option option) {
+    if (option == null) {
+      return;
+    }
+    if (option.getName() == null || option.getName().trim().isEmpty()) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option name is required");
+    }
+    if (option.getDescription() == null || option.getDescription().trim().isEmpty()) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option description is required");
+    }
+  }
+
+  private void validateProviderMapping(OptionType optionType, String apiProvider) {
+    if (optionType == null || optionType.getId() == null) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type is required");
+    }
+    if (apiProvider == null || apiProvider.trim().isEmpty()) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT, "API provider is required");
+    }
+    boolean exists = searchProviderRepository
+        .existsByOptionTypeIdAndProviderKeyIgnoreCaseAndEnabledTrue(optionType.getId(), apiProvider.trim());
+    if (!exists) {
+      throw new ValidationException(ErrorCode.INVALID_INPUT,
+          "API provider is not configured for the specified option type");
+    }
   }
 }

@@ -24,8 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.option.OptionDetailResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionRequestDTO;
-import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.service.OptionService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,13 +54,13 @@ public class OptionController {
   @GetMapping("/{optionUuid}")
   @Operation(summary = "Get option by UUID", description = "Retrieve a specific option by its unique identifier", operationId = "getOptionById")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Option found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionResponseDTO.class))),
+      @ApiResponse(responseCode = "200", description = "Option found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionDetailResponseDTO.class))),
       @ApiResponse(responseCode = "404", description = "Option not found", content = @Content),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
   })
-  public ResponseEntity<OptionResponseDTO> findById(@PathVariable UUID optionUuid) {
+  public ResponseEntity<OptionDetailResponseDTO> findById(@PathVariable UUID optionUuid) {
     logger.debug("Get option by UUID request for optionUuid={}", optionUuid);
-    OptionResponseDTO option = optionService.findByUuid(optionUuid);
+    OptionDetailResponseDTO option = optionService.findByUuid(optionUuid);
     logger.info("Option retrieved for optionUuid={}", optionUuid);
     return ResponseEntity.ok(option);
   }
@@ -67,14 +68,14 @@ public class OptionController {
   @GetMapping
   @Operation(summary = "Get options by option type", description = "Retrieve all options for a specific option type with pagination support", operationId = "getOptionsByOptionType")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionResponseDTO.class))),
+      @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionSummaryResponseDTO.class))),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
   })
-  public ResponseEntity<List<OptionResponseDTO>> findByOptionTypeUuid(
+  public ResponseEntity<List<OptionSummaryResponseDTO>> findByOptionTypeUuid(
       @RequestParam UUID optionTypeUuid,
       @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
     logger.debug("Get options by option type request for optionTypeUuid={}", optionTypeUuid);
-    List<OptionResponseDTO> options = optionService.findByOptionTypeUuid(optionTypeUuid, pageable);
+    List<OptionSummaryResponseDTO> options = optionService.findByOptionTypeUuid(optionTypeUuid, pageable);
     logger.info("Options retrieved for optionTypeUuid={}, count={}", optionTypeUuid, options.size());
     return ResponseEntity.ok(options);
   }
@@ -82,15 +83,15 @@ public class OptionController {
   @PostMapping
   @Operation(summary = "Create a new option", description = "Create a new option with the provided information", operationId = "createOption")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "Option created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionResponseDTO.class))),
+      @ApiResponse(responseCode = "201", description = "Option created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionDetailResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
       @ApiResponse(responseCode = "409", description = "Option already exists", content = @Content)
   })
-  public ResponseEntity<OptionResponseDTO> createOption(@Valid @RequestBody OptionRequestDTO newOptionRequest,
+  public ResponseEntity<OptionDetailResponseDTO> createOption(@Valid @RequestBody OptionRequestDTO newOptionRequest,
       UriComponentsBuilder ucb) {
     logger.debug("Create option request received");
-    OptionResponseDTO createdOption = optionService.createOption(newOptionRequest);
+    OptionDetailResponseDTO createdOption = optionService.createOption(newOptionRequest);
     URI locationOfNewOption = ucb.path("/api/options/{optionUuid}").buildAndExpand(createdOption.getUuid()).toUri();
     logger.info("Option created with optionUuid={}", createdOption.getUuid());
     return ResponseEntity.created(locationOfNewOption).body(createdOption);
@@ -99,15 +100,15 @@ public class OptionController {
   @PutMapping("/{optionUuid}")
   @Operation(summary = "Update an existing option", description = "Update option information for the specified option UUID", operationId = "updateOption")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Option updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionResponseDTO.class))),
+      @ApiResponse(responseCode = "200", description = "Option updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionDetailResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
       @ApiResponse(responseCode = "404", description = "Option not found", content = @Content)
   })
-  public ResponseEntity<OptionResponseDTO> updateOption(@PathVariable UUID optionUuid,
+  public ResponseEntity<OptionDetailResponseDTO> updateOption(@PathVariable UUID optionUuid,
       @Valid @RequestBody OptionRequestDTO optionToUpdate) {
     logger.debug("Update option request for optionUuid={}", optionUuid);
-    OptionResponseDTO updatedOption = optionService.updateOption(optionUuid, optionToUpdate);
+    OptionDetailResponseDTO updatedOption = optionService.updateOption(optionUuid, optionToUpdate);
     logger.info("Option updated for optionUuid={}", optionUuid);
     return ResponseEntity.ok(updatedOption);
   }

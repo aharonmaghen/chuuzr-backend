@@ -1,14 +1,10 @@
 package com.chuuzr.chuuzrbackend.dto.option;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeResponseDTO;
 
-/**
- * DTO for returning Option data to API clients.
- */
-public class OptionResponseDTO {
+public class OptionSummaryResponseDTO {
   private UUID uuid;
   private OptionTypeResponseDTO optionType;
   private String apiProvider;
@@ -16,14 +12,12 @@ public class OptionResponseDTO {
   private String name;
   private String description;
   private String imageUrl;
-  private LocalDateTime updatedAt;
-  private LocalDateTime createdAt;
 
-  public OptionResponseDTO() {
+  public OptionSummaryResponseDTO() {
   }
 
-  public OptionResponseDTO(UUID uuid, OptionTypeResponseDTO optionType, String apiProvider, String externalId,
-      String name, String description, String imageUrl, LocalDateTime updatedAt, LocalDateTime createdAt) {
+  public OptionSummaryResponseDTO(UUID uuid, OptionTypeResponseDTO optionType, String apiProvider, String externalId,
+      String name, String description, String imageUrl) {
     this.uuid = uuid;
     this.optionType = optionType;
     this.apiProvider = apiProvider;
@@ -31,8 +25,6 @@ public class OptionResponseDTO {
     this.name = name;
     this.description = description;
     this.imageUrl = imageUrl;
-    this.updatedAt = updatedAt;
-    this.createdAt = createdAt;
   }
 
   public UUID getUuid() {
@@ -91,19 +83,4 @@ public class OptionResponseDTO {
     this.imageUrl = imageUrl;
   }
 
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
 }

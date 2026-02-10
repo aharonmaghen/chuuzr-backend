@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.chuuzr.chuuzrbackend.dto.option.OptionMapper;
-import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionMapper;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
@@ -44,10 +44,10 @@ public class RoomOptionService {
   }
 
   @Transactional(readOnly = true)
-  public List<OptionResponseDTO> getRoomOptions(UUID roomUuid, Pageable pageable) {
+  public List<OptionSummaryResponseDTO> getRoomOptions(UUID roomUuid, Pageable pageable) {
     logger.debug("Fetching room options for roomUuid={}", roomUuid);
     Page<RoomOption> page = roomOptionRepository.findByRoomUuid(roomUuid, pageable);
-    return page.getContent().stream().map(RoomOption::getOption).map(OptionMapper::toResponseDTO)
+    return page.getContent().stream().map(RoomOption::getOption).map(OptionMapper::toSummaryDTO)
         .collect(Collectors.toList());
   }
 

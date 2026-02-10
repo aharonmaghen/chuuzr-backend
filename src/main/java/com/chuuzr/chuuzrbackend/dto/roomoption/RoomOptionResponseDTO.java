@@ -2,19 +2,19 @@ package com.chuuzr.chuuzrbackend.dto.roomoption;
 
 import java.time.LocalDateTime;
 
-import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.room.RoomResponseDTO;
 
 public class RoomOptionResponseDTO {
   private RoomResponseDTO room;
-  private OptionResponseDTO option;
+  private OptionSummaryResponseDTO option;
   private LocalDateTime updatedAt;
   private LocalDateTime createdAt;
 
   public RoomOptionResponseDTO() {
   }
 
-  public RoomOptionResponseDTO(RoomResponseDTO room, OptionResponseDTO option,
+  public RoomOptionResponseDTO(RoomResponseDTO room, OptionSummaryResponseDTO option,
       LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.room = room;
     this.option = option;
@@ -30,11 +30,11 @@ public class RoomOptionResponseDTO {
     this.room = room;
   }
 
-  public OptionResponseDTO getOption() {
+  public OptionSummaryResponseDTO getOption() {
     return option;
   }
 
-  public void setOption(OptionResponseDTO option) {
+  public void setOption(OptionSummaryResponseDTO option) {
     this.option = option;
   }
 

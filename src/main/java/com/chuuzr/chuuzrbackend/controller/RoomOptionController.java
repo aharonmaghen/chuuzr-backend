@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
-import com.chuuzr.chuuzrbackend.dto.option.OptionResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
 import com.chuuzr.chuuzrbackend.service.RoomOptionService;
@@ -40,48 +40,48 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Rooms")
 @SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class RoomOptionController {
-  private static final Logger logger = LoggerFactory.getLogger(RoomOptionController.class);
+    private static final Logger logger = LoggerFactory.getLogger(RoomOptionController.class);
 
-  private final RoomOptionService roomOptionService;
+    private final RoomOptionService roomOptionService;
 
-  @Autowired
-  public RoomOptionController(RoomOptionService roomOptionService) {
-    this.roomOptionService = roomOptionService;
-  }
+    @Autowired
+    public RoomOptionController(RoomOptionService roomOptionService) {
+        this.roomOptionService = roomOptionService;
+    }
 
-  @GetMapping("/{roomUuid}/options")
-  @Operation(summary = "Get options for a room", description = "Retrieve all options that are associated with a specific room with pagination support", operationId = "getRoomOptions")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionResponseDTO.class))),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
-  })
-  public ResponseEntity<List<OptionResponseDTO>> getRoomOptions(@PathVariable UUID roomUuid,
-      @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
-    logger.debug("Get room options request for roomUuid={}", roomUuid);
-    List<OptionResponseDTO> options = roomOptionService.getRoomOptions(roomUuid, pageable);
-    logger.info("Room options retrieved for roomUuid={}, count={}", roomUuid, options.size());
-    return ResponseEntity.ok(options);
-  }
+    @GetMapping("/{roomUuid}/options")
+    @Operation(summary = "Get options for a room", description = "Retrieve all options that are associated with a specific room with pagination support", operationId = "getRoomOptions")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionSummaryResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+    })
+    public ResponseEntity<List<OptionSummaryResponseDTO>> getRoomOptions(@PathVariable UUID roomUuid,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
+        logger.debug("Get room options request for roomUuid={}", roomUuid);
+        List<OptionSummaryResponseDTO> options = roomOptionService.getRoomOptions(roomUuid, pageable);
+        logger.info("Room options retrieved for roomUuid={}, count={}", roomUuid, options.size());
+        return ResponseEntity.ok(options);
+    }
 
-  @PostMapping("/{roomUuid}/options")
-  @Operation(summary = "Add option to room", description = "Add an option to a specific room", operationId = "addOptionToRoom")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "Option added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room or option not found", content = @Content),
-      @ApiResponse(responseCode = "409", description = "Option already in room", content = @Content)
-  })
-  public ResponseEntity<RoomOptionResponseDTO> addOptionToRoom(@PathVariable UUID roomUuid,
-      @Valid @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {
-    logger.debug("Add option to room request for roomUuid={}, optionUuid={}", roomUuid,
-        roomOptionRequest.getOptionUuid());
-    RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid,
-        roomOptionRequest.getOptionUuid());
-    URI locationOfNewOption = ucb.path("/api/rooms/{roomUuid}/options")
-        .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
-    logger.info("Option added to room for roomUuid={}, optionUuid={}", roomUuid,
-        roomOptionRequest.getOptionUuid());
-    return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
-  }
+    @PostMapping("/{roomUuid}/options")
+    @Operation(summary = "Add option to room", description = "Add an option to a specific room", operationId = "addOptionToRoom")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Option added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Room or option not found", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Option already in room", content = @Content)
+    })
+    public ResponseEntity<RoomOptionResponseDTO> addOptionToRoom(@PathVariable UUID roomUuid,
+            @Valid @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {
+        logger.debug("Add option to room request for roomUuid={}, optionUuid={}", roomUuid,
+                roomOptionRequest.getOptionUuid());
+        RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid,
+                roomOptionRequest.getOptionUuid());
+        URI locationOfNewOption = ucb.path("/api/rooms/{roomUuid}/options")
+                .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
+        logger.info("Option added to room for roomUuid={}, optionUuid={}", roomUuid,
+                roomOptionRequest.getOptionUuid());
+        return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
+    }
 }
