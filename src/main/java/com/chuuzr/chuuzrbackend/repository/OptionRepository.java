@@ -13,4 +13,6 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
   Optional<Option> findByUuid(UUID uuid);
 
   Page<Option> findByOptionTypeUuid(UUID optionTypeUuid, Pageable pageable);
+
+  Optional<Option> findByApiProviderAndExternalIdAndOptionTypeUuid(String apiProvider, String externalId, UUID optionTypeUuid);
 }

@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.option.OptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
-import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
 import com.chuuzr.chuuzrbackend.service.RoomOptionService;
 
@@ -64,24 +64,22 @@ public class RoomOptionController {
   }
 
   @PostMapping("/{roomUuid}/options")
-  @Operation(summary = "Add option to room", description = "Add an option to a specific room", operationId = "addOptionToRoom")
+  @Operation(summary = "Add option to room", description = "Add an option to a specific room. If the option already exists (based on apiProvider, externalId, and optionTypeUuid), it will be recycled and added to the room. Otherwise, a new option will be created and added to the room.", operationId = "addOptionToRoom")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Option added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room or option not found", content = @Content),
+      @ApiResponse(responseCode = "404", description = "Room or option type not found", content = @Content),
       @ApiResponse(responseCode = "409", description = "Option already in room", content = @Content)
   })
   public ResponseEntity<RoomOptionResponseDTO> addOptionToRoom(@PathVariable UUID roomUuid,
-      @Valid @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {
-    logger.debug("Add option to room request for roomUuid={}, optionUuid={}", roomUuid,
-        roomOptionRequest.getOptionUuid());
-    RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid,
-        roomOptionRequest.getOptionUuid());
+      @Valid @RequestBody OptionRequestDTO optionRequest, UriComponentsBuilder ucb) {
+    logger.debug("Add option to room request for roomUuid={}", roomUuid);
+    RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid, optionRequest);
     URI locationOfNewOption = ucb.path("/api/rooms/{roomUuid}/options")
         .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
     logger.info("Option added to room for roomUuid={}, optionUuid={}", roomUuid,
-        roomOptionRequest.getOptionUuid());
+        addedRoomOption.getOption().getUuid());
     return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
   }
 }
