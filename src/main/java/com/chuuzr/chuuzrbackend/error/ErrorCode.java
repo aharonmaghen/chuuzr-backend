@@ -36,6 +36,13 @@ public enum ErrorCode {
   INVALID_VOTE_TRANSITION("INVALID_VOTE_TRANSITION", HttpStatus.BAD_REQUEST, "Invalid vote transition"),
   DUPLICATE_RESOURCE("DUPLICATE_RESOURCE", HttpStatus.CONFLICT, "Resource already exists"),
 
+  // External API / Search Errors
+  EXTERNAL_API_AUTH_FAILED("EXTERNAL_API_AUTH_FAILED", HttpStatus.BAD_GATEWAY, "External API authentication failed"),
+  EXTERNAL_API_UNAVAILABLE("EXTERNAL_API_UNAVAILABLE", HttpStatus.SERVICE_UNAVAILABLE, "External API is unavailable"),
+  EXTERNAL_API_BAD_RESPONSE("EXTERNAL_API_BAD_RESPONSE", HttpStatus.BAD_GATEWAY, "External API returned an error"),
+  SEARCH_PROVIDER_CONFIG_ERROR("SEARCH_PROVIDER_CONFIG_ERROR", HttpStatus.SERVICE_UNAVAILABLE, "Search provider configuration error"),
+  SEARCH_FAILED("SEARCH_FAILED", HttpStatus.BAD_GATEWAY, "Search failed"),
+
   // Server Errors
   INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred");
 

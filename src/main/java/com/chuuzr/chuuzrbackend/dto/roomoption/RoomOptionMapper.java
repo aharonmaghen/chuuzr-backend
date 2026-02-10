@@ -14,7 +14,7 @@ public class RoomOptionMapper {
     }
     return new RoomOptionResponseDTO(
         RoomMapper.toResponseDTO(roomOption.getRoom()),
-        OptionMapper.toResponseDTO(roomOption.getOption()),
+        OptionMapper.toSummaryDTO(roomOption.getOption()),
         roomOption.getUpdatedAt(),
         roomOption.getCreatedAt());
   }
