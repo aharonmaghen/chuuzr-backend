@@ -68,7 +68,7 @@ public class OptionService {
         .collect(Collectors.toList());
   }
 
-        public OptionDetailResponseDTO createOption(OptionRequestDTO optionRequestDTO) {
+  public OptionDetailResponseDTO createOption(OptionRequestDTO optionRequestDTO) {
     logger.debug("Creating option");
     if (optionRequestDTO.getOptionTypeUuid() == null) {
       throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type UUID is required");
