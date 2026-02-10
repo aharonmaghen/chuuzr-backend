@@ -20,7 +20,6 @@ import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionMapper;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
-import com.chuuzr.chuuzrbackend.exception.ValidationException;
 import com.chuuzr.chuuzrbackend.model.Option;
 import com.chuuzr.chuuzrbackend.model.Room;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
@@ -78,11 +77,6 @@ public class RoomOptionService {
         () -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND,
             "Room with UUID " + roomUuid + " not found"));
 
-    // Validate input
-    if (optionRequestDTO.getOptionTypeUuid() == null) {
-      throw new ValidationException(ErrorCode.INVALID_INPUT, "Option type UUID is required");
-    }
-
     // Check if option already exists
     Optional<Option> existingOption = optionRepository.findByApiProviderAndExternalIdAndOptionTypeUuid(
         optionRequestDTO.getApiProvider(), 
@@ -97,8 +91,16 @@ public class RoomOptionService {
     } else {
       // Create new option using OptionService
       logger.debug("Option does not exist, creating new option");
-      option = optionRepository.findByUuid(optionService.createOption(optionRequestDTO).getUuid())
+      UUID createdOptionUuid = optionService.createOption(optionRequestDTO).getUuid();
+      option = optionRepository.findByUuid(createdOptionUuid)
           .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND, "Option creation failed"));
+    }
+
+    // Check if option is already in room
+    Optional<RoomOption> existingRoomOption = roomOptionRepository.findByUuids(roomUuid, option.getUuid());
+    if (existingRoomOption.isPresent()) {
+      logger.info("Option is already in room for roomUuid={}, optionUuid={}", roomUuid, option.getUuid());
+      return RoomOptionMapper.toResponseDTO(existingRoomOption.get());
     }
 
     // Add option to room
