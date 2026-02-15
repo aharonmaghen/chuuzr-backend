@@ -60,6 +60,7 @@ services:
       - db
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
     restart: unless-stopped
 
 volumes:
