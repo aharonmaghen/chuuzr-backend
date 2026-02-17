@@ -1,6 +1,7 @@
 package com.chuuzr.chuuzrbackend.service.auth;
 
 import java.security.SecureRandom;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -25,8 +26,11 @@ import com.chuuzr.chuuzrbackend.repository.UserRepository;
 import com.chuuzr.chuuzrbackend.security.JwtUtil;
 import com.chuuzr.chuuzrbackend.service.sms.SmsService;
 import com.chuuzr.chuuzrbackend.util.CountryCodeUtil;
+import com.chuuzr.chuuzrbackend.util.RedisKeyConstants;
 import com.chuuzr.chuuzrbackend.util.PiiMaskingUtil;
 import com.chuuzr.chuuzrbackend.util.ValidationUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Transactional
@@ -38,18 +42,23 @@ public class AuthServiceImpl implements AuthService {
   private final SmsService smsService;
   private final JwtUtil jwtUtil;
   private final RefreshTokenService refreshTokenService;
+  private final ObjectMapper objectMapper;
   private final long otpExpirationMinutes;
+  private final long registrationExpirationMs;
   private final SecureRandom otpGenerator = new SecureRandom();
 
   public AuthServiceImpl(UserRepository userRepository, StringRedisTemplate stringRedisTemplate, SmsService smsService,
-      JwtUtil jwtUtil, RefreshTokenService refreshTokenService,
-      @Value("${otp.expiration.minutes}") long otpExpirationMinutes) {
+      JwtUtil jwtUtil, RefreshTokenService refreshTokenService, ObjectMapper objectMapper,
+      @Value("${otp.expiration.minutes}") long otpExpirationMinutes,
+      @Value("${jwt.registration-expiration-ms}") long registrationExpirationMs) {
     this.userRepository = userRepository;
     this.stringRedisTemplate = stringRedisTemplate;
     this.smsService = smsService;
     this.jwtUtil = jwtUtil;
     this.refreshTokenService = refreshTokenService;
+    this.objectMapper = objectMapper;
     this.otpExpirationMinutes = otpExpirationMinutes;
+    this.registrationExpirationMs = registrationExpirationMs;
   }
 
   @Override
@@ -67,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
     logger.debug("Storing OTP in Redis with expiration of {} minutes", otpExpirationMinutes);
     stringRedisTemplate.opsForValue().set(
-        "otp:" + fullPhoneNumber,
+        RedisKeyConstants.OTP_PREFIX + fullPhoneNumber,
         otp,
         otpExpirationMinutes,
         TimeUnit.MINUTES);
@@ -87,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     String fullPhone = CountryCodeUtil.toDialCode(request.getCountryCode()) + normalizedPhone;
-    String redisKey = "otp:" + fullPhone;
+    String redisKey = RedisKeyConstants.OTP_PREFIX + fullPhone;
 
     String storedOtp = stringRedisTemplate.opsForValue().get(redisKey);
     logger.debug("Comparing OTP - provided: {}, stored: {}",
@@ -111,8 +120,21 @@ public class AuthServiceImpl implements AuthService {
           return UserMapper.toAuthResponse(jwt, user.getUuid(), false);
         })
         .orElseGet(() -> {
-          String tempJwt = jwtUtil.generateRegistrationToken(fullPhone);
-          logger.debug("Registration token generated for new user");
+          String preRegUuid = UUID.randomUUID().toString();
+          String redisValue;
+          try {
+            redisValue = objectMapper.writeValueAsString(
+                Map.of("countryCode", request.getCountryCode(), "phoneNumber", normalizedPhone));
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize pre-registration data", e);
+          }
+          stringRedisTemplate.opsForValue().set(
+              RedisKeyConstants.PRE_REG_PREFIX + preRegUuid,
+              redisValue,
+              registrationExpirationMs,
+              TimeUnit.MILLISECONDS);
+          String tempJwt = jwtUtil.generateRegistrationToken(preRegUuid);
+          logger.debug("Registration token generated for new user with pre-reg key: {}", preRegUuid);
           return UserMapper.toAuthResponse(tempJwt, null, true);
         });
   }
