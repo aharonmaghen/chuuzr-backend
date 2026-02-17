@@ -46,8 +46,8 @@ public class JwtUtil {
     return buildToken(subject, accessTokenExpirationMs, role, "ACCESS");
   }
 
-  public String generateRegistrationToken(String phoneNumber) {
-    return buildToken(phoneNumber, registrationExpirationMs, "ROLE_PRE_REGISTER", "ACCESS");
+  public String generateRegistrationToken(String preRegUuid) {
+    return buildToken(preRegUuid, registrationExpirationMs, "ROLE_PRE_REGISTER", "ACCESS");
   }
 
   private String buildToken(String subject, long duration, String role, String tokenType) {
@@ -77,15 +77,6 @@ public class JwtUtil {
       throw new IllegalStateException("Not a standard user token. Current role: " + role);
     }
     return UUID.fromString(claims.getSubject());
-  }
-
-  public String extractPhoneNumberFromRegistrationToken(String token) {
-    Claims claims = parseClaims(token).getPayload();
-    String role = (String) claims.get("role");
-    if (!"ROLE_PRE_REGISTER".equals(role)) {
-      throw new IllegalStateException("Not a registration token. Current role: " + role);
-    }
-    return claims.getSubject();
   }
 
   private Jws<Claims> parseClaims(String token) {

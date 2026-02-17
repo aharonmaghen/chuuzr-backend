@@ -21,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
+import com.chuuzr.chuuzrbackend.dto.user.UserCreateRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserCreatedResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
@@ -100,7 +101,7 @@ public class UserController {
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
       @ApiResponse(responseCode = "409", description = "User already exists", content = @Content)
   })
-  public ResponseEntity<UserCreatedResponseDTO> createUser(@Valid @RequestBody UserRequestDTO newUserRequest,
+  public ResponseEntity<UserCreatedResponseDTO> createUser(@Valid @RequestBody UserCreateRequestDTO newUserRequest,
       UriComponentsBuilder ucb) {
     logger.debug("Create user request received");
     UserCreatedResponseDTO createdUser = userService.createUser(newUserRequest);

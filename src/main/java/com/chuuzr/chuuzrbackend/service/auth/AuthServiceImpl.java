@@ -39,17 +39,20 @@ public class AuthServiceImpl implements AuthService {
   private final JwtUtil jwtUtil;
   private final RefreshTokenService refreshTokenService;
   private final long otpExpirationMinutes;
+  private final long registrationExpirationMs;
   private final SecureRandom otpGenerator = new SecureRandom();
 
   public AuthServiceImpl(UserRepository userRepository, StringRedisTemplate stringRedisTemplate, SmsService smsService,
       JwtUtil jwtUtil, RefreshTokenService refreshTokenService,
-      @Value("${otp.expiration.minutes}") long otpExpirationMinutes) {
+      @Value("${otp.expiration.minutes}") long otpExpirationMinutes,
+      @Value("${jwt.registration-expiration-ms}") long registrationExpirationMs) {
     this.userRepository = userRepository;
     this.stringRedisTemplate = stringRedisTemplate;
     this.smsService = smsService;
     this.jwtUtil = jwtUtil;
     this.refreshTokenService = refreshTokenService;
     this.otpExpirationMinutes = otpExpirationMinutes;
+    this.registrationExpirationMs = registrationExpirationMs;
   }
 
   @Override
@@ -111,8 +114,16 @@ public class AuthServiceImpl implements AuthService {
           return UserMapper.toAuthResponse(jwt, user.getUuid(), false);
         })
         .orElseGet(() -> {
-          String tempJwt = jwtUtil.generateRegistrationToken(fullPhone);
-          logger.debug("Registration token generated for new user");
+          String preRegUuid = UUID.randomUUID().toString();
+          String redisValue = "{\"countryCode\":\"" + request.getCountryCode()
+              + "\",\"phoneNumber\":\"" + normalizedPhone + "\"}";
+          stringRedisTemplate.opsForValue().set(
+              "pre_reg:" + preRegUuid,
+              redisValue,
+              registrationExpirationMs,
+              TimeUnit.MILLISECONDS);
+          String tempJwt = jwtUtil.generateRegistrationToken(preRegUuid);
+          logger.debug("Registration token generated for new user with pre-reg key: {}", preRegUuid);
           return UserMapper.toAuthResponse(tempJwt, null, true);
         });
   }
