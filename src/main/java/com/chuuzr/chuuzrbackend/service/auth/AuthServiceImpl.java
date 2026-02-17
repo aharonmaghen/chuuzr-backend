@@ -1,6 +1,7 @@
 package com.chuuzr.chuuzrbackend.service.auth;
 
 import java.security.SecureRandom;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,8 @@ import com.chuuzr.chuuzrbackend.util.CountryCodeUtil;
 import com.chuuzr.chuuzrbackend.util.RedisKeyConstants;
 import com.chuuzr.chuuzrbackend.util.PiiMaskingUtil;
 import com.chuuzr.chuuzrbackend.util.ValidationUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Transactional
@@ -39,12 +42,13 @@ public class AuthServiceImpl implements AuthService {
   private final SmsService smsService;
   private final JwtUtil jwtUtil;
   private final RefreshTokenService refreshTokenService;
+  private final ObjectMapper objectMapper;
   private final long otpExpirationMinutes;
   private final long registrationExpirationMs;
   private final SecureRandom otpGenerator = new SecureRandom();
 
   public AuthServiceImpl(UserRepository userRepository, StringRedisTemplate stringRedisTemplate, SmsService smsService,
-      JwtUtil jwtUtil, RefreshTokenService refreshTokenService,
+      JwtUtil jwtUtil, RefreshTokenService refreshTokenService, ObjectMapper objectMapper,
       @Value("${otp.expiration.minutes}") long otpExpirationMinutes,
       @Value("${jwt.registration-expiration-ms}") long registrationExpirationMs) {
     this.userRepository = userRepository;
@@ -52,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
     this.smsService = smsService;
     this.jwtUtil = jwtUtil;
     this.refreshTokenService = refreshTokenService;
+    this.objectMapper = objectMapper;
     this.otpExpirationMinutes = otpExpirationMinutes;
     this.registrationExpirationMs = registrationExpirationMs;
   }
@@ -116,8 +121,13 @@ public class AuthServiceImpl implements AuthService {
         })
         .orElseGet(() -> {
           String preRegUuid = UUID.randomUUID().toString();
-          String redisValue = "{\"countryCode\":\"" + request.getCountryCode()
-              + "\",\"phoneNumber\":\"" + normalizedPhone + "\"}";
+          String redisValue;
+          try {
+            redisValue = objectMapper.writeValueAsString(
+                Map.of("countryCode", request.getCountryCode(), "phoneNumber", normalizedPhone));
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize pre-registration data", e);
+          }
           stringRedisTemplate.opsForValue().set(
               RedisKeyConstants.PRE_REG_PREFIX + preRegUuid,
               redisValue,
