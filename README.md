@@ -2,82 +2,113 @@
 
 The backend for **chuuzr** — a versatile decision-making and group voting application. Originally built to help friends vote on which movie to watch, chuuzr has evolved into a platform for group decisions of any kind: choosing restaurants, weekend plans, travel destinations, and more.
 
-## 🚀 Overview
+## Overview
 
-This is the Spring Boot backend that powers chuuzr, a social coordination platform built with flexibility and simplicity in mind. Users can create "rooms", add customizable "options" (like movies, restaurants, etc.), invite others, and vote collaboratively in real time.
+Spring Boot REST API that powers chuuzr, a social coordination platform built with flexibility and simplicity in mind. Users can create "rooms" with typed options (like movies, restaurants, etc.), invite others, and vote collaboratively.
 
-## ✨ Features
+## Features
 
-- ✅ Create and manage voting rooms
-- 📬 Invite friends via shareable links
-- 🗳️ Real-time voting on customizable options
-- 📊 Aggregated results with winner selection
-- 🔒 OTP-based user login (via phone number)
-- 🌐 API-first design with OpenAPI documentation (via springdoc)
-- 📦 RESTful endpoints with clear structure
+- **Rooms** — Create voting rooms scoped to an option type (e.g., "Movie")
+- **Options** — Add options manually or search external providers (currently TMDB for movies)
+- **Voting** — Upvote/downvote options with enforced state transitions (UP/DOWN must go through NONE)
+- **Score tracking** — Real-time aggregated scores per option per room
+- **OTP authentication** — Phone-based login via SMS (Twilio) with JWT access tokens and refresh token rotation
+- **User profiles** — Name, nickname, phone, profile picture with custom validation
+- **External search** — Extensible search provider system (factory pattern) with TMDB integration
+- **API documentation** — Full OpenAPI 3 / Swagger UI
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Java 17**
-- **Spring Boot**
-- **PostgreSQL**
-- **Gradle**
-- **springdoc-openapi**
-- **JWT / OTP Authentication (Planned or Implemented)**
-- **Hosted on:** _coming soon_
+- **Java 17** / **Spring Boot 3.2**
+- **PostgreSQL 15** with **Flyway** migrations
+- **Redis 7** (OTP storage, refresh tokens, pre-registration state)
+- **Spring Security** + **JWT** (jjwt) + OTP authentication
+- **Spring Data JPA** with **Hypersistence Utils** (JSONB support)
+- **Twilio** for SMS
+- **libphonenumber** for phone validation
+- **springdoc-openapi** for API docs
+- **Gradle** build system
 
-## 🧪 Running Locally
+## Running Locally
 
-First, clone the repository:
+### Prerequisites
+
+- Java 17+
+- Docker and Docker Compose
+
+### Setup
+
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/aharonmaghen/chuuzr-backend.git
 cd chuuzr-backend
 ```
 
-### Option 1: Using Docker (Recommended)
-
-Make sure you have Docker and Docker Compose installed. Then run:
+2. Copy `.env.template` to `.env` and fill in values:
 
 ```bash
-docker-compose up
+cp .env.template .env
 ```
 
-This will start the backend service and a PostgreSQL database using the configuration in `docker-compose.yml`.
+Key variables: database credentials, JWT secret/expirations, Twilio SMS credentials, TMDB API key. See `.env.template` for the full list.
 
-### Option 2: Using Gradle
+### Option 1: Docker Compose (Recommended)
 
-Ensure you have a PostgreSQL database running and update your `application.properties` file accordingly:
+Start everything (app + PostgreSQL + Redis):
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/chuuzr_db
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
+```bash
+docker compose up -d
 ```
 
-Then run the application:
+### Option 2: Gradle Only
+
+Ensure PostgreSQL and Redis are running locally, then:
 
 ```bash
 ./gradlew bootRun
 ```
 
-## 📖 API Documentation
+### Spring Profiles
 
-Visit `/swagger-ui.html` (or `/swagger-ui/index.html`) once the server is running to explore available endpoints.
+- **`dev`** — Uses a mock SMS service (no Twilio needed) and relaxes Swagger UI auth. Set `SPRING_PROFILES_ACTIVE=dev` in `.env`.
+- **Default (production)** — Uses Twilio for SMS. Swagger UI requires authentication.
 
-## 🔮 Roadmap
+## API Documentation
 
-- [ ] User profile and authentication enhancements
-- [ ] WebSocket support for real-time updates
-- [ ] Admin/moderator roles per room
-- [ ] Option categories with external APIs (e.g., Yelp, TMDb, etc.)
-- [ ] Notifications & reminders
+Once the server is running, visit `/swagger-ui/index.html` to explore the API.
 
-## 🧠 Inspiration
+### Endpoints
+
+| Area | Base Path | Description |
+|------|-----------|-------------|
+| Auth | `/api/auth` | OTP request/verify, token refresh, logout |
+| Users | `/api/users` | Profile creation and management |
+| Rooms | `/api/rooms` | Create and manage voting rooms |
+| Room Members | `/api/rooms/{uuid}/users` | Add users to rooms, list members |
+| Room Options | `/api/rooms/{uuid}/options` | Add options to rooms, list room options |
+| Voting | `/api/rooms/{uuid}/options/{uuid}/votes` | Cast and update votes |
+| Options | `/api/options` | CRUD for options |
+| Option Types | `/api/option-types` | CRUD for option types |
+| Search | `/api/rooms/{uuid}/search` | Search external providers for options |
+
+## Architecture
+
+Layered Spring Boot architecture:
+
+- **controller/** — REST endpoints under `/api` with OpenAPI annotations
+- **service/** — Business logic with `@Transactional` semantics
+- **repository/** — Spring Data JPA repositories
+- **model/** — JPA entities with composite keys for junction tables
+- **dto/** — Request/response DTOs organized by domain, with static mapper classes
+- **security/** — JWT filter, OTP login flow, Spring Security configuration
+- **exception/** — Custom exception hierarchy with centralized error handling
+- **util/** — Custom Bean Validation validators (phone, country code, URL, etc.)
+
+## Inspiration
 
 chuuzr began as "Movie Night", a tool to help groups agree on what to watch together. As the concept grew, it became clear that the same voting mechanism could be used for any shared decision.
 
 ---
 
-> Built with ❤️ and Java. Inspired by the power of choice.
+> Built with Java. Inspired by the power of choice.
