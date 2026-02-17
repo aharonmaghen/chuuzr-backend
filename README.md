@@ -15,7 +15,7 @@ Spring Boot REST API that powers chuuzr, a social coordination platform built wi
 - **OTP authentication** — Phone-based login via SMS (Twilio) with JWT access tokens and refresh token rotation
 - **User profiles** — Name, nickname, phone, profile picture with custom validation
 - **External search** — Extensible search provider system (factory pattern) with TMDB integration
-- **API documentation** — Full OpenAPI 3 / Swagger UI
+- **API documentation** — Full OpenAPI 3 / Scalar UI
 
 ## Tech Stack
 
@@ -71,12 +71,12 @@ Ensure PostgreSQL and Redis are running locally, then:
 
 ### Spring Profiles
 
-- **`dev`** — Uses a mock SMS service (no Twilio needed) and relaxes Swagger UI auth. Set `SPRING_PROFILES_ACTIVE=dev` in `.env`.
-- **Default (production)** — Uses Twilio for SMS. Swagger UI requires authentication.
+- **`dev`** — Uses a mock SMS service (no Twilio needed) and relaxes Scalar UI auth. Set `SPRING_PROFILES_ACTIVE=dev` in `.env`.
+- **Default (production)** — Uses Twilio for SMS. Scalar UI requires authentication.
 
 ## API Documentation
 
-Once the server is running, visit `/swagger-ui/index.html` to explore the API.
+Once the server is running, visit `/scalar` to explore the API.
 
 ### Endpoints
 
