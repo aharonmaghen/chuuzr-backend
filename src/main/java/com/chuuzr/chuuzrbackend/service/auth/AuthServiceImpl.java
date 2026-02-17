@@ -63,15 +63,17 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public void requestOtp(UserOtpRequest request) {
-    logger.debug("OTP request received for phone: {}",
-        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()));
+    String normalizedCountryCode = request.getCountryCode().trim().toUpperCase();
 
-    String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), request.getCountryCode());
+    logger.debug("OTP request received for phone: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), normalizedCountryCode));
+
+    String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), normalizedCountryCode);
     if (normalizedPhone == null) {
-      throw new IllegalArgumentException("Invalid phone number for country code: " + request.getCountryCode());
+      throw new IllegalArgumentException("Invalid phone number for country code: " + normalizedCountryCode);
     }
 
-    String fullPhoneNumber = CountryCodeUtil.toDialCode(request.getCountryCode()) + normalizedPhone;
+    String fullPhoneNumber = CountryCodeUtil.toDialCode(normalizedCountryCode) + normalizedPhone;
     String otp = generateOtp();
 
     logger.debug("Storing OTP in Redis with expiration of {} minutes", otpExpirationMinutes);
@@ -81,21 +83,23 @@ public class AuthServiceImpl implements AuthService {
         otpExpirationMinutes,
         TimeUnit.MINUTES);
 
-    smsService.sendOtp(request.getCountryCode(), normalizedPhone, otp);
+    smsService.sendOtp(normalizedCountryCode, normalizedPhone, otp);
   }
 
   @Override
   public UserAuthResponse verifyOtp(UserOtpVerifyRequest request) {
-    logger.debug("OTP verification request for phone: {}",
-        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()));
+    String normalizedCountryCode = request.getCountryCode().trim().toUpperCase();
 
-    String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), request.getCountryCode());
+    logger.debug("OTP verification request for phone: {}",
+        PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), normalizedCountryCode));
+
+    String normalizedPhone = ValidationUtil.normalizePhoneNumber(request.getPhoneNumber(), normalizedCountryCode);
     if (normalizedPhone == null) {
       throw new AuthorizationException(ErrorCode.OTP_INVALID,
-          "Invalid phone number for country code: " + request.getCountryCode());
+          "Invalid phone number for country code: " + normalizedCountryCode);
     }
 
-    String fullPhone = CountryCodeUtil.toDialCode(request.getCountryCode()) + normalizedPhone;
+    String fullPhone = CountryCodeUtil.toDialCode(normalizedCountryCode) + normalizedPhone;
     String redisKey = RedisKeyConstants.OTP_PREFIX + fullPhone;
 
     String storedOtp = stringRedisTemplate.opsForValue().get(redisKey);
@@ -105,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
 
     if (storedOtp == null || !storedOtp.equals(request.getOtp())) {
       logger.warn("OTP verification failed for phone: {} - provided: {}",
-          PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), request.getCountryCode()),
+          PiiMaskingUtil.maskPhoneNumberWithCountry(request.getPhoneNumber(), normalizedCountryCode),
           PiiMaskingUtil.maskOtp(request.getOtp()));
       throw new AuthorizationException(ErrorCode.OTP_INVALID, "Invalid or expired OTP");
     }
@@ -113,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
     stringRedisTemplate.delete(redisKey);
     logger.debug("OTP verified and deleted from Redis");
 
-    return userRepository.findByPhoneNumberAndCountryCode(normalizedPhone, request.getCountryCode())
+    return userRepository.findByPhoneNumberAndCountryCode(normalizedPhone, normalizedCountryCode)
         .map(user -> {
           String jwt = jwtUtil.generateToken(user.getUuid());
           logger.debug("Access token generated for existing user: {}", user.getUuid());
@@ -124,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
           String redisValue;
           try {
             redisValue = objectMapper.writeValueAsString(
-                Map.of("countryCode", request.getCountryCode(), "phoneNumber", normalizedPhone));
+                Map.of("countryCode", normalizedCountryCode, "phoneNumber", normalizedPhone));
           } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize pre-registration data", e);
           }
