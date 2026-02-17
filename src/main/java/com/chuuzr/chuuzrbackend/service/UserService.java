@@ -22,6 +22,7 @@ import com.chuuzr.chuuzrbackend.exception.UserNotFoundException;
 import com.chuuzr.chuuzrbackend.model.User;
 import com.chuuzr.chuuzrbackend.repository.UserRepository;
 import com.chuuzr.chuuzrbackend.security.JwtUtil;
+import com.chuuzr.chuuzrbackend.util.RedisKeyConstants;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -59,7 +60,7 @@ public class UserService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String preRegUuid = (String) authentication.getPrincipal();
 
-    String redisKey = "pre_reg:" + preRegUuid;
+    String redisKey = RedisKeyConstants.PRE_REG_PREFIX + preRegUuid;
     String redisValue = stringRedisTemplate.opsForValue().get(redisKey);
     if (redisValue == null) {
       throw new AuthorizationException(ErrorCode.JWT_INVALID, "Registration data expired or already used");

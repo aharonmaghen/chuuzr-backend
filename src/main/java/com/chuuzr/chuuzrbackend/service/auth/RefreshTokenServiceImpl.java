@@ -9,10 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.chuuzr.chuuzrbackend.util.RedisKeyConstants;
+
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
   private static final Logger logger = LoggerFactory.getLogger(RefreshTokenServiceImpl.class);
-  private static final String REFRESH_TOKEN_PREFIX = "refresh_token:";
   private final StringRedisTemplate stringRedisTemplate;
 
   public RefreshTokenServiceImpl(StringRedisTemplate stringRedisTemplate) {
@@ -22,7 +23,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   @Override
   public String generateAndStoreRefreshToken(UUID userUuid, long expirationDays) {
     String opaqueToken = UUID.randomUUID().toString();
-    String key = REFRESH_TOKEN_PREFIX + opaqueToken;
+    String key = RedisKeyConstants.REFRESH_TOKEN_PREFIX + opaqueToken;
 
     logger.debug("Generating refresh token for user: {} with {} day expiration", userUuid, expirationDays);
     stringRedisTemplate.opsForValue().set(
@@ -36,7 +37,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   @Override
   public Optional<UUID> validateRefreshToken(String refreshToken) {
-    String key = REFRESH_TOKEN_PREFIX + refreshToken;
+    String key = RedisKeyConstants.REFRESH_TOKEN_PREFIX + refreshToken;
     String userUuidStr = stringRedisTemplate.opsForValue().get(key);
 
     if (userUuidStr == null) {
@@ -50,7 +51,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   @Override
   public void revokeRefreshToken(String refreshToken) {
-    String key = REFRESH_TOKEN_PREFIX + refreshToken;
+    String key = RedisKeyConstants.REFRESH_TOKEN_PREFIX + refreshToken;
     stringRedisTemplate.delete(key);
   }
 

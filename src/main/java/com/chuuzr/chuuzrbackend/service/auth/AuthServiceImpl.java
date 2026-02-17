@@ -25,6 +25,7 @@ import com.chuuzr.chuuzrbackend.repository.UserRepository;
 import com.chuuzr.chuuzrbackend.security.JwtUtil;
 import com.chuuzr.chuuzrbackend.service.sms.SmsService;
 import com.chuuzr.chuuzrbackend.util.CountryCodeUtil;
+import com.chuuzr.chuuzrbackend.util.RedisKeyConstants;
 import com.chuuzr.chuuzrbackend.util.PiiMaskingUtil;
 import com.chuuzr.chuuzrbackend.util.ValidationUtil;
 
@@ -70,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
 
     logger.debug("Storing OTP in Redis with expiration of {} minutes", otpExpirationMinutes);
     stringRedisTemplate.opsForValue().set(
-        "otp:" + fullPhoneNumber,
+        RedisKeyConstants.OTP_PREFIX + fullPhoneNumber,
         otp,
         otpExpirationMinutes,
         TimeUnit.MINUTES);
@@ -90,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     String fullPhone = CountryCodeUtil.toDialCode(request.getCountryCode()) + normalizedPhone;
-    String redisKey = "otp:" + fullPhone;
+    String redisKey = RedisKeyConstants.OTP_PREFIX + fullPhone;
 
     String storedOtp = stringRedisTemplate.opsForValue().get(redisKey);
     logger.debug("Comparing OTP - provided: {}, stored: {}",
@@ -118,7 +119,7 @@ public class AuthServiceImpl implements AuthService {
           String redisValue = "{\"countryCode\":\"" + request.getCountryCode()
               + "\",\"phoneNumber\":\"" + normalizedPhone + "\"}";
           stringRedisTemplate.opsForValue().set(
-              "pre_reg:" + preRegUuid,
+              RedisKeyConstants.PRE_REG_PREFIX + preRegUuid,
               redisValue,
               registrationExpirationMs,
               TimeUnit.MILLISECONDS);
