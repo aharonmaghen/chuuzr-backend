@@ -1,0 +1,8 @@
+[
+  {
+    "id": "0",
+    "alias": "Chuuzr Redis",
+    "host": "redis",
+    "port": 6379
+  }
+]

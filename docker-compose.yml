@@ -49,6 +49,19 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    environment:
+      RI_PRE_SETUP_DATABASES_PATH: /data/databases.json
+    depends_on:
+      - redis
+    volumes:
+      - redisinsight_data:/data
+      - ./docker/redisinsight/databases.json:/data/databases.json:ro
+    restart: unless-stopped
+
   pgadmin:
     image: dpage/pgadmin4
     ports:
@@ -66,4 +79,5 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+  redisinsight_data:
   redis_data:
