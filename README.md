@@ -61,19 +61,6 @@ Start everything (app + PostgreSQL + Redis):
 docker compose up -d
 ```
 
-Or start only the infrastructure and run the app locally:
-
-```bash
-docker compose up -d db redis
-./gradlew bootRun
-```
-
-To include database/cache GUIs (pgAdmin on port 5050, RedisInsight on port 5540):
-
-```bash
-docker compose up -d db redis pgadmin redisinsight
-```
-
 ### Option 2: Gradle Only
 
 Ensure PostgreSQL and Redis are running locally, then:
