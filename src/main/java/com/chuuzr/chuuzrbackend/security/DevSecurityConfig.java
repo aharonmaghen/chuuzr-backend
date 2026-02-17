@@ -32,8 +32,7 @@ public class DevSecurityConfig {
                 .requestMatchers(
                     "/api/auth/**",
                     "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html")
+                    "/scalar/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").hasRole("PRE_REGISTER")
                 .anyRequest().hasRole("USER"))
