@@ -33,7 +33,6 @@ public enum ErrorCode {
 
   // Conflict Errors
   VOTING_CONFLICT("VOTING_CONFLICT", HttpStatus.CONFLICT, "Voting conflict occurred"),
-  INVALID_VOTE_TRANSITION("INVALID_VOTE_TRANSITION", HttpStatus.BAD_REQUEST, "Invalid vote transition"),
   DUPLICATE_RESOURCE("DUPLICATE_RESOURCE", HttpStatus.CONFLICT, "Resource already exists"),
 
   // External API / Search Errors

@@ -43,7 +43,7 @@ public class UserVoteController {
   }
 
   @PutMapping("/{roomUuid}/options/{optionUuid}/votes")
-  @Operation(summary = "Cast or update a vote", description = "Create or update the authenticated user's vote for an option in a room. Vote transitions must go through NONE.", operationId = "castUserVote")
+  @Operation(summary = "Cast or update a vote", description = "Create or update the authenticated user's vote for an option in a room. All transitions (UP, DOWN, NONE) are allowed directly.", operationId = "castUserVote")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Vote recorded successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserVoteResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input or invalid vote transition", content = @Content),
