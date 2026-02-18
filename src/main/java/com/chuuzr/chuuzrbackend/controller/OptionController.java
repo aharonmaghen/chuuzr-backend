@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionDetailResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
@@ -55,8 +56,8 @@ public class OptionController {
   @Operation(summary = "Get option by UUID", description = "Retrieve a specific option by its unique identifier", operationId = "getOptionById")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Option found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionDetailResponseDTO.class))),
-      @ApiResponse(responseCode = "404", description = "Option not found", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+      @ApiResponse(responseCode = "404", description = "Option not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<OptionDetailResponseDTO> findById(@PathVariable UUID optionUuid) {
     logger.debug("Get option by UUID request for optionUuid={}", optionUuid);
@@ -69,7 +70,7 @@ public class OptionController {
   @Operation(summary = "Get options by option type", description = "Retrieve all options for a specific option type with pagination support", operationId = "getOptionsByOptionType")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionSummaryResponseDTO.class))),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<List<OptionSummaryResponseDTO>> findByOptionTypeUuid(
       @RequestParam UUID optionTypeUuid,
@@ -84,9 +85,9 @@ public class OptionController {
   @Operation(summary = "Create a new option", description = "Create a new option with the provided information", operationId = "createOption")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Option created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionDetailResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "409", description = "Option already exists", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "409", description = "Option already exists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<OptionDetailResponseDTO> createOption(@Valid @RequestBody OptionRequestDTO newOptionRequest,
       UriComponentsBuilder ucb) {
@@ -101,9 +102,9 @@ public class OptionController {
   @Operation(summary = "Update an existing option", description = "Update option information for the specified option UUID", operationId = "updateOption")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Option updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionDetailResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Option not found", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Option not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<OptionDetailResponseDTO> updateOption(@PathVariable UUID optionUuid,
       @Valid @RequestBody OptionRequestDTO optionToUpdate) {

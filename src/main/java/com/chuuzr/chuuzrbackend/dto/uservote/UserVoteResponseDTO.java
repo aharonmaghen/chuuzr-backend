@@ -6,11 +6,23 @@ import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomuser.RoomUserResponseDTO;
 import com.chuuzr.chuuzrbackend.model.UserVote.VoteType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "User vote response")
 public class UserVoteResponseDTO {
+  @Schema(description = "The room-user membership for this vote")
   private RoomUserResponseDTO roomUser;
+
+  @Schema(description = "The room-option association for this vote")
   private RoomOptionResponseDTO roomOption;
+
+  @Schema(description = "The vote direction", example = "UP")
   private VoteType voteType;
+
+  @Schema(description = "Creation timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime createdAt;
+
+  @Schema(description = "Last update timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime updatedAt;
 
   public UserVoteResponseDTO() {

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.room.RoomRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.room.RoomResponseDTO;
 import com.chuuzr.chuuzrbackend.service.RoomService;
@@ -49,8 +50,8 @@ public class RoomController {
   @Operation(summary = "Get room by UUID", description = "Retrieve a specific room by its unique identifier", operationId = "getRoomById")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Room found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomResponseDTO.class))),
-      @ApiResponse(responseCode = "404", description = "Room not found", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+      @ApiResponse(responseCode = "404", description = "Room not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<RoomResponseDTO> findById(@PathVariable UUID roomUuid) {
     logger.debug("Get room by UUID request for roomUuid={}", roomUuid);
@@ -63,9 +64,9 @@ public class RoomController {
   @Operation(summary = "Create a new room", description = "Create a new room with the provided information", operationId = "createRoom")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Room created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "409", description = "Room already exists", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "409", description = "Room already exists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<RoomResponseDTO> createRoom(@Valid @RequestBody RoomRequestDTO newRoomRequest,
       UriComponentsBuilder ucb) {
@@ -80,9 +81,9 @@ public class RoomController {
   @Operation(summary = "Update an existing room", description = "Update room information for the specified room UUID", operationId = "updateRoom")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Room updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room not found", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Room not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<RoomResponseDTO> updateRoom(@PathVariable UUID roomUuid,
       @Valid @RequestBody RoomRequestDTO roomToUpdate) {

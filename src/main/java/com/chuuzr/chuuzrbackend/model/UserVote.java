@@ -7,6 +7,7 @@ import org.hibernate.type.SqlTypes;
 
 import com.chuuzr.chuuzrbackend.model.compositekeys.UserVoteId;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -153,6 +154,7 @@ public class UserVote {
     return h$;
   }
 
+  @Schema(description = "Vote direction", enumAsRef = true)
   public enum VoteType {
     UP, DOWN, NONE
   }
