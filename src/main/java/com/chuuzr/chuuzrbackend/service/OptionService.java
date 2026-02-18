@@ -2,6 +2,7 @@ package com.chuuzr.chuuzrbackend.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -64,8 +65,35 @@ public class OptionService {
     logger.debug("Finding options by optionTypeUuid={}", optionTypeUuid);
     Page<Option> page = optionRepository.findByOptionTypeUuid(optionTypeUuid, pageable);
     return page.getContent().stream()
-          .map(OptionMapper::toSummaryDTO)
+        .map(OptionMapper::toSummaryDTO)
         .collect(Collectors.toList());
+  }
+
+  public Option findOrCreateOption(String apiProvider, String externalId, OptionType optionType) {
+    logger.debug("Finding or creating option for apiProvider={}, externalId={}", apiProvider, externalId);
+    Optional<Option> existing = optionRepository
+        .findByApiProviderAndExternalIdAndOptionTypeUuid(apiProvider, externalId, optionType.getUuid());
+    if (existing.isPresent()) {
+      return existing.get();
+    }
+
+    validateProviderMapping(optionType, apiProvider);
+
+    Option option = new Option();
+    option.setApiProvider(apiProvider);
+    option.setExternalId(externalId);
+    option.setOptionType(optionType);
+
+    SearchProviderService provider = searchProviderFactory.getProviderByKey(apiProvider);
+    Map<String, Object> metadata = provider.fetchOptionMetadata(externalId);
+    option.setMetadata(metadata);
+    provider.applyMetadataToOption(option, metadata);
+
+    validateOptionFields(option);
+
+    Option savedOption = optionRepository.save(option);
+    logger.info("Option created with uuid={}", savedOption.getUuid());
+    return savedOption;
   }
 
   public OptionDetailResponseDTO createOption(OptionRequestDTO optionRequestDTO) {

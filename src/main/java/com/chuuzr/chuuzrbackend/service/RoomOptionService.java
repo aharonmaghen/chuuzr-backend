@@ -17,11 +17,11 @@ import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionMapper;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.exception.BusinessLogicException;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.Option;
 import com.chuuzr.chuuzrbackend.model.Room;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
-import com.chuuzr.chuuzrbackend.repository.OptionRepository;
 import com.chuuzr.chuuzrbackend.repository.RoomOptionRepository;
 import com.chuuzr.chuuzrbackend.repository.RoomRepository;
 
@@ -33,14 +33,14 @@ public class RoomOptionService {
 
   private final RoomOptionRepository roomOptionRepository;
   private final RoomRepository roomRepository;
-  private final OptionRepository optionRepository;
+  private final OptionService optionService;
 
   @Autowired
   public RoomOptionService(RoomOptionRepository roomOptionRepository, RoomRepository roomRepository,
-      OptionRepository optionRepository) {
+      OptionService optionService) {
     this.roomOptionRepository = roomOptionRepository;
     this.roomRepository = roomRepository;
-    this.optionRepository = optionRepository;
+    this.optionService = optionService;
   }
 
   @Transactional(readOnly = true)
@@ -51,19 +51,22 @@ public class RoomOptionService {
         .collect(Collectors.toList());
   }
 
-  public RoomOptionResponseDTO addOptionToRoom(UUID roomUuid, UUID optionUuid) {
-    logger.debug("Adding option to room roomUuid={}, optionUuid={}", roomUuid, optionUuid);
+  public RoomOptionResponseDTO addOptionToRoom(UUID roomUuid, String apiProvider, String externalId) {
+    logger.debug("Adding option to room roomUuid={}, apiProvider={}, externalId={}", roomUuid, apiProvider, externalId);
     Room room = roomRepository.findByUuid(roomUuid).orElseThrow(
         () -> new ResourceNotFoundException(ErrorCode.ROOM_NOT_FOUND,
             "Room with UUID " + roomUuid + " not found"));
 
-    Option option = optionRepository.findByUuid(optionUuid)
-        .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.OPTION_NOT_FOUND,
-            "Option with UUID " + optionUuid + " not found"));
+    Option option = optionService.findOrCreateOption(apiProvider, externalId, room.getOptionType());
+
+    roomOptionRepository.findByUuids(roomUuid, option.getUuid()).ifPresent(existing -> {
+      throw new BusinessLogicException(ErrorCode.DUPLICATE_RESOURCE, "Option is already in this room");
+    });
 
     RoomOption roomOptionToSave = RoomOptionMapper.toEntity(room, option);
     roomOptionToSave.setScore(0);
     RoomOption savedRoomOption = roomOptionRepository.save(roomOptionToSave);
+    logger.info("Option added to room roomUuid={}, optionUuid={}", roomUuid, option.getUuid());
     return RoomOptionMapper.toResponseDTO(savedRoomOption);
   }
 }
