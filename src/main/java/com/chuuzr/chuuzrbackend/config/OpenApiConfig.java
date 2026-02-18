@@ -73,15 +73,6 @@ public class OpenApiConfig {
   }
 
   @Bean
-  public OpenApiCustomizer globalResponseCustomizer() {
-    return openApi -> {
-      openApi.getComponents().addSchemas("ErrorDTO",
-          new io.swagger.v3.oas.models.media.Schema<>()
-              .$ref("#/components/schemas/ErrorDTO"));
-    };
-  }
-
-  @Bean
   public OpenApiCustomizer tagOrderingCustomizer() {
     return openApi -> {
       if (openApi.getTags() != null) {

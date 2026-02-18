@@ -7,7 +7,9 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.search.SearchRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.search.SearchResponseDTO;
 import com.chuuzr.chuuzrbackend.service.search.SearchService;
@@ -46,12 +49,13 @@ public class SearchController {
   @Operation(summary = "Search options for a room", description = "Search external providers for options based on the room's option type", operationId = "search")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Search completed successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SearchResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room not found", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Room not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<SearchResponseDTO> search(@PathVariable UUID roomUuid,
-      @Valid @RequestBody SearchRequestDTO searchRequest, Pageable pageable) {
+      @Valid @RequestBody SearchRequestDTO searchRequest,
+      @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
 
     logger.debug("Search request received for roomUuid={}", roomUuid);
     SearchResponseDTO response = searchService.search(roomUuid, searchRequest, pageable);

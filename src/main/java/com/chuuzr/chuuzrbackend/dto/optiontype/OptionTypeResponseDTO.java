@@ -3,14 +3,23 @@ package com.chuuzr.chuuzrbackend.dto.optiontype;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * DTO for returning OptionType data to API clients.
- */
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Option type information response")
 public class OptionTypeResponseDTO {
+  @Schema(description = "Unique identifier for the option type", example = "550e8400-e29b-41d4-a716-446655440000", format = "uuid")
   private UUID uuid;
+
+  @Schema(description = "Name of the option type", example = "Movies")
   private String name;
+
+  @Schema(description = "Description of the option type", example = "Feature films and documentaries")
   private String description;
+
+  @Schema(description = "Last update timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime updatedAt;
+
+  @Schema(description = "Creation timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime createdAt;
 
   public OptionTypeResponseDTO() {

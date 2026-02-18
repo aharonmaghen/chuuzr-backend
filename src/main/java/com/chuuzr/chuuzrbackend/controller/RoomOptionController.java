@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
@@ -53,10 +55,10 @@ public class RoomOptionController {
   @Operation(summary = "Get options for a room", description = "Retrieve all options that are associated with a specific room with pagination support", operationId = "getRoomOptions")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionSummaryResponseDTO.class))),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<List<OptionSummaryResponseDTO>> getRoomOptions(@PathVariable UUID roomUuid,
-      @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
     logger.debug("Get room options request for roomUuid={}", roomUuid);
     List<OptionSummaryResponseDTO> options = roomOptionService.getRoomOptions(roomUuid, pageable);
     logger.info("Room options retrieved for roomUuid={}, count={}", roomUuid, options.size());
@@ -67,10 +69,10 @@ public class RoomOptionController {
   @Operation(summary = "Add option to room", description = "Add an option to a specific room", operationId = "addOptionToRoom")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Option added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room or option not found", content = @Content),
-      @ApiResponse(responseCode = "409", description = "Option already in room", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Room or option not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "409", description = "Option already in room", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<RoomOptionResponseDTO> addOptionToRoom(@PathVariable UUID roomUuid,
       @Valid @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {

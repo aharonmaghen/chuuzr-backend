@@ -21,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserCreateRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserCreatedResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserRequestDTO;
@@ -53,7 +54,7 @@ public class UserController {
   @Operation(summary = "Get current user profile", description = "Retrieve the authenticated user's profile information", operationId = "getCurrentUserProfile")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "User profile retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-      @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required or invalid token", content = @Content)
+      @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required or invalid token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
     UserInternalDTO userContext = (UserInternalDTO) authentication.getPrincipal();
@@ -67,8 +68,8 @@ public class UserController {
   @Operation(summary = "Update current user profile", description = "Update the authenticated user's profile information. All fields are required except profile picture.", operationId = "updateCurrentUserProfile")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "User profile updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required or invalid token", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required or invalid token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserResponseDTO> updateCurrentUser(Authentication authentication,
       @Valid @RequestBody UserRequestDTO userToUpdate) {
@@ -83,8 +84,8 @@ public class UserController {
   @Operation(summary = "Get user by UUID", description = "Retrieve a specific user by their unique identifier", operationId = "getUserById")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "User found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-      @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+      @ApiResponse(responseCode = "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserResponseDTO> findById(@PathVariable UUID userUuid) {
     logger.debug("Get user by UUID request for userUuid={}", userUuid);
@@ -97,9 +98,9 @@ public class UserController {
   @Operation(summary = "Create a new user", description = "Create a new user with the provided information. All fields are required except profile picture. Returns authentication token for newly created user.", operationId = "createUser")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "User created successfully with authentication token", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserCreatedResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "409", description = "User already exists", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "409", description = "User already exists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserCreatedResponseDTO> createUser(@Valid @RequestBody UserCreateRequestDTO newUserRequest,
       UriComponentsBuilder ucb) {
@@ -114,9 +115,9 @@ public class UserController {
   @Operation(summary = "Update an existing user", description = "Update user information for the specified user UUID. All fields are required except profile picture.", operationId = "updateUser")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "User updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID userUuid,
       @Valid @RequestBody UserRequestDTO userToUpdate) {

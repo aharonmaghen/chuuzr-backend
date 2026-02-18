@@ -9,8 +9,8 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeResponseDTO;
 import com.chuuzr.chuuzrbackend.service.OptionTypeService;
@@ -53,8 +54,8 @@ public class OptionTypeController {
   @Operation(summary = "Get option type by UUID", description = "Retrieve a specific option type by its unique identifier", operationId = "getOptionTypeById")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Option type found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionTypeResponseDTO.class))),
-      @ApiResponse(responseCode = "404", description = "Option type not found", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+      @ApiResponse(responseCode = "404", description = "Option type not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<OptionTypeResponseDTO> findById(@PathVariable UUID optionTypeUuid) {
     logger.debug("Get option type by UUID request for optionTypeUuid={}", optionTypeUuid);
@@ -67,10 +68,10 @@ public class OptionTypeController {
   @Operation(summary = "Get all option types", description = "Retrieve all option types with pagination support", operationId = "getAllOptionTypes")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Option types retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionTypeResponseDTO.class))),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<List<OptionTypeResponseDTO>> getAllOptionTypes(
-      @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
     logger.debug("Get all option types request received");
     List<OptionTypeResponseDTO> optionTypes = optionTypeService.getAllOptionTypes(pageable);
     logger.info("Option types retrieved, count={}", optionTypes.size());
@@ -81,9 +82,9 @@ public class OptionTypeController {
   @Operation(summary = "Create a new option type", description = "Create a new option type with the provided information", operationId = "createOptionType")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Option type created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionTypeResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "409", description = "Option type already exists", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "409", description = "Option type already exists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<OptionTypeResponseDTO> createOptionType(
       @Valid @RequestBody OptionTypeRequestDTO newOptionTypeRequest,
@@ -100,9 +101,9 @@ public class OptionTypeController {
   @Operation(summary = "Update an existing option type", description = "Update option type information for the specified option type UUID", operationId = "updateOptionType")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Option type updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionTypeResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Option type not found", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Option type not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<OptionTypeResponseDTO> updateOptionType(@PathVariable UUID optionTypeUuid,
       @Valid @RequestBody OptionTypeRequestDTO optionTypeToUpdate) {
