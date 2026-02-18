@@ -9,8 +9,8 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,7 +74,7 @@ public class OptionController {
   })
   public ResponseEntity<List<OptionSummaryResponseDTO>> findByOptionTypeUuid(
       @RequestParam UUID optionTypeUuid,
-      @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
     logger.debug("Get options by option type request for optionTypeUuid={}", optionTypeUuid);
     List<OptionSummaryResponseDTO> options = optionService.findByOptionTypeUuid(optionTypeUuid, pageable);
     logger.info("Options retrieved for optionTypeUuid={}, count={}", optionTypeUuid, options.size());

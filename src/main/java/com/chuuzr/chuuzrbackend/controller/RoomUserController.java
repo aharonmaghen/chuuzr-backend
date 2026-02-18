@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -57,7 +58,7 @@ public class RoomUserController {
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<List<UserResponseDTO>> getRoomUsers(@PathVariable UUID roomUuid,
-      @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
     logger.debug("Get room users request for roomUuid={}", roomUuid);
     List<UserResponseDTO> users = roomUserService.getRoomUsers(roomUuid, pageable);
     logger.info("Room users retrieved for roomUuid={}, count={}", roomUuid, users.size());

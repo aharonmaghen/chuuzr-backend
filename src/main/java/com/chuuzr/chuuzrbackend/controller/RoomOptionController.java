@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -57,7 +58,7 @@ public class RoomOptionController {
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<List<OptionSummaryResponseDTO>> getRoomOptions(@PathVariable UUID roomUuid,
-      @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
+      @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
     logger.debug("Get room options request for roomUuid={}", roomUuid);
     List<OptionSummaryResponseDTO> options = roomOptionService.getRoomOptions(roomUuid, pageable);
     logger.info("Room options retrieved for roomUuid={}, count={}", roomUuid, options.size());
