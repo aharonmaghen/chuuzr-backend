@@ -5,15 +5,23 @@ import java.util.UUID;
 
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeResponseDTO;
 
-/**
- * DTO for returning Room data to API clients.
- * Only exposes UUID (not internal ID) and includes timestamps.
- */
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Room information response")
 public class RoomResponseDTO {
+  @Schema(description = "Unique identifier for the room", example = "550e8400-e29b-41d4-a716-446655440000", format = "uuid")
   private UUID uuid;
+
+  @Schema(description = "Name of the room", example = "Friday Movie Night")
   private String name;
+
+  @Schema(description = "The option type associated with this room")
   private OptionTypeResponseDTO optionType;
+
+  @Schema(description = "Last update timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime updatedAt;
+
+  @Schema(description = "Creation timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime createdAt;
 
   public RoomResponseDTO() {

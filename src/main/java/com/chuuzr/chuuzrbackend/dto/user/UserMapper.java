@@ -31,6 +31,28 @@ public class UserMapper {
         user.getCreatedAt());
   }
 
+  public static User toEntity(UserCreateRequestDTO dto, String countryCode, String normalizedPhone) {
+    if (dto == null) {
+      return null;
+    }
+    User user = new User();
+    user.setName(dto.getName());
+    user.setNickname(dto.getNickname());
+    user.setCountryCode(countryCode);
+    user.setPhoneNumber(normalizedPhone);
+
+    if (dto.getProfilePicture() != null && !dto.getProfilePicture().trim().isEmpty()) {
+      try {
+        user.setProfilePicture(new URL(dto.getProfilePicture().trim()));
+      } catch (MalformedURLException e) {
+        throw new ValidationException(ErrorCode.FIELD_INVALID_FORMAT,
+            Map.of("profilePicture", List.of("Invalid URL format: " + e.getMessage())));
+      }
+    }
+
+    return user;
+  }
+
   public static User toEntity(UserRequestDTO dto) {
     if (dto == null) {
       return null;

@@ -6,12 +6,17 @@ import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidCountryCode;
 import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberFormat;
 import com.chuuzr.chuuzrbackend.util.validation.annotations.ValidPhoneNumberPair;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "OTP request payload")
 @ValidPhoneNumberPair
 public class UserOtpRequest {
+  @Schema(description = "2-letter country code", example = "US")
   @NotBlank(message = "Country code is required")
   @ValidCountryCode
   private final String countryCode;
 
+  @Schema(description = "Phone number without country code", example = "5551234567")
   @NotBlank(message = "Phone number is required")
   @ValidPhoneNumberFormat
   private final String phoneNumber;

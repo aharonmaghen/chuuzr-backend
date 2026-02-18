@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chuuzr.chuuzrbackend.dto.auth.UserAuthResponse;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.auth.UserOtpRequest;
 import com.chuuzr.chuuzrbackend.dto.auth.UserOtpVerifyRequest;
 import com.chuuzr.chuuzrbackend.exception.RefreshTokenException;
@@ -66,7 +67,7 @@ public class AuthController {
   @Operation(summary = "Request OTP for phone authentication", description = "Send an OTP to the specified phone number for authentication", operationId = "requestOtp")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "202", description = "OTP request accepted", content = @Content),
-      @ApiResponse(responseCode = "400", description = "Invalid phone number or country code", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid phone number or country code", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<Void> requestOtp(@Valid @RequestBody UserOtpRequest request) {
     logger.debug("OTP request received for phone: {}",
@@ -82,8 +83,8 @@ public class AuthController {
   @Operation(summary = "Verify OTP and authenticate user", description = "Verify the OTP code and return authentication token if valid", operationId = "verifyOtp")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserAuthResponse.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid OTP or request data", content = @Content),
-      @ApiResponse(responseCode = "401", description = "OTP verification failed", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid OTP or request data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "OTP verification failed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserAuthResponse> verifyOtp(@Valid @RequestBody UserOtpVerifyRequest request,
       HttpServletResponse response) {
@@ -111,8 +112,8 @@ public class AuthController {
   @Operation(summary = "Refresh access token", description = "Use refresh token from secure httpOnly cookie to obtain a new access token", operationId = "refreshAccessToken")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Token refreshed successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserAuthResponse.class))),
-      @ApiResponse(responseCode = "400", description = "Missing refresh token in cookie", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Refresh token validation failed", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Missing refresh token in cookie", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Refresh token validation failed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserAuthResponse> refreshAccessToken(
       @Parameter(hidden = true) @CookieValue(name = "${jwt.refresh-cookie-name}", required = false) String refreshToken,

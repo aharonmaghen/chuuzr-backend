@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.auth.UserInternalDTO;
+import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
 import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteResponseDTO;
 import com.chuuzr.chuuzrbackend.service.UserVoteService;
@@ -43,12 +44,12 @@ public class UserVoteController {
   }
 
   @PutMapping("/{roomUuid}/options/{optionUuid}/votes")
-  @Operation(summary = "Cast or update a vote", description = "Create or update the authenticated user's vote for an option in a room. Vote transitions must go through NONE.", operationId = "castUserVote")
+  @Operation(summary = "Cast or update a vote", description = "Create or update the authenticated user's vote for an option in a room. All transitions (UP, DOWN, NONE) are allowed directly.", operationId = "castUserVote")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Vote recorded successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserVoteResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input or invalid vote transition", content = @Content),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room, option, or user not found", content = @Content)
+      @ApiResponse(responseCode = "400", description = "Invalid input or invalid vote transition", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Room, option, or user not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<UserVoteResponseDTO> castVote(@PathVariable("roomUuid") UUID roomUuid,
       @PathVariable("optionUuid") UUID optionUuid, @Valid @RequestBody UserVoteRequestDTO userVoteRequestDTO,

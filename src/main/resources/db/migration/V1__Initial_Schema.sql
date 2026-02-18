@@ -30,6 +30,18 @@ CREATE TABLE IF NOT EXISTS public.options
     CONSTRAINT unique_movie_uuid UNIQUE (uuid)
 );
 
+CREATE TABLE IF NOT EXISTS public.rooms
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    uuid uuid NOT NULL,
+    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    option_type_id bigint NOT NULL,
+    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT rooms_pkey PRIMARY KEY (id),
+    CONSTRAINT unique_room_uuid UNIQUE (uuid)
+);
+
 CREATE TABLE IF NOT EXISTS public.room_options
 (
     room_id bigint NOT NULL,
@@ -47,17 +59,6 @@ CREATE TABLE IF NOT EXISTS public.room_users
     updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT room_users_pkey PRIMARY KEY (room_id, user_id)
-);
-
-CREATE TABLE IF NOT EXISTS public.rooms
-(
-    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
-    uuid uuid NOT NULL,
-    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
-    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT rooms_pkey PRIMARY KEY (id),
-    CONSTRAINT unique_room_uuid UNIQUE (uuid)
 );
 
 CREATE TABLE IF NOT EXISTS public.user_votes
@@ -82,65 +83,66 @@ CREATE TABLE IF NOT EXISTS public.users
     profile_picture text COLLATE pg_catalog."default",
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    otp_code character varying(6) COLLATE pg_catalog."default",
-    otp_expiration_time timestamp(6) without time zone,
     CONSTRAINT users_pkey PRIMARY KEY (id),
     CONSTRAINT unique_user_uuid UNIQUE (uuid)
 );
 
-ALTER TABLE IF EXISTS public.options
+CREATE TABLE IF NOT EXISTS public.search_providers
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    option_type_id bigint NOT NULL,
+    provider_key character varying(100) NOT NULL,
+    enabled boolean NOT NULL,
+    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT search_providers_pkey PRIMARY KEY (id),
+    CONSTRAINT unique_option_type_id_provider_key UNIQUE (option_type_id, provider_key)
+);
+
+-- Foreign keys
+
+ALTER TABLE public.options
     ADD CONSTRAINT option_type_id_fkey FOREIGN KEY (option_type_id)
-    REFERENCES public.option_types (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+    REFERENCES public.option_types (id);
 
+ALTER TABLE public.rooms
+    ADD CONSTRAINT option_type_id_fkey FOREIGN KEY (option_type_id)
+    REFERENCES public.option_types (id);
 
-ALTER TABLE IF EXISTS public.room_options
+ALTER TABLE public.room_options
     ADD CONSTRAINT option_id_fkey FOREIGN KEY (option_id)
-    REFERENCES public.options (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+    REFERENCES public.options (id);
 
-
-ALTER TABLE IF EXISTS public.room_options
+ALTER TABLE public.room_options
     ADD CONSTRAINT room_id_fkey FOREIGN KEY (room_id)
-    REFERENCES public.rooms (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+    REFERENCES public.rooms (id);
 
-
-ALTER TABLE IF EXISTS public.room_users
+ALTER TABLE public.room_users
     ADD CONSTRAINT room_id_fkey FOREIGN KEY (room_id)
-    REFERENCES public.rooms (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+    REFERENCES public.rooms (id);
 
-
-ALTER TABLE IF EXISTS public.room_users
+ALTER TABLE public.room_users
     ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
-    REFERENCES public.users (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+    REFERENCES public.users (id);
 
-
-ALTER TABLE IF EXISTS public.user_votes
+ALTER TABLE public.user_votes
     ADD CONSTRAINT room_option_fkey FOREIGN KEY (room_id, option_id)
-    REFERENCES public.room_options (room_id, option_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+    REFERENCES public.room_options (room_id, option_id);
 
-
-ALTER TABLE IF EXISTS public.user_votes
+ALTER TABLE public.user_votes
     ADD CONSTRAINT room_user_fkey FOREIGN KEY (room_id, user_id)
-    REFERENCES public.room_users (room_id, user_id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
+    REFERENCES public.room_users (room_id, user_id);
+
+ALTER TABLE public.search_providers
+    ADD CONSTRAINT option_type_id_fkey FOREIGN KEY (option_type_id)
+    REFERENCES public.option_types (id);
+
+-- Seed data
+
+INSERT INTO public.option_types (uuid, name, description, created_at, updated_at)
+VALUES (gen_random_uuid(), 'Movie', 'Movies and films', NOW(), NOW());
+
+INSERT INTO public.search_providers (option_type_id, provider_key, enabled)
+VALUES (1, 'TMDB', TRUE);
 
 END;

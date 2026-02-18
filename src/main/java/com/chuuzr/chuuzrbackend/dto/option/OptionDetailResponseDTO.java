@@ -6,16 +6,38 @@ import java.util.UUID;
 
 import com.chuuzr.chuuzrbackend.dto.optiontype.OptionTypeResponseDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Detailed option information response")
 public class OptionDetailResponseDTO {
+  @Schema(description = "Unique identifier for the option", example = "550e8400-e29b-41d4-a716-446655440000", format = "uuid")
   private UUID uuid;
+
+  @Schema(description = "The option type this option belongs to")
   private OptionTypeResponseDTO optionType;
+
+  @Schema(description = "External API provider identifier", example = "tmdb")
   private String apiProvider;
+
+  @Schema(description = "Identifier in the external API", example = "550")
   private String externalId;
+
+  @Schema(description = "Name of the option", example = "Fight Club")
   private String name;
+
+  @Schema(description = "Description of the option", example = "An insomniac office worker and a devil-may-care soap maker form an underground fight club.")
   private String description;
+
+  @Schema(description = "URL to the option image", example = "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg", format = "uri")
   private String imageUrl;
+
+  @Schema(description = "Additional metadata from the external provider")
   private Map<String, Object> metadata;
+
+  @Schema(description = "Last update timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime updatedAt;
+
+  @Schema(description = "Creation timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime createdAt;
 
   public OptionDetailResponseDTO() {

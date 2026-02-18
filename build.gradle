@@ -38,8 +38,8 @@ dependencies {
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	// Swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+	// API Docs
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-scalar:2.8.15'
 
 	// DB, Hibernate and Flyway
 	implementation 'org.postgresql:postgresql:42.7.2'
