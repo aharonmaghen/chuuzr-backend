@@ -66,24 +66,25 @@ public class RoomOptionController {
   }
 
   @PostMapping("/{roomUuid}/options")
-  @Operation(summary = "Add option to room", description = "Add an option to a specific room", operationId = "addOptionToRoom")
+  @Operation(summary = "Add option to room", description = "Find or create an option by apiProvider and externalId (derived from the room's option type), then add it to the room", operationId = "addOptionToRoom")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Option added to room successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionResponseDTO.class))),
       @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
-      @ApiResponse(responseCode = "404", description = "Room or option not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Room not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
       @ApiResponse(responseCode = "409", description = "Option already in room", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
   public ResponseEntity<RoomOptionResponseDTO> addOptionToRoom(@PathVariable UUID roomUuid,
       @Valid @RequestBody RoomOptionRequestDTO roomOptionRequest, UriComponentsBuilder ucb) {
-    logger.debug("Add option to room request for roomUuid={}, optionUuid={}", roomUuid,
-        roomOptionRequest.getOptionUuid());
+    logger.debug("Add option to room request for roomUuid={}, apiProvider={}, externalId={}", roomUuid,
+        roomOptionRequest.getApiProvider(), roomOptionRequest.getExternalId());
+
     RoomOptionResponseDTO addedRoomOption = roomOptionService.addOptionToRoom(roomUuid,
-        roomOptionRequest.getOptionUuid());
+        roomOptionRequest.getApiProvider(), roomOptionRequest.getExternalId());
     URI locationOfNewOption = ucb.path("/api/rooms/{roomUuid}/options")
         .buildAndExpand(addedRoomOption.getRoom().getUuid()).toUri();
-    logger.info("Option added to room for roomUuid={}, optionUuid={}", roomUuid,
-        roomOptionRequest.getOptionUuid());
+
+    logger.info("Option added to room for roomUuid={}", roomUuid);
     return ResponseEntity.created(locationOfNewOption).body(addedRoomOption);
   }
 }

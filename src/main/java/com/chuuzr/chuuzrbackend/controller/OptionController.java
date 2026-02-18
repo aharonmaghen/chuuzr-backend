@@ -1,6 +1,5 @@
 package com.chuuzr.chuuzrbackend.controller;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,13 +14,11 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
@@ -79,23 +76,6 @@ public class OptionController {
     List<OptionSummaryResponseDTO> options = optionService.findByOptionTypeUuid(optionTypeUuid, pageable);
     logger.info("Options retrieved for optionTypeUuid={}, count={}", optionTypeUuid, options.size());
     return ResponseEntity.ok(options);
-  }
-
-  @PostMapping
-  @Operation(summary = "Create a new option", description = "Create a new option with the provided information", operationId = "createOption")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "Option created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionDetailResponseDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class))),
-      @ApiResponse(responseCode = "409", description = "Option already exists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
-  })
-  public ResponseEntity<OptionDetailResponseDTO> createOption(@Valid @RequestBody OptionRequestDTO newOptionRequest,
-      UriComponentsBuilder ucb) {
-    logger.debug("Create option request received");
-    OptionDetailResponseDTO createdOption = optionService.createOption(newOptionRequest);
-    URI locationOfNewOption = ucb.path("/api/options/{optionUuid}").buildAndExpand(createdOption.getUuid()).toUri();
-    logger.info("Option created with optionUuid={}", createdOption.getUuid());
-    return ResponseEntity.created(locationOfNewOption).body(createdOption);
   }
 
   @PutMapping("/{optionUuid}")
