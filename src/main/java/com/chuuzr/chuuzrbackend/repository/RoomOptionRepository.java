@@ -28,4 +28,9 @@ public interface RoomOptionRepository extends JpaRepository<RoomOption, RoomOpti
   @Query("UPDATE RoomOption ro SET ro.score = ro.score - 1 " +
       "WHERE ro.roomOptionId.roomId = :roomId AND ro.roomOptionId.optionId = :optionId")
   void decrementScore(@Param("roomId") Long roomId, @Param("optionId") Long optionId);
+
+  @Modifying
+  @Query("UPDATE RoomOption ro SET ro.score = ro.score + :delta " +
+      "WHERE ro.roomOptionId.roomId = :roomId AND ro.roomOptionId.optionId = :optionId")
+  void adjustScore(@Param("roomId") Long roomId, @Param("optionId") Long optionId, @Param("delta") int delta);
 }

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteMapper;
 import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
-import com.chuuzr.chuuzrbackend.exception.InvalidVoteTransitionException;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
 import com.chuuzr.chuuzrbackend.model.RoomUser;
@@ -65,9 +64,6 @@ public class UserVoteService {
     if (oldType == voteType) {
       logger.debug("Vote unchanged for userUuid={}, optionUuid={}", userUuid, optionUuid);
       return UserVoteMapper.toResponseDTO(existingUserVote);
-    } else if (oldType != VoteType.NONE && voteType != VoteType.NONE) {
-      throw new InvalidVoteTransitionException(
-          "Invalid vote transition from " + oldType + " to " + voteType + ". Must transition through NONE.");
     } else {
       existingUserVote.setVoteType(voteType);
       existingUserVote = userVoteRepository.save(existingUserVote);
@@ -78,13 +74,19 @@ public class UserVoteService {
   }
 
   private void applyScoreChange(RoomOption option, VoteType oldType, VoteType newType) {
-    long roomId = option.getRoomOptionId().getRoomId();
-    long optId = option.getRoomOptionId().getOptionId();
-
-    if (newType == VoteType.UP || oldType == VoteType.DOWN) {
-      roomOptionRepository.incrementScore(roomId, optId);
-    } else if (newType == VoteType.DOWN || oldType == VoteType.UP) {
-      roomOptionRepository.decrementScore(roomId, optId);
+    int delta = voteValue(newType) - voteValue(oldType);
+    if (delta != 0) {
+      long roomId = option.getRoomOptionId().getRoomId();
+      long optId = option.getRoomOptionId().getOptionId();
+      roomOptionRepository.adjustScore(roomId, optId, delta);
     }
+  }
+
+  private int voteValue(VoteType type) {
+    return switch (type) {
+      case UP -> 1;
+      case DOWN -> -1;
+      case NONE -> 0;
+    };
   }
 }
