@@ -45,12 +45,14 @@ public class AuthServiceImpl implements AuthService {
   private final ObjectMapper objectMapper;
   private final long otpExpirationMinutes;
   private final long registrationExpirationMs;
+  private final String fixedOtpValue;
   private final SecureRandom otpGenerator = new SecureRandom();
 
   public AuthServiceImpl(UserRepository userRepository, StringRedisTemplate stringRedisTemplate, SmsService smsService,
       JwtUtil jwtUtil, RefreshTokenService refreshTokenService, ObjectMapper objectMapper,
       @Value("${otp.expiration.minutes}") long otpExpirationMinutes,
-      @Value("${jwt.registration-expiration-ms}") long registrationExpirationMs) {
+      @Value("${jwt.registration-expiration-ms}") long registrationExpirationMs,
+      @Value("${otp.fixed-value:}") String fixedOtpValue) {
     this.userRepository = userRepository;
     this.stringRedisTemplate = stringRedisTemplate;
     this.smsService = smsService;
@@ -59,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
     this.objectMapper = objectMapper;
     this.otpExpirationMinutes = otpExpirationMinutes;
     this.registrationExpirationMs = registrationExpirationMs;
+    this.fixedOtpValue = fixedOtpValue;
   }
 
   @Override
@@ -172,6 +175,9 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private String generateOtp() {
+    if (!fixedOtpValue.isBlank()) {
+      return fixedOtpValue;
+    }
     int code = otpGenerator.nextInt(900_000) + 100_000;
     return String.format("%06d", code);
   }
