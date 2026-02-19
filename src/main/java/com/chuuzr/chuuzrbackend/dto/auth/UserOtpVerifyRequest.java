@@ -20,7 +20,7 @@ public class UserOtpVerifyRequest {
   @NotBlank(message = "Phone number is required")
   private final String phoneNumber;
 
-  @Schema(description = "One-time password sent via SMS", example = "123456")
+  @Schema(description = "One-time password sent via SMS", example = "111111")
   @NotBlank(message = "OTP is required")
   @Pattern(regexp = "^\\d{4,8}$", message = "OTP must be 4-8 digits")
   private final String otp;
