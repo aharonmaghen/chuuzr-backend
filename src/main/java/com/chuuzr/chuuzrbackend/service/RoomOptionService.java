@@ -12,10 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.chuuzr.chuuzrbackend.dto.option.OptionMapper;
-import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionMapper;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 import com.chuuzr.chuuzrbackend.exception.BusinessLogicException;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
@@ -44,10 +43,10 @@ public class RoomOptionService {
   }
 
   @Transactional(readOnly = true)
-  public List<OptionSummaryResponseDTO> getRoomOptions(UUID roomUuid, Pageable pageable) {
+  public List<RoomOptionSummaryResponseDTO> getRoomOptions(UUID roomUuid, Pageable pageable) {
     logger.debug("Fetching room options for roomUuid={}", roomUuid);
     Page<RoomOption> page = roomOptionRepository.findByRoomUuid(roomUuid, pageable);
-    return page.getContent().stream().map(RoomOption::getOption).map(OptionMapper::toSummaryDTO)
+    return page.getContent().stream().map(RoomOptionMapper::toSummaryDTO)
         .collect(Collectors.toList());
   }
 

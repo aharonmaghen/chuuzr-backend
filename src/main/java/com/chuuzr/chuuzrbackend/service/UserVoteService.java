@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteMapper;
-import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
@@ -41,7 +41,7 @@ public class UserVoteService {
   }
 
   @Transactional
-  public UserVoteResponseDTO castVote(UUID roomUuid, UUID userUuid, UUID optionUuid, VoteType voteType) {
+  public UserVoteSummaryResponseDTO castVote(UUID roomUuid, UUID userUuid, UUID optionUuid, VoteType voteType) {
     logger.debug("Casting vote roomUuid={}, userUuid={}, optionUuid={}, voteType={}", roomUuid, userUuid, optionUuid,
         voteType);
     RoomUser roomUser = roomUserRepository.findByUuids(roomUuid, userUuid)
@@ -63,23 +63,25 @@ public class UserVoteService {
 
     if (oldType == voteType) {
       logger.debug("Vote unchanged for userUuid={}, optionUuid={}", userUuid, optionUuid);
-      return UserVoteMapper.toResponseDTO(existingUserVote);
+      return UserVoteMapper.toSummaryDTO(voteType, roomOption.getScore());
     } else {
       existingUserVote.setVoteType(voteType);
-      existingUserVote = userVoteRepository.save(existingUserVote);
-      applyScoreChange(roomOption, oldType, voteType);
+      userVoteRepository.save(existingUserVote);
+      int newScore = applyScoreChange(roomOption, oldType, voteType);
+      return UserVoteMapper.toSummaryDTO(voteType, newScore);
     }
-
-    return UserVoteMapper.toResponseDTO(existingUserVote);
   }
 
-  private void applyScoreChange(RoomOption option, VoteType oldType, VoteType newType) {
+  private int applyScoreChange(RoomOption option, VoteType oldType, VoteType newType) {
     int delta = voteValue(newType) - voteValue(oldType);
     if (delta != 0) {
-      long roomId = option.getRoomOptionId().getRoomId();
-      long optId = option.getRoomOptionId().getOptionId();
-      roomOptionRepository.adjustScore(roomId, optId, delta);
+      roomOptionRepository.adjustScore(
+          option.getRoomOptionId().getRoomId(),
+          option.getRoomOptionId().getOptionId(),
+          delta);
     }
+    int currentScore = option.getScore() != null ? option.getScore() : 0;
+    return currentScore + delta;
   }
 
   private int voteValue(VoteType type) {

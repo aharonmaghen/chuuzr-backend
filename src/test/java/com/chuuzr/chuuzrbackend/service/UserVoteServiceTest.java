@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
 import com.chuuzr.chuuzrbackend.model.RoomUser;
@@ -77,7 +77,7 @@ class UserVoteServiceTest {
     when(userVoteRepository.findById(voteId)).thenReturn(Optional.empty());
     when(userVoteRepository.save(any(UserVote.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    UserVoteResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.UP);
+    UserVoteSummaryResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.UP);
 
     assertEquals(VoteType.UP, result.getVoteType());
     verify(roomOptionRepository).adjustScore(1L, 1L, 1);
@@ -90,7 +90,7 @@ class UserVoteServiceTest {
     when(userVoteRepository.findById(voteId)).thenReturn(Optional.empty());
     when(userVoteRepository.save(any(UserVote.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    UserVoteResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.DOWN);
+    UserVoteSummaryResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.DOWN);
 
     assertEquals(VoteType.DOWN, result.getVoteType());
     verify(roomOptionRepository).adjustScore(1L, 1L, -1);
@@ -103,7 +103,7 @@ class UserVoteServiceTest {
     UserVoteId voteId = new UserVoteId(1L, 1L, 1L);
     when(userVoteRepository.findById(voteId)).thenReturn(Optional.of(existing));
 
-    UserVoteResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.UP);
+    UserVoteSummaryResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.UP);
 
     assertEquals(VoteType.UP, result.getVoteType());
     verify(userVoteRepository, never()).save(any());
@@ -118,7 +118,7 @@ class UserVoteServiceTest {
     when(userVoteRepository.findById(voteId)).thenReturn(Optional.of(existing));
     when(userVoteRepository.save(any(UserVote.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    UserVoteResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.NONE);
+    UserVoteSummaryResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.NONE);
 
     assertEquals(VoteType.NONE, result.getVoteType());
     verify(roomOptionRepository).adjustScore(1L, 1L, -1);
@@ -132,7 +132,7 @@ class UserVoteServiceTest {
     when(userVoteRepository.findById(voteId)).thenReturn(Optional.of(existing));
     when(userVoteRepository.save(any(UserVote.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    UserVoteResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.DOWN);
+    UserVoteSummaryResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.DOWN);
 
     assertEquals(VoteType.DOWN, result.getVoteType());
     verify(roomOptionRepository).adjustScore(1L, 1L, -2);
@@ -146,7 +146,7 @@ class UserVoteServiceTest {
     when(userVoteRepository.findById(voteId)).thenReturn(Optional.of(existing));
     when(userVoteRepository.save(any(UserVote.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    UserVoteResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.UP);
+    UserVoteSummaryResponseDTO result = userVoteService.castVote(roomUuid, userUuid, optionUuid, VoteType.UP);
 
     assertEquals(VoteType.UP, result.getVoteType());
     verify(roomOptionRepository).adjustScore(1L, 1L, 2);
