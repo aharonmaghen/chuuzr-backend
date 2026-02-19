@@ -15,8 +15,18 @@ public class RoomOptionMapper {
     return new RoomOptionResponseDTO(
         RoomMapper.toResponseDTO(roomOption.getRoom()),
         OptionMapper.toSummaryDTO(roomOption.getOption()),
+        roomOption.getScore(),
         roomOption.getUpdatedAt(),
         roomOption.getCreatedAt());
+  }
+
+  public static RoomOptionSummaryResponseDTO toSummaryDTO(RoomOption roomOption) {
+    if (roomOption == null) {
+      return null;
+    }
+    return new RoomOptionSummaryResponseDTO(
+        OptionMapper.toSummaryDTO(roomOption.getOption()),
+        roomOption.getScore());
   }
 
   public static RoomOption toEntity(Room room, Option option) {

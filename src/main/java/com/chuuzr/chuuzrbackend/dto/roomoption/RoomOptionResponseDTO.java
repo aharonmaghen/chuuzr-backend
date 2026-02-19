@@ -15,6 +15,9 @@ public class RoomOptionResponseDTO {
   @Schema(description = "The option in this association")
   private OptionSummaryResponseDTO option;
 
+  @Schema(description = "Voting score for this option in the room", example = "5")
+  private Integer score;
+
   @Schema(description = "Last update timestamp", example = "2024-01-15T10:30:00", format = "date-time")
   private LocalDateTime updatedAt;
 
@@ -25,9 +28,10 @@ public class RoomOptionResponseDTO {
   }
 
   public RoomOptionResponseDTO(RoomResponseDTO room, OptionSummaryResponseDTO option,
-      LocalDateTime updatedAt, LocalDateTime createdAt) {
+      Integer score, LocalDateTime updatedAt, LocalDateTime createdAt) {
     this.room = room;
     this.option = option;
+    this.score = score;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }
@@ -46,6 +50,14 @@ public class RoomOptionResponseDTO {
 
   public void setOption(OptionSummaryResponseDTO option) {
     this.option = option;
+  }
+
+  public Integer getScore() {
+    return score;
+  }
+
+  public void setScore(Integer score) {
+    this.score = score;
   }
 
   public LocalDateTime getUpdatedAt() {

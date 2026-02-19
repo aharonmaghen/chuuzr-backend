@@ -24,9 +24,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.chuuzr.chuuzrbackend.config.OpenApiConfig;
 import com.chuuzr.chuuzrbackend.dto.error.ErrorDTO;
-import com.chuuzr.chuuzrbackend.dto.option.OptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
+import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.service.RoomOptionService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,13 +54,13 @@ public class RoomOptionController {
   @GetMapping("/{roomUuid}/options")
   @Operation(summary = "Get options for a room", description = "Retrieve all options that are associated with a specific room with pagination support", operationId = "getRoomOptions")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OptionSummaryResponseDTO.class))),
+      @ApiResponse(responseCode = "200", description = "Options retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoomOptionSummaryResponseDTO.class))),
       @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
   })
-  public ResponseEntity<List<OptionSummaryResponseDTO>> getRoomOptions(@PathVariable UUID roomUuid,
+  public ResponseEntity<List<RoomOptionSummaryResponseDTO>> getRoomOptions(@PathVariable UUID roomUuid,
       @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
     logger.debug("Get room options request for roomUuid={}", roomUuid);
-    List<OptionSummaryResponseDTO> options = roomOptionService.getRoomOptions(roomUuid, pageable);
+    List<RoomOptionSummaryResponseDTO> options = roomOptionService.getRoomOptions(roomUuid, pageable);
     logger.info("Room options retrieved for roomUuid={}, count={}", roomUuid, options.size());
     return ResponseEntity.ok(options);
   }
