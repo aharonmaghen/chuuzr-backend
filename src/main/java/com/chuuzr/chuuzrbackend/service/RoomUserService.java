@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import com.chuuzr.chuuzrbackend.dto.roomuser.RoomUserResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.user.UserMapper;
 import com.chuuzr.chuuzrbackend.dto.user.UserResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.event.UserJoinedEvent;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.exception.UserNotFoundException;
 import com.chuuzr.chuuzrbackend.model.Room;
@@ -35,13 +37,15 @@ public class RoomUserService {
   private final RoomUserRepository roomUserRepository;
   private final RoomRepository roomRepository;
   private final UserRepository userRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
   public RoomUserService(RoomUserRepository roomUserRepository, RoomRepository roomRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository, ApplicationEventPublisher eventPublisher) {
     this.roomUserRepository = roomUserRepository;
     this.roomRepository = roomRepository;
     this.userRepository = userRepository;
+    this.eventPublisher = eventPublisher;
   }
 
   @Transactional(readOnly = true)
@@ -64,6 +68,7 @@ public class RoomUserService {
 
     RoomUser roomUserToSave = RoomUserMapper.toEntity(room, user);
     RoomUser savedRoomUser = roomUserRepository.save(roomUserToSave);
+    eventPublisher.publishEvent(new UserJoinedEvent(this, room.getUuid(), user.getUuid(), user.getNickname()));
     return RoomUserMapper.toResponseDTO(savedRoomUser);
   }
 }

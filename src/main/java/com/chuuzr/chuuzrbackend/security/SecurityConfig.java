@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/otp/request", "/api/auth/otp/verify", "/api/auth/refresh",
                     "/api/auth/logout")
                 .permitAll()
+                .requestMatchers("/ws/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").hasRole("PRE_REGISTER")
                 .anyRequest().hasRole("USER"))
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

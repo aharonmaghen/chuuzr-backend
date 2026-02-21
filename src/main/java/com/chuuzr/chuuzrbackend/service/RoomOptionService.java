@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionMapper;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionResponseDTO;
 import com.chuuzr.chuuzrbackend.dto.roomoption.RoomOptionSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.event.OptionAddedEvent;
 import com.chuuzr.chuuzrbackend.exception.BusinessLogicException;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.Option;
@@ -33,13 +35,15 @@ public class RoomOptionService {
   private final RoomOptionRepository roomOptionRepository;
   private final RoomRepository roomRepository;
   private final OptionService optionService;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
   public RoomOptionService(RoomOptionRepository roomOptionRepository, RoomRepository roomRepository,
-      OptionService optionService) {
+      OptionService optionService, ApplicationEventPublisher eventPublisher) {
     this.roomOptionRepository = roomOptionRepository;
     this.roomRepository = roomRepository;
     this.optionService = optionService;
+    this.eventPublisher = eventPublisher;
   }
 
   @Transactional(readOnly = true)
@@ -66,6 +70,9 @@ public class RoomOptionService {
     roomOptionToSave.setScore(0);
     RoomOption savedRoomOption = roomOptionRepository.save(roomOptionToSave);
     logger.info("Option added to room roomUuid={}, optionUuid={}", roomUuid, option.getUuid());
+    eventPublisher.publishEvent(new OptionAddedEvent(
+        this, roomUuid, option.getUuid(), option.getName(), option.getImageUrl(),
+        savedRoomOption.getScore(), savedRoomOption.getCreatedAt()));
     return RoomOptionMapper.toResponseDTO(savedRoomOption);
   }
 }

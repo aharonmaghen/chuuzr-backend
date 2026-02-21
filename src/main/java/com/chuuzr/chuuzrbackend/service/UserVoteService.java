@@ -5,11 +5,13 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteMapper;
 import com.chuuzr.chuuzrbackend.dto.uservote.UserVoteSummaryResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.event.VoteUpdatedEvent;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.model.RoomOption;
 import com.chuuzr.chuuzrbackend.model.RoomUser;
@@ -31,13 +33,15 @@ public class UserVoteService {
   private final UserVoteRepository userVoteRepository;
   private final RoomUserRepository roomUserRepository;
   private final RoomOptionRepository roomOptionRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
   public UserVoteService(UserVoteRepository userVoteRepository, RoomUserRepository roomUserRepository,
-      RoomOptionRepository roomOptionRepository) {
+      RoomOptionRepository roomOptionRepository, ApplicationEventPublisher eventPublisher) {
     this.userVoteRepository = userVoteRepository;
     this.roomUserRepository = roomUserRepository;
     this.roomOptionRepository = roomOptionRepository;
+    this.eventPublisher = eventPublisher;
   }
 
   @Transactional
@@ -68,6 +72,8 @@ public class UserVoteService {
       existingUserVote.setVoteType(voteType);
       userVoteRepository.save(existingUserVote);
       int newScore = applyScoreChange(roomOption, oldType, voteType);
+      eventPublisher.publishEvent(new VoteUpdatedEvent(
+          this, roomUuid, optionUuid, userUuid, voteType, newScore));
       return UserVoteMapper.toSummaryDTO(voteType, newScore);
     }
   }

@@ -34,7 +34,8 @@ public class DevSecurityConfig {
                 .requestMatchers(
                     "/api/auth/**",
                     "/v3/api-docs/**",
-                    "/scalar/**")
+                    "/scalar/**",
+                    "/ws/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").hasRole("PRE_REGISTER")
                 .anyRequest().hasRole("USER"))

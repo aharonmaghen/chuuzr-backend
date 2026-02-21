@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import com.chuuzr.chuuzrbackend.dto.room.RoomMapper;
 import com.chuuzr.chuuzrbackend.dto.room.RoomRequestDTO;
 import com.chuuzr.chuuzrbackend.dto.room.RoomResponseDTO;
 import com.chuuzr.chuuzrbackend.error.ErrorCode;
+import com.chuuzr.chuuzrbackend.event.RoomUpdatedEvent;
 import com.chuuzr.chuuzrbackend.exception.ResourceNotFoundException;
 import com.chuuzr.chuuzrbackend.exception.ValidationException;
 import com.chuuzr.chuuzrbackend.model.OptionType;
@@ -27,11 +29,14 @@ public class RoomService {
 
   private final RoomRepository roomRepository;
   private final OptionTypeRepository optionTypeRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
-  public RoomService(RoomRepository roomRepository, OptionTypeRepository optionTypeRepository) {
+  public RoomService(RoomRepository roomRepository, OptionTypeRepository optionTypeRepository,
+      ApplicationEventPublisher eventPublisher) {
     this.roomRepository = roomRepository;
     this.optionTypeRepository = optionTypeRepository;
+    this.eventPublisher = eventPublisher;
   }
 
   @Transactional(readOnly = true)
@@ -75,7 +80,9 @@ public class RoomService {
     RoomMapper.updateEntityFromDTO(room, roomRequestDTO);
     Room updatedRoom = roomRepository.save(room);
     logger.info("Room updated with uuid={}", roomUuid);
-
+    eventPublisher.publishEvent(new RoomUpdatedEvent(
+        this, updatedRoom.getUuid(), updatedRoom.getName(),
+        updatedRoom.getOptionType().getName(), updatedRoom.getUpdatedAt()));
     return RoomMapper.toResponseDTO(updatedRoom);
   }
 }
